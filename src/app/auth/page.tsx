@@ -58,7 +58,7 @@ export default function AuthPage() {
       {/* LEFT — image */}
       <div style={{
         flex: 1,
-        backgroundImage: 'url(/assets/cards/Tarolog.png)',
+        backgroundImage: 'url(/assets/mora-door.png)',
         backgroundSize: 'cover',
         backgroundPosition: '30% center',
         position: 'relative',
