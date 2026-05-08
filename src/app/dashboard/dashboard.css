@@ -1,0 +1,334 @@
+.db-wrap {
+  min-height: 100vh;
+  background: var(--bg, #090705);
+  color: var(--cream, #f0e6d3);
+  font-family: 'Raleway', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.db-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  border-bottom: 1px solid rgba(201,169,110,0.12);
+  position: sticky;
+  top: 0;
+  background: rgba(9,7,5,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.db-header-left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.db-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cream-dim, #9a8a75);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.db-nav-link:hover { color: var(--cream, #f0e6d3); }
+.db-nav-link-icon { font-size: 16px; opacity: 0.7; }
+.db-header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.db-avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.db-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201,169,110,0.3);
+  object-fit: cover;
+}
+.db-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201,169,110,0.3);
+  background: rgba(201,169,110,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--gold, #c9a96e);
+}
+.db-avatar-chevron { color: var(--cream-dim, #9a8a75); font-size: 12px; }
+.db-logout-link {
+  color: var(--cream-dim, #9a8a75);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.db-logout-link:hover { color: var(--gold, #c9a96e); }
+
+/* WELCOME */
+.db-welcome {
+  padding: 40px 40px 28px;
+}
+.db-welcome-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--cream, #f0e6d3);
+  margin: 0 0 4px;
+}
+.db-welcome-sub {
+  font-size: 13px;
+  color: var(--cream-dim, #9a8a75);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.db-welcome-plus { color: var(--gold, #c9a96e); }
+
+/* GRID */
+.db-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  padding: 0 40px 40px;
+  flex: 1;
+}
+
+/* WIDGET BASE */
+.db-widget {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(201,169,110,0.1);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* CARD OF DAY */
+.db-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.db-card-label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--cream-dim, #9a8a75);
+  text-transform: uppercase;
+}
+.db-card-date {
+  font-size: 12px;
+  color: var(--cream-dim, #9a8a75);
+}
+.db-card-body {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.db-card-img-wrap {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.db-card-img {
+  width: 110px;
+  border-radius: 10px;
+  border: 1px solid rgba(201,169,110,0.2);
+}
+.db-card-img-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: var(--cream-dim, #9a8a75);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.db-card-content { flex: 1; }
+.db-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--cream, #f0e6d3);
+  margin: 0 0 4px;
+}
+.db-card-arcana {
+  font-size: 12px;
+  color: var(--gold-dim, #7a6040);
+  letter-spacing: 0.06em;
+  margin: 0 0 14px;
+}
+.db-card-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cream-dim, #9a8a75);
+  margin: 0 0 20px;
+}
+.db-outcome-label {
+  font-size: 12px;
+  color: var(--cream-dim, #9a8a75);
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+}
+.db-outcome-btns {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.db-outcome-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Raleway', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+}
+.db-outcome-btn--yes {
+  background: rgba(201,169,110,0.1);
+  border-color: rgba(201,169,110,0.3);
+  color: var(--gold, #c9a96e);
+}
+.db-outcome-btn--yes:hover { background: rgba(201,169,110,0.2); }
+.db-outcome-btn--no {
+  background: transparent;
+  border-color: rgba(255,255,255,0.1);
+  color: var(--cream-dim, #9a8a75);
+}
+.db-outcome-btn--no:hover { border-color: rgba(255,255,255,0.2); color: var(--cream, #f0e6d3); }
+.db-card-actions {
+  display: flex;
+  gap: 20px;
+}
+.db-card-action-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cream-dim, #9a8a75);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.db-card-action-link:hover { color: var(--gold, #c9a96e); }
+
+/* EMPTY CARD STATE */
+.db-no-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 16px;
+}
+.db-no-card-icon { font-size: 32px; opacity: 0.4; }
+.db-no-card-text { font-size: 15px; color: var(--cream-dim, #9a8a75); }
+.db-no-card-btn {
+  padding: 10px 28px;
+  background: var(--gold, #c9a96e);
+  color: #090705;
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+  text-transform: uppercase;
+}
+.db-no-card-btn:hover { opacity: 0.85; }
+
+/* RIGHT WIDGETS */
+.db-right { display: flex; flex-direction: column; gap: 20px; }
+
+.db-widget-icon { font-size: 20px; margin-bottom: 12px; opacity: 0.7; }
+.db-widget-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--cream, #f0e6d3);
+  margin: 0 0 8px;
+}
+.db-widget-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cream-dim, #9a8a75);
+  margin: 0 0 16px;
+}
+.db-widget-btn {
+  display: inline-block;
+  padding: 9px 20px;
+  background: rgba(201,169,110,0.12);
+  border: 1px solid rgba(201,169,110,0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Raleway', sans-serif;
+  color: var(--gold, #c9a96e);
+  text-decoration: none;
+  transition: background 0.2s;
+  cursor: pointer;
+  margin-right: 10px;
+}
+.db-widget-btn:hover { background: rgba(201,169,110,0.2); }
+.db-widget-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--cream-dim, #9a8a75);
+}
+.db-widget-btn--ghost:hover { color: var(--cream, #f0e6d3); }
+
+.db-tarot-img-placeholder {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background: rgba(201,169,110,0.05);
+  border: 1px solid rgba(201,169,110,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  opacity: 0.4;
+  margin-bottom: 14px;
+}
+
+/* FOOTER TIP */
+.db-footer {
+  padding: 16px 40px;
+  border-top: 1px solid rgba(201,169,110,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.db-footer-tip {
+  font-size: 12px;
+  color: var(--cream-dim, #9a8a75);
+  letter-spacing: 0.03em;
+  font-style: italic;
+}
+.db-footer-star { color: var(--gold-dim, #7a6040); font-size: 10px; }
+
+@media (max-width: 900px) {
+  .db-grid { grid-template-columns: 1fr; }
+  .db-header { padding: 0 20px; }
+  .db-welcome { padding: 24px 20px 16px; }
+  .db-grid { padding: 0 20px 32px; }
+  .db-card-body { flex-direction: column; }
+  .db-card-img-wrap { flex-direction: row; align-items: center; gap: 16px; }
+}
