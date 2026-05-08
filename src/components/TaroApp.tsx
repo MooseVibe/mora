@@ -42,7 +42,7 @@ export default function TaroApp() {
           <span className="site-logo-icon" aria-hidden="true">✦</span>
           <span className="site-logo-text">MORA</span>
         </div>
-        <button className="site-signin-btn" type="button">Войти</button>
+        <a href="/auth/login" className="site-signin-btn">Войти</a>
       </header>
 
       <div id="stage">
