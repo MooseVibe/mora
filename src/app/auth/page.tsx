@@ -89,7 +89,7 @@ export default function AuthPage() {
               Добро пожаловать к Море
             </h1>
             <p style={{ color: '#9a8a75', fontSize: '14px', margin: 0 }}>
-              {step === 'enter' ? 'Она поможет тебе разобраться…' : `Код отправлен на ${email}`}
+              {step === 'enter' ? 'Она поможет тебе разобраться…' : `Письмо отправлено на ${email}`}
             </p>
           </div>
 
@@ -144,11 +144,11 @@ export default function AuthPage() {
             /* Step 2: OTP */
             <form onSubmit={handleVerify}>
               <p style={{ color: '#9a8a75', fontSize: '13px', marginBottom: '20px', lineHeight: 1.6 }}>
-                Введи код из письма — он действует 10 минут.
+                Введи код из письма — он действует 10 минут. Код может быть 6 или 8 цифр.
               </p>
               <input
-                type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="000000" maxLength={6} required autoFocus
+                type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                placeholder="••••••••" maxLength={8} required autoFocus
                 style={{
                   width: '100%', padding: '16px', marginBottom: '12px',
                   background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
