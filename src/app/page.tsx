@@ -1,36 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import TaroApp from '@/components/TaroApp'
 
-export default async function Home() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) redirect('/dashboard')
-
-  return (
-    <main style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      background: '#090705',
-      gap: '24px',
-      fontFamily: 'sans-serif',
-    }}>
-      <h1 style={{ color: '#c9a96e', fontSize: '2rem', margin: 0 }}>Mora</h1>
-      <p style={{ color: '#9a8a75', margin: 0 }}>Тест авторизации</p>
-      <a href="/auth/login" style={{
-        background: '#c9a96e',
-        color: '#090705',
-        padding: '12px 32px',
-        borderRadius: '8px',
-        textDecoration: 'none',
-        fontWeight: 600,
-        fontSize: '1rem',
-      }}>
-        Войти через Google
-      </a>
-    </main>
-  )
+export default function Home() {
+  return <TaroApp />
 }
