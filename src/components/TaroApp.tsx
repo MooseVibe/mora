@@ -3,13 +3,61 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+const CARD_NAMES: Record<string, { name: string; arcana: string }> = {
+  fool:             { name: 'Шут',               arcana: '0 Аркан'    },
+  magician:         { name: 'Маг',               arcana: 'I Аркан'    },
+  'high-priestess': { name: 'Верховная Жрица',   arcana: 'II Аркан'   },
+  empress:          { name: 'Императрица',        arcana: 'III Аркан'  },
+  emperor:          { name: 'Император',          arcana: 'IV Аркан'   },
+  hierophant:       { name: 'Иерофант',           arcana: 'V Аркан'    },
+  lovers:           { name: 'Влюблённые',         arcana: 'VI Аркан'   },
+  chariot:          { name: 'Колесница',          arcana: 'VII Аркан'  },
+  strength:         { name: 'Сила',              arcana: 'VIII Аркан' },
+  hermit:           { name: 'Отшельник',          arcana: 'IX Аркан'   },
+  wheel:            { name: 'Колесо Фортуны',     arcana: 'X Аркан'    },
+  justice:          { name: 'Справедливость',     arcana: 'XI Аркан'   },
+  'hanged-man':     { name: 'Повешенный',         arcana: 'XII Аркан'  },
+  death:            { name: 'Смерть',             arcana: 'XIII Аркан' },
+  temperance:       { name: 'Умеренность',        arcana: 'XIV Аркан'  },
+  devil:            { name: 'Дьявол',             arcana: 'XV Аркан'   },
+  tower:            { name: 'Башня',              arcana: 'XVI Аркан'  },
+  star:             { name: 'Звезда',             arcana: 'XVII Аркан' },
+  moon:             { name: 'Луна',               arcana: 'XVIII Аркан'},
+  sun:              { name: 'Солнце',             arcana: 'XIX Аркан'  },
+  judgement:        { name: 'Суд',                arcana: 'XX Аркан'   },
+  world:            { name: 'Мир',                arcana: 'XXI Аркан'  },
+}
+
 export default function TaroApp() {
   const [isAuthed, setIsAuthed] = useState(false)
+  const [alreadyDrawn, setAlreadyDrawn] = useState<{ cardId: string } | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
+    const today = new Date().toISOString().split('T')[0]
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthed(!!session)
+      const authed = !!session
+      setIsAuthed(authed)
+
+      try {
+        const raw = localStorage.getItem('mora:pendingDraw')
+        if (raw) {
+          const draw = JSON.parse(raw)
+          if (draw.drawnAt === today) {
+            if (authed) {
+              window.location.href = '/dashboard'
+            } else {
+              setAlreadyDrawn({ cardId: draw.cardId })
+            }
+          } else {
+            // старый draw — чистим
+            localStorage.removeItem('mora:pendingDraw')
+          }
+        }
+      } catch {
+        localStorage.removeItem('mora:pendingDraw')
+      }
     })
 
     // загружаем app.js как ES-модуль после монтирования DOM
@@ -96,11 +144,37 @@ export default function TaroApp() {
               </div>
 
               <div className="day-panel-content-col">
-                <div className="day-text-block">
-                  <h2 className="landing-panel-title">Карта дня</h2>
-                  <p className="landing-panel-desc">Вытяни карту и узнай, что приготовил тебе день</p>
-                </div>
-                <button className="btn fu" data-vis="visible" id="drawBtn">Вытянуть карту</button>
+                {alreadyDrawn ? (
+                  <div className="day-text-block">
+                    <span className="landing-panel-badge landing-panel-badge--drawn">Карта дня</span>
+                    <h2 className="landing-panel-title">
+                      {CARD_NAMES[alreadyDrawn.cardId]?.name ?? 'Карта'}
+                    </h2>
+                    <p className="landing-panel-desc" style={{fontSize:'12px',letterSpacing:'0.1em',opacity:0.5,textTransform:'uppercase',marginBottom:'12px'}}>
+                      {CARD_NAMES[alreadyDrawn.cardId]?.arcana}
+                    </p>
+                    <p className="landing-panel-desc">
+                      Мора уже открыла тебе карту сегодня. Одна карта — один день. Вернись вечером и расскажи, сбылось ли.
+                    </p>
+                    <a href="/auth?intent=save" className="btn" style={{marginTop:'16px',display:'inline-block'}}>
+                      ✦ Сохранить в дневник
+                    </a>
+                    <p className="drawn-today-footer">Новая карта — завтра</p>
+                  </div>
+                ) : (
+                  <div className="day-text-block">
+                    <h2 className="landing-panel-title">Карта дня</h2>
+                    <p className="landing-panel-desc">Вытяни карту и узнай, что приготовил тебе день</p>
+                  </div>
+                )}
+                <button
+                  className="btn fu"
+                  data-vis="visible"
+                  id="drawBtn"
+                  style={alreadyDrawn ? {display:'none'} : undefined}
+                >
+                  Вытянуть карту
+                </button>
               </div>
             </div>
           </div>

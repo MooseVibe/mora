@@ -2861,6 +2861,31 @@
     }
   }
 
+/* ── Already drawn today — landing panel state ── */
+.landing-panel-badge--drawn {
+  background: rgba(201,169,110,0.15);
+  color: #c9a96e;
+  border: 1px solid rgba(201,169,110,0.3);
+  font-family: 'Raleway', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.drawn-today-footer {
+  font-family: 'Raleway', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream, #f0e6d3);
+  opacity: 0.3;
+  margin-top: 12px;
+}
+
 /* ── Result screen: save / share actions ── */
 .result-card-actions {
   display: flex;
