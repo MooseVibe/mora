@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthPage() {
@@ -9,6 +9,12 @@ export default function AuthPage() {
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isSaveIntent, setIsSaveIntent] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setIsSaveIntent(params.get('intent') === 'save')
+  }, [])
 
   const supabase = createClient()
 
@@ -86,10 +92,14 @@ export default function AuthPage() {
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <div style={{ color: '#c9a96e', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>✦ MORA</div>
             <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '28px', fontWeight: 300, color: '#f0e6d3', margin: '0 0 8px' }}>
-              Добро пожаловать к Море
+              {isSaveIntent ? 'Войди, чтобы Мора тебя запомнила' : 'Добро пожаловать к Море'}
             </h1>
             <p style={{ color: '#9a8a75', fontSize: '14px', margin: 0 }}>
-              {step === 'enter' ? 'Она поможет тебе разобраться…' : `Письмо отправлено на ${email}`}
+              {step === 'verify'
+                ? `Письмо отправлено на ${email}`
+                : isSaveIntent
+                  ? 'Карта дня сохранится в твоём дневнике'
+                  : 'Она поможет тебе разобраться…'}
             </p>
           </div>
 

@@ -4,16 +4,12 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function TaroApp() {
-  const [ctaHref, setCtaHref] = useState('/auth')
-  const [ctaLabel, setCtaLabel] = useState('Войти и сохранить')
+  const [isAuthed, setIsAuthed] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setCtaHref('/dashboard')
-        setCtaLabel('Открыть кабинет')
-      }
+      setIsAuthed(!!session)
     })
 
     // загружаем app.js как ES-модуль после монтирования DOM
@@ -26,10 +22,6 @@ export default function TaroApp() {
       document.body.removeChild(script)
     }
   }, [])
-
-  function closeModal() {
-    document.getElementById('saveCardModal')?.setAttribute('hidden', '')
-  }
 
   return (
     <>
@@ -155,25 +147,24 @@ export default function TaroApp() {
           <div className="result-reading-actions" id="resultReadingActions">
             <button className="btn result-reading-action" id="resultStreetBtn" type="button" hidden>Перевести на пацанский</button>
           </div>
+          <div className="result-card-actions">
+            <a
+              href={isAuthed ? '/dashboard' : '/auth?intent=save'}
+              className="result-card-action-btn result-card-action-btn--save"
+            >
+              ✦ Сохранить карту
+            </a>
+            <button className="result-card-action-btn result-card-action-btn--share" type="button" disabled>
+              ↗ Поделиться
+            </button>
+          </div>
         </section>
         <div id="resultSpacer"></div>
         <div className="result-el" id="resultCardName"></div>
         <div className="result-el" id="resultDivider"></div>
         <div className="result-el" id="resultText"></div>
         <button className="btn result-el" id="streetToggleBtn" hidden>Перевести на пацанский</button>
-        <button className="btn btn-secondary result-el" id="resultAgainBtn">Вытянуть ещё раз</button>
-      </div>
-
-      {/* Save Card Modal */}
-      <div id="saveCardModal" hidden>
-        <div className="save-modal-backdrop" onClick={closeModal} />
-        <div className="save-modal-panel">
-          <div className="save-modal-icon">✦</div>
-          <h3 className="save-modal-title">Сохрани карту дня</h3>
-          <p className="save-modal-text">Войди, чтобы карта сохранилась в твой дневник и ты мог отслеживать свой путь</p>
-          <a href={ctaHref} className="save-modal-btn save-modal-btn--primary">{ctaLabel}</a>
-          <button className="save-modal-btn save-modal-btn--ghost" onClick={closeModal}>Пропустить</button>
-        </div>
+        <button className="btn btn-secondary result-el" id="resultAgainBtn" style={{display:'none'}}>Вытянуть ещё раз</button>
       </div>
 
       <div id="deckGallery" aria-hidden="true" hidden>

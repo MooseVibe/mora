@@ -26,10 +26,6 @@ function savePendingDraw() {
       variantIdx: reading?.variantIdx ?? 0,
       drawnAt: new Date().toISOString().split('T')[0],
     }));
-    window.setTimeout(() => {
-      const modal = document.getElementById('saveCardModal');
-      if (modal) modal.removeAttribute('hidden');
-    }, 1000);
   } catch(_) {}
 }
 
@@ -512,8 +508,6 @@ export async function startDrawing() {
 export function resetScene() {
   if (STATE !== 'result') return;
   cleanupDeck3DFlight();
-  const modal = document.getElementById('saveCardModal');
-  if (modal) modal.setAttribute('hidden', '');
   transition('resetting');
   d.clearCardZoomState();
   d.dom.resultOverlay.classList.add('is-returning-to-deck');
