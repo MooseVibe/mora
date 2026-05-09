@@ -122,7 +122,18 @@ export default function TaroApp() {
 
             <div className="landing-panel landing-panel-day">
               <div className="landing-panel-day-bg" aria-hidden="true"></div>
-              <div className="day-panel-deck-col">
+              <div className="day-panel-deck-col" style={{position:'relative'}}>
+                {/* карта поверх колоды когда уже вытянута */}
+                {alreadyDrawn && (
+                  <div className="drawn-card-preview" aria-hidden="true">
+                    <img
+                      src={`/assets/cards/${alreadyDrawn.cardId}.png`}
+                      alt=""
+                      className="drawn-card-preview-img"
+                    />
+                  </div>
+                )}
+                <div style={alreadyDrawn ? {opacity:0,pointerEvents:'none'} : undefined}>
                 <div className="deck3d" aria-hidden="true">
                   <div className="deck3d-stack">
                     <div className="deck3d-card deck3d-card--layer deck3d-card--layer-3"><div className="deck3d-card-inner"></div></div>
@@ -141,6 +152,7 @@ export default function TaroApp() {
                     <div className="scard" id="sc3"><span className="card-mark" style={{top:'18px',left:'18px'}}>✦</span><span className="card-mark" style={{bottom:'18px',right:'18px'}}>✦</span></div>
                   </div>
                 </div>
+                </div>{/* /deck hide wrapper */}
               </div>
 
               <div className="day-panel-content-col">
