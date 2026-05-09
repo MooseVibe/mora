@@ -71,6 +71,25 @@ export default function TaroApp() {
     }
   }, [])
 
+  function handleCardTilt(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2)
+    const dy = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2)
+    const img = e.currentTarget.querySelector('.drawn-card-preview-img') as HTMLElement
+    if (img) {
+      img.style.transition = 'transform 0.08s ease'
+      img.style.transform = `perspective(500px) rotateY(${dx * 14}deg) rotateX(${-dy * 14}deg) scale(1.04)`
+    }
+  }
+
+  function handleCardTiltEnd(e: React.MouseEvent<HTMLDivElement>) {
+    const img = e.currentTarget.querySelector('.drawn-card-preview-img') as HTMLElement
+    if (img) {
+      img.style.transition = 'transform 0.5s ease'
+      img.style.transform = ''
+    }
+  }
+
   return (
     <>
       <div className="app-loader" id="appLoader" role="status" aria-live="polite" aria-label="Грузим колоду">
@@ -125,7 +144,11 @@ export default function TaroApp() {
               <div className="day-panel-deck-col" style={{position:'relative'}}>
                 {/* карта поверх колоды когда уже вытянута */}
                 {alreadyDrawn && (
-                  <div className="drawn-card-preview" aria-hidden="true">
+                  <div
+                    className="drawn-card-preview"
+                    onMouseMove={handleCardTilt}
+                    onMouseLeave={handleCardTiltEnd}
+                  >
                     <img
                       src={`/assets/cards/${alreadyDrawn.cardId}.png`}
                       alt=""
@@ -155,7 +178,7 @@ export default function TaroApp() {
                 </div>{/* /deck hide wrapper */}
               </div>
 
-              <div className="day-panel-content-col">
+              <div className={`day-panel-content-col${alreadyDrawn ? ' day-panel-content-col--drawn' : ''}`}>
                 {alreadyDrawn ? (
                   <div className="day-text-block">
                     <span className="landing-panel-badge landing-panel-badge--drawn">Карта дня</span>

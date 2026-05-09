@@ -24,7 +24,8 @@ export default function CardSyncOnMount() {
       body: JSON.stringify(draw),
     }).then(res => {
       if (res.ok) {
-        localStorage.removeItem('mora:pendingDraw')
+        // не удаляем pendingDraw — он нужен чтобы после логаута
+        // нельзя было вытянуть карту повторно в тот же день
         router.refresh()
       }
     }).catch(() => {})
