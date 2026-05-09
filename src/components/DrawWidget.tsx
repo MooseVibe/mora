@@ -8,7 +8,7 @@ export default function DrawWidget() {
 
   useEffect(() => {
     setMounted(true)
-    ;(window as any).__moraDrawAuthed = true
+    ;(window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed = true
 
     const script = document.createElement('script')
     script.type = 'module'
@@ -16,7 +16,7 @@ export default function DrawWidget() {
     document.body.appendChild(script)
 
     return () => {
-      delete (window as any).__moraDrawAuthed
+      delete (window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed
       document.body.classList.remove('is-drawing-card')
       document.body.removeChild(script)
     }
