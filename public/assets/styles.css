@@ -1154,6 +1154,8 @@
   }
   #resultReadingPanel.result-reading-panel.visible {
     transform:translate(0, -50%);
+    pointer-events:auto;
+    z-index:45;
   }
   #resultReadingKicker.result-reading-kicker[hidden] { display:none; }
   #resultReadingKicker.result-reading-kicker {
@@ -1990,7 +1992,7 @@
     position:fixed;
     top:0; left:0; right:0;
     height:var(--header-height);
-    z-index:20;
+    z-index:50;
     display:flex;
     align-items:center;
     justify-content:space-between;
