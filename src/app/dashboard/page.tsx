@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import CardSyncOnMount from '@/components/CardSyncOnMount'
 import './dashboard.css'
 
 const CARDS: Record<string, { name: string; arcana: string; desc: string; img: string }> = {
@@ -50,6 +51,7 @@ export default async function Dashboard() {
 
   return (
     <div className="db-wrap">
+      <CardSyncOnMount />
 
       {/* HEADER */}
       <header className="db-header">

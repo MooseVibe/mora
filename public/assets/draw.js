@@ -16,6 +16,23 @@ export function initDraw(deps) {
   d = deps;
 }
 
+function savePendingDraw() {
+  try {
+    const card = d.getCurrent();
+    const reading = d.getCurrentReading();
+    if (!card) return;
+    localStorage.setItem('mora:pendingDraw', JSON.stringify({
+      cardId: card.id,
+      variantIdx: reading?.variantIdx ?? 0,
+      drawnAt: new Date().toISOString().split('T')[0],
+    }));
+    window.setTimeout(() => {
+      const modal = document.getElementById('saveCardModal');
+      if (modal) modal.removeAttribute('hidden');
+    }, 1000);
+  } catch(_) {}
+}
+
 function cleanupDeck3DFlight() {
   if (!activeDeck3DFlight) return;
 
@@ -176,6 +193,7 @@ function handoffDeck3DFlightToRevealCard() {
   window.setTimeout(() => {
     if (STATE !== 'drawing') return;
     transition('result');
+    savePendingDraw();
     d.dom.resultOverlay.style.pointerEvents = 'auto';
     d.updateCardZoomAvailability();
     if (d.canUseMobileTilt()) {
@@ -481,6 +499,7 @@ export async function startDrawing() {
     [d.DRAW_TIMING.finish, () => {
       cleanupDeck3DFlight();
       transition('result');
+      savePendingDraw();
       d.dom.resultOverlay.style.pointerEvents = 'auto';
       d.updateCardZoomAvailability();
       if (d.canUseMobileTilt()) {
@@ -493,6 +512,8 @@ export async function startDrawing() {
 export function resetScene() {
   if (STATE !== 'result') return;
   cleanupDeck3DFlight();
+  const modal = document.getElementById('saveCardModal');
+  if (modal) modal.setAttribute('hidden', '');
   transition('resetting');
   d.clearCardZoomState();
   d.dom.resultOverlay.classList.add('is-returning-to-deck');

@@ -1,9 +1,21 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function TaroApp() {
+  const [ctaHref, setCtaHref] = useState('/auth')
+  const [ctaLabel, setCtaLabel] = useState('Войти и сохранить')
+
   useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setCtaHref('/dashboard')
+        setCtaLabel('Открыть кабинет')
+      }
+    })
+
     // загружаем app.js как ES-модуль после монтирования DOM
     const script = document.createElement('script')
     script.type = 'module'
@@ -14,6 +26,10 @@ export default function TaroApp() {
       document.body.removeChild(script)
     }
   }, [])
+
+  function closeModal() {
+    document.getElementById('saveCardModal')?.setAttribute('hidden', '')
+  }
 
   return (
     <>
@@ -146,6 +162,18 @@ export default function TaroApp() {
         <div className="result-el" id="resultText"></div>
         <button className="btn result-el" id="streetToggleBtn" hidden>Перевести на пацанский</button>
         <button className="btn btn-secondary result-el" id="resultAgainBtn">Вытянуть ещё раз</button>
+      </div>
+
+      {/* Save Card Modal */}
+      <div id="saveCardModal" hidden>
+        <div className="save-modal-backdrop" onClick={closeModal} />
+        <div className="save-modal-panel">
+          <div className="save-modal-icon">✦</div>
+          <h3 className="save-modal-title">Сохрани карту дня</h3>
+          <p className="save-modal-text">Войди, чтобы карта сохранилась в твой дневник и ты мог отслеживать свой путь</p>
+          <a href={ctaHref} className="save-modal-btn save-modal-btn--primary">{ctaLabel}</a>
+          <button className="save-modal-btn save-modal-btn--ghost" onClick={closeModal}>Пропустить</button>
+        </div>
       </div>
 
       <div id="deckGallery" aria-hidden="true" hidden>
