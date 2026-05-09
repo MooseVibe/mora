@@ -22,6 +22,10 @@ let deckTransitionFlipTimer = null;
 
 export function initGallery(deps) {
   g = deps;
+  if (!g.dom.galleryTrack) {
+    hydrateCardBackEmblems(document);
+    return;
+  }
   galleryItems = g.CARDS.map((card, index) => {
     const item = createGalleryCardItem(card, index);
     g.dom.galleryTrack.appendChild(item);

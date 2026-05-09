@@ -1,0 +1,122 @@
+'use client'
+
+import React from 'react'
+
+const CARD_DATA: Record<string, { name: string; arcana: string; num: string }> = {
+  fool:             { name: 'Шут',               arcana: '0 Аркан',    num: '0'      },
+  magician:         { name: 'Маг',               arcana: 'I Аркан',    num: 'I'      },
+  'high-priestess': { name: 'Верховная Жрица',   arcana: 'II Аркан',   num: 'II'     },
+  empress:          { name: 'Императрица',        arcana: 'III Аркан',  num: 'III'    },
+  emperor:          { name: 'Император',          arcana: 'IV Аркан',   num: 'IV'     },
+  hierophant:       { name: 'Иерофант',           arcana: 'V Аркан',    num: 'V'      },
+  lovers:           { name: 'Влюблённые',         arcana: 'VI Аркан',   num: 'VI'     },
+  chariot:          { name: 'Колесница',          arcana: 'VII Аркан',  num: 'VII'    },
+  strength:         { name: 'Сила',              arcana: 'VIII Аркан', num: 'VIII'   },
+  hermit:           { name: 'Отшельник',          arcana: 'IX Аркан',   num: 'IX'     },
+  wheel:            { name: 'Колесо Фортуны',     arcana: 'X Аркан',    num: 'X'      },
+  justice:          { name: 'Справедливость',     arcana: 'XI Аркан',   num: 'XI'     },
+  'hanged-man':     { name: 'Повешенный',         arcana: 'XII Аркан',  num: 'XII'    },
+  death:            { name: 'Смерть',             arcana: 'XIII Аркан', num: 'XIII'   },
+  temperance:       { name: 'Умеренность',        arcana: 'XIV Аркан',  num: 'XIV'    },
+  devil:            { name: 'Дьявол',             arcana: 'XV Аркан',   num: 'XV'     },
+  tower:            { name: 'Башня',              arcana: 'XVI Аркан',  num: 'XVI'    },
+  star:             { name: 'Звезда',             arcana: 'XVII Аркан', num: 'XVII'   },
+  moon:             { name: 'Луна',               arcana: 'XVIII Аркан',num: 'XVIII'  },
+  sun:              { name: 'Солнце',             arcana: 'XIX Аркан',  num: 'XIX'    },
+  judgement:        { name: 'Суд',                arcana: 'XX Аркан',   num: 'XX'     },
+  world:            { name: 'Мир',                arcana: 'XXI Аркан',  num: 'XXI'    },
+}
+
+function formatDate(dateStr: string): string {
+  const today = new Date().toISOString().split('T')[0]
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  if (dateStr === today) return 'сегодня'
+  if (dateStr === yesterday) return 'вчера'
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
+}
+
+function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
+  const card = CARD_DATA[cardId]
+
+  function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2)
+    const dy = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2)
+    const img = e.currentTarget.querySelector('.rcw-thumb-img') as HTMLElement
+    if (img) {
+      img.style.transition = 'transform 0.08s ease'
+      img.style.transform = `perspective(400px) rotateY(${dx * 12}deg) rotateX(${-dy * 12}deg) scale(1.03)`
+    }
+  }
+
+  function handleTiltEnd(e: React.MouseEvent<HTMLDivElement>) {
+    const img = e.currentTarget.querySelector('.rcw-thumb-img') as HTMLElement
+    if (img) {
+      img.style.transition = 'transform 0.4s ease'
+      img.style.transform = ''
+    }
+  }
+
+  return (
+    <div className="rcw-card">
+      <div
+        className="rcw-thumb"
+        onMouseMove={handleTilt}
+        onMouseLeave={handleTiltEnd}
+      >
+        <img
+          src={`/assets/cards/${cardId}.png`}
+          alt={card?.name ?? cardId}
+          className="rcw-thumb-img"
+        />
+        <span className="rcw-num">— {card?.num ?? ''} —</span>
+      </div>
+      <div className="rcw-meta">
+        <span className="rcw-name">{card?.name ?? cardId}</span>
+        <span className="rcw-date">{formatDate(drawnAt)}</span>
+      </div>
+    </div>
+  )
+}
+
+function EmptyTile() {
+  return (
+    <div className="rcw-card rcw-card--empty">
+      <div className="rcw-thumb rcw-thumb--empty">
+        <span className="rcw-empty-icon">✦</span>
+      </div>
+      <div className="rcw-meta">
+        <span className="rcw-name rcw-name--dim">Ещё нет</span>
+      </div>
+    </div>
+  )
+}
+
+interface Props {
+  draws: Array<{ card_id: string; drawn_at: string }> | null
+}
+
+export default function RecentCardsWidget({ draws }: Props) {
+  const filled = draws ?? []
+  const slots = [0, 1, 2]
+
+  return (
+    <div className="db-widget rcw-widget">
+      <div className="rcw-head">
+        <span className="rcw-title">Дневник карт</span>
+        <a href="/journal" className="rcw-link">смотреть все →</a>
+      </div>
+      <div className="rcw-grid">
+        {slots.map(i =>
+          filled[i]
+            ? <CardTile key={i} cardId={filled[i].card_id} drawnAt={filled[i].drawn_at} />
+            : <EmptyTile key={i} />
+        )}
+      </div>
+      {filled.length === 0 && (
+        <p className="rcw-empty-hint">Вытягивай карту каждый день — здесь появится твой путь</p>
+      )}
+    </div>
+  )
+}

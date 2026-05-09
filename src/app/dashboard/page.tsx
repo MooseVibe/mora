@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import CardSyncOnMount from '@/components/CardSyncOnMount'
+import DrawWidget from '@/components/DrawWidget'
+import RecentCardsWidget from '@/components/RecentCardsWidget'
 import './dashboard.css'
 
 const CARDS: Record<string, { name: string; arcana: string; desc: string; img: string }> = {
@@ -44,6 +46,13 @@ export default async function Dashboard() {
     .eq('user_id', user.id)
     .eq('drawn_at', today)
     .single()
+
+  const { data: recentDraws } = await supabase
+    .from('card_draws')
+    .select('card_id, drawn_at')
+    .eq('user_id', user.id)
+    .order('drawn_at', { ascending: false })
+    .limit(3)
 
   const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'Путник'
   const avatarUrl = user.user_metadata?.avatar_url
@@ -91,7 +100,7 @@ export default async function Dashboard() {
       <div className="db-grid">
 
         {/* LEFT: CARD OF DAY */}
-        <div className="db-widget">
+        <div className={`db-widget${!card ? ' db-widget--draw' : ''}`}>
           <div className="db-card-header">
             <span className="db-card-label">Ваша карта дня</span>
             <span className="db-card-date">Сегодня, {formatDate()}</span>
@@ -119,23 +128,13 @@ export default async function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="db-no-card">
-              <div className="db-no-card-icon">✦</div>
-              <p className="db-no-card-text">Вы ещё не вытянули карту сегодня</p>
-              <a href="/" className="db-no-card-btn">Вытянуть карту</a>
-            </div>
+            <DrawWidget />
           )}
         </div>
 
         {/* RIGHT WIDGETS */}
         <div className="db-right">
-          <div className="db-widget">
-            <div className="db-widget-icon">✦</div>
-            <h3 className="db-widget-title">Давайте сделаем предсказания точнее</h3>
-            <p className="db-widget-text">Ответьте на несколько вопросов о себе, чтобы мы лучше понимали вас и ваши запросы.</p>
-            <a href="#" className="db-widget-btn">Ответить на вопросы</a>
-            <a href="#" className="db-widget-btn db-widget-btn--ghost">Позже</a>
-          </div>
+          <RecentCardsWidget draws={recentDraws} />
 
           <div className="db-widget">
             <div className="db-tarot-img-placeholder">☽</div>

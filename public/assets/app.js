@@ -193,9 +193,9 @@ const dom = {
   galleryCloseBtn: byId('galleryCloseBtn'),
   galleryPrevBtn: byId('galleryPrevBtn'),
   galleryNextBtn: byId('galleryNextBtn'),
-  startEls: START_FU_IDS.map(byId),
-  resultEls: RESULT_EL_IDS.map(byId),
-  stackCards: [0,1,2,3].map(i => byId('sc'+i)),
+  startEls: START_FU_IDS.map(byId).filter(Boolean),
+  resultEls: RESULT_EL_IDS.map(byId).filter(Boolean),
+  stackCards: [0,1,2,3].map(i => byId('sc'+i)).filter(Boolean),
 };
 
 // ═══════════════════════════════════════
@@ -210,7 +210,7 @@ function initStars() {
     s.style.setProperty('--dur',   (2.5 + Math.random() * 4) + 's');
     s.style.setProperty('--delay', (Math.random() * 5) + 's');
     s.style.setProperty('--op',    (0.15 + Math.random() * 0.35).toFixed(2));
-    dom.stars.appendChild(s);
+    if (dom.stars) dom.stars.appendChild(s);
   }
 }
 
@@ -615,7 +615,7 @@ function settleDeckToIdlePose() {
   dom.deckWrap.classList.add('is-action-settling');
   dom.deckWrap.style.pointerEvents = 'none';
   dom.drawBtn.disabled = true;
-  dom.shuffleBtn.disabled = true;
+  if (dom.shuffleBtn) dom.shuffleBtn.disabled = true;
 
   void dom.deckWrap.offsetWidth;
 
@@ -643,7 +643,7 @@ function settleDeckToIdlePose() {
         dom.deckWrap.style.pointerEvents = '';
         dom.deckWrap.style.transition = '';
         dom.drawBtn.disabled = false;
-        dom.shuffleBtn.disabled = false;
+        if (dom.shuffleBtn) dom.shuffleBtn.disabled = false;
       }
       resolve();
     }, 300);
@@ -1428,11 +1428,11 @@ function updateUI() {
   // При shuffle отдельно блокируем кнопки, но не скрываем
   if (isShuffling) {
     dom.drawBtn.disabled    = true;
-    dom.shuffleBtn.disabled = true;
+    if (dom.shuffleBtn) dom.shuffleBtn.disabled = true;
     setShuffleButtonBusy(true);
   } else if (isIdle) {
     dom.drawBtn.disabled    = false;
-    dom.shuffleBtn.disabled = false;
+    if (dom.shuffleBtn) dom.shuffleBtn.disabled = false;
     setShuffleButtonBusy(false);
   }
 
@@ -1453,6 +1453,7 @@ function updateUI() {
 }
 
 function setShuffleButtonBusy(isBusy) {
+  if (!dom.shuffleBtn) return;
   dom.shuffleBtn.classList.toggle('is-shuffling', isBusy);
   dom.shuffleBtn.setAttribute('aria-label', isBusy ? 'Перетасовываем' : 'Перетасовать колоду');
 }
@@ -1539,7 +1540,7 @@ function bindEvents() {
   }
   // dom.deckWrap.addEventListener('click', openDeckGallery); // gallery временно отключена
   dom.drawBtn.addEventListener('click', startDrawing);
-  dom.shuffleBtn.addEventListener('click', shuffleDeck);
+  if (dom.shuffleBtn) dom.shuffleBtn.addEventListener('click', shuffleDeck);
   dom.streetToggleBtn.addEventListener('click', toggleInterpretation);
   dom.resultOverlay.addEventListener('click', closeCardZoomFromBackdrop);
   dom.revealCard.addEventListener('click', () => {
@@ -1547,17 +1548,17 @@ function bindEvents() {
   });
   dom.revealCard.addEventListener('pointermove', handleCardTiltMove);
   dom.revealCard.addEventListener('pointerleave', handleCardTiltLeave);
-  dom.resultAgainBtn.addEventListener('click', resetScene);
-  dom.resultStreetBtn.addEventListener('click', toggleResultPanelStreet);
-  dom.galleryCloseBtn.addEventListener('click', closeDeckGallery);
-  dom.galleryPrevBtn.addEventListener('click', showPrevGalleryCard);
-  dom.galleryNextBtn.addEventListener('click', showNextGalleryCard);
-  dom.deckGallery.addEventListener('click', handleGalleryBackdropClick);
-  dom.galleryTrack.addEventListener('click', handleGalleryCardClick);
-  dom.galleryTrack.addEventListener('pointermove', handleGalleryTiltMove);
-  dom.galleryTrack.addEventListener('pointerleave', resetGalleryTilt);
-  dom.deckGallery.addEventListener('touchstart', handleGalleryTouchStart, { passive:true });
-  dom.deckGallery.addEventListener('touchend', handleGalleryTouchEnd);
+  if (dom.resultAgainBtn) dom.resultAgainBtn.addEventListener('click', resetScene);
+  if (dom.resultStreetBtn) dom.resultStreetBtn.addEventListener('click', toggleResultPanelStreet);
+  if (dom.galleryCloseBtn) dom.galleryCloseBtn.addEventListener('click', closeDeckGallery);
+  if (dom.galleryPrevBtn) dom.galleryPrevBtn.addEventListener('click', showPrevGalleryCard);
+  if (dom.galleryNextBtn) dom.galleryNextBtn.addEventListener('click', showNextGalleryCard);
+  if (dom.deckGallery) dom.deckGallery.addEventListener('click', handleGalleryBackdropClick);
+  if (dom.galleryTrack) dom.galleryTrack.addEventListener('click', handleGalleryCardClick);
+  if (dom.galleryTrack) dom.galleryTrack.addEventListener('pointermove', handleGalleryTiltMove);
+  if (dom.galleryTrack) dom.galleryTrack.addEventListener('pointerleave', resetGalleryTilt);
+  if (dom.deckGallery) dom.deckGallery.addEventListener('touchstart', handleGalleryTouchStart, { passive:true });
+  if (dom.deckGallery) dom.deckGallery.addEventListener('touchend', handleGalleryTouchEnd);
   window.addEventListener('keydown', handleGalleryKeydown);
   window.addEventListener('resize', updateViewportVars);
 

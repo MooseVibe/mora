@@ -21,11 +21,20 @@ function savePendingDraw() {
     const card = d.getCurrent();
     const reading = d.getCurrentReading();
     if (!card) return;
-    localStorage.setItem('mora:pendingDraw', JSON.stringify({
+    const draw = {
       cardId: card.id,
       variantIdx: reading?.variantIdx ?? 0,
       drawnAt: new Date().toISOString().split('T')[0],
-    }));
+    };
+    localStorage.setItem('mora:pendingDraw', JSON.stringify(draw));
+    // если контекст дашборда — сохраняем в БД сразу
+    if (window.__moraDrawAuthed) {
+      fetch('/api/draws', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(draw),
+      }).catch(() => {});
+    }
   } catch(_) {}
 }
 
@@ -108,6 +117,7 @@ function runDeck3DDrawExperiment() {
   }
 
   transition('drawing');
+  document.body.classList.add('is-drawing-card');
   d.clearCardZoomState();
   d.clearStartInlineMotion();
   d.setCurrent(d.pickCard());
@@ -190,6 +200,8 @@ function handoffDeck3DFlightToRevealCard() {
     if (STATE !== 'drawing') return;
     transition('result');
     savePendingDraw();
+    const backdrop = document.getElementById('drawBackdrop');
+    if (backdrop) backdrop.style.display = 'block';
     d.dom.resultOverlay.style.pointerEvents = 'auto';
     d.updateCardZoomAvailability();
     if (d.canUseMobileTilt()) {
@@ -508,6 +520,7 @@ export async function startDrawing() {
 export function resetScene() {
   if (STATE !== 'result') return;
   cleanupDeck3DFlight();
+  document.body.classList.remove('is-drawing-card');
   transition('resetting');
   d.clearCardZoomState();
   d.dom.resultOverlay.classList.add('is-returning-to-deck');
