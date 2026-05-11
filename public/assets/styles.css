@@ -362,8 +362,11 @@
   /* stars */
   .stars-deco { position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
   .star-dot {
-    position:absolute; width:2px; height:2px;
+    position:absolute;
+    width:var(--star-size, 2px);
+    height:var(--star-size, 2px);
     background:var(--gold); border-radius:50%; opacity:0;
+    box-shadow:0 0 8px rgba(201,169,110,0.36);
     animation:twinkle var(--dur,3s) var(--delay,0s) ease-in-out infinite;
   }
   @keyframes twinkle {
@@ -892,6 +895,14 @@
       transform 0.12s ease,
       box-shadow 0.24s ease;
     position:relative;
+  }
+  .btn.fu[data-vis="visible"],
+  a.btn,
+  button.btn {
+    cursor:pointer;
+  }
+  .btn:not(:disabled):hover {
+    cursor:pointer;
   }
   .btn:disabled {
     cursor:default;
@@ -2032,23 +2043,52 @@
   }
 
   .site-signin-btn {
+    --btn-color:var(--gold);
+    --btn-border-color:var(--gold-dim);
+    --btn-hover-color:var(--cream);
+    --btn-hover-border-color:rgba(201,169,110,0.88);
+    --btn-hover-bg:rgba(201,169,110,0.08);
+    --btn-hover-shadow:0 0 18px rgba(201,169,110,0.08);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
     font-family:'Raleway',sans-serif;
-    font-weight:300;
-    font-size:12px;
-    letter-spacing:0.12em;
-    color:var(--cream);
-    background:transparent;
-    border:1px solid rgba(201,169,110,0.28);
-    border-radius:6px;
-    padding:7px 18px;
+    font-weight:400;
+    font-size:11px;
+    line-height:1;
+    letter-spacing:0.15em;
+    color:var(--btn-color);
+    background:rgba(201,169,110,0.055);
+    border:1px solid var(--btn-border-color);
+    border-radius:8px;
+    padding:10px 20px;
     cursor:pointer;
-    transition:border-color 0.22s, color 0.22s;
+    text-decoration:none;
+    transition:
+      border-color 0.22s,
+      color 0.22s,
+      background-color 0.22s,
+      box-shadow 0.22s,
+      transform 0.22s;
     text-transform:uppercase;
   }
 
   .site-signin-btn:hover {
-    border-color:var(--gold);
-    color:var(--gold);
+    border-color:var(--btn-hover-border-color);
+    color:var(--btn-hover-color);
+    background-color:var(--btn-hover-bg);
+    box-shadow:var(--btn-hover-shadow);
+    cursor:pointer !important;
+    text-decoration:none;
+  }
+
+  .site-signin-btn:active {
+    transform:scale(0.98);
+  }
+
+  .site-signin-btn:focus-visible {
+    outline:1px solid rgba(201,169,110,0.6);
+    outline-offset:4px;
   }
 
   /* ═══════════════════════════════
@@ -2141,31 +2181,10 @@
     filter:saturate(0.88) brightness(0.86) contrast(1.06);
     pointer-events:none;
     z-index:0;
-    transition:opacity 0.72s cubic-bezier(0.16,1,0.3,1);
   }
 
   .landing-panel-tarot-hover-bg {
-    position:absolute;
-    inset:0;
-    background:
-      linear-gradient(90deg, rgba(10,7,5,0.92) 0%, rgba(10,7,5,0.72) 38%, rgba(10,7,5,0.18) 62%, rgba(10,7,5,0.04) 100%),
-      linear-gradient(180deg, rgba(14,10,6,0.18), rgba(14,10,6,0.38)),
-      url("cards/Tarolog2.png") 62% center / cover no-repeat,
-      url("day-panel-bg.png") center / cover no-repeat,
-      rgba(10,7,5,0.96);
-    opacity:0;
-    filter:saturate(0.88) brightness(0.86) contrast(1.06);
-    pointer-events:none;
-    z-index:0;
-    transition:opacity 0.72s cubic-bezier(0.16,1,0.3,1);
-  }
-
-  .landing-panel-tarot:hover .landing-panel-tarot-bg {
-    opacity:1;
-  }
-
-  .landing-panel-tarot:hover .landing-panel-tarot-hover-bg {
-    opacity:1;
+    display:none;
   }
 
   .landing-panel-tarot .landing-panel-badge--tarot {
@@ -2275,13 +2294,13 @@
   }
 
   .deck3d {
-    --deck3d-width:175px;
+    --deck3d-width:188px;
     --deck3d-depth:4px;
     position:relative;
     width:var(--deck3d-width);
     aspect-ratio:var(--card-aspect);
     transform:
-      translate(-18px, -18px)
+      translate(-22px, -18px)
       rotateZ(0.8deg);
     transform-origin:center bottom;
     pointer-events:none;
@@ -2557,7 +2576,7 @@
     padding:0;
     padding-top:144px;     /* смещает контент на ~72px ниже центра */
     position:relative;
-    z-index:1;
+    z-index:5;
   }
 
   .day-text-block {
@@ -2611,7 +2630,16 @@
   /* Draw button inside panel */
   .day-panel-content-col #drawBtn {
     align-self:flex-start;
+    position:relative;
+    z-index:6;
+    pointer-events:auto;
     white-space:nowrap;
+  }
+
+  .site-signin-btn,
+  .day-panel-content-col #drawBtn:not(:disabled),
+  .day-panel-content-col #drawBtn:not(:disabled):hover {
+    cursor:pointer !important;
   }
 
   /* Shuffle button hidden on new landing */
@@ -2623,12 +2651,12 @@
   .landing-tagline {
     font-family:'Raleway',sans-serif;
     font-weight:300;
-    font-size:11px;
+    font-size:13px;
     letter-spacing:0.06em;
     color:var(--cream-dim);
-    opacity:0.4;
+    opacity:0.68;
     text-align:center;
-    line-height:1.7;
+    line-height:1.55;
   }
 
   @media (max-width: 640px) {

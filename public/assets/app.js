@@ -202,14 +202,15 @@ const dom = {
 // STARS
 // ═══════════════════════════════════════
 function initStars() {
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < 42; i++) {
     const s = document.createElement('div');
     s.className = 'star-dot';
     s.style.left = Math.random() * 100 + '%';
     s.style.top  = Math.random() * 100 + '%';
     s.style.setProperty('--dur',   (2.5 + Math.random() * 4) + 's');
     s.style.setProperty('--delay', (Math.random() * 5) + 's');
-    s.style.setProperty('--op',    (0.15 + Math.random() * 0.35).toFixed(2));
+    s.style.setProperty('--op',    (0.24 + Math.random() * 0.42).toFixed(2));
+    s.style.setProperty('--star-size', (1.6 + Math.random() * 1.4).toFixed(2) + 'px');
     if (dom.stars) dom.stars.appendChild(s);
   }
 }
