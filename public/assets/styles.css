@@ -1,5 +1,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   * { -webkit-tap-highlight-color: transparent; }
+  body { cursor: default; }
+  p, h1, h2, h3, h4, h5, h6, span, div { cursor: default; }
 
   :root {
     --bg: #090705;
@@ -368,6 +370,8 @@
     background:var(--gold); border-radius:50%; opacity:0;
     box-shadow:0 0 8px rgba(201,169,110,0.36);
     animation:twinkle var(--dur,3s) var(--delay,0s) ease-in-out infinite;
+    pointer-events:none;
+    will-change:opacity, transform;
   }
   @keyframes twinkle {
     0%,100%{opacity:0;transform:scale(0.5)}
@@ -2061,7 +2065,7 @@
     background:rgba(201,169,110,0.055);
     border:1px solid var(--btn-border-color);
     border-radius:8px;
-    padding:10px 20px;
+    padding:12px 24px;
     cursor:pointer;
     text-decoration:none;
     transition:
@@ -2577,6 +2581,7 @@
     padding-top:144px;     /* смещает контент на ~72px ниже центра */
     position:relative;
     z-index:5;
+    pointer-events:auto;
   }
 
   .day-text-block {
@@ -2593,6 +2598,7 @@
     width:200px;
     margin-bottom:0;
     flex-shrink:0;
+    pointer-events:none;
   }
 
   .landing-panel-day #deckWrap::before {
