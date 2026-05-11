@@ -31,6 +31,45 @@ const CARD_NAMES: Record<string, { name: string; arcana: string }> = {
 export default function TaroApp() {
   const [isAuthed, setIsAuthed] = useState(false)
   const [alreadyDrawn, setAlreadyDrawn] = useState<{ cardId: string } | null>(null)
+  const [showSaveModal, setShowSaveModal] = useState(false)
+
+  function showAppLoader() {
+    const loader = document.getElementById('appLoader')
+    if (!loader) return
+    loader.removeAttribute('hidden')
+    loader.classList.remove('is-hiding')
+    const deck = loader.querySelector('.app-loader-deck') as HTMLElement | null
+    if (deck) {
+      deck.classList.remove('nav-shuffling')
+      void deck.offsetWidth // reflow to restart animation
+      deck.classList.add('nav-shuffling')
+    }
+  }
+
+  function hideAppLoader() {
+    const loader = document.getElementById('appLoader')
+    if (!loader) return
+    loader.classList.add('is-hiding')
+    const deck = loader.querySelector('.app-loader-deck')
+    if (deck) deck.classList.remove('nav-shuffling')
+    setTimeout(() => loader.setAttribute('hidden', ''), 500)
+  }
+
+  function navigateWithTransition(href: string) {
+    setShowSaveModal(false)
+    showAppLoader()
+    setTimeout(() => { window.location.href = href }, 1650)
+  }
+
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return
+      showAppLoader()
+      setTimeout(() => hideAppLoader(), 1650)
+    }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -88,19 +127,13 @@ export default function TaroApp() {
     const rect = e.currentTarget.getBoundingClientRect()
     const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2)
     const dy = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2)
-    const img = e.currentTarget.querySelector('.drawn-card-preview-img') as HTMLElement
-    if (img) {
-      img.style.transition = 'transform 0.08s ease'
-      img.style.transform = `perspective(500px) rotateY(${dx * 14}deg) rotateX(${-dy * 14}deg) scale(1.04)`
-    }
+    e.currentTarget.style.transition = 'transform 0.08s ease'
+    e.currentTarget.style.transform = `perspective(700px) rotateY(${dx * 12}deg) rotateX(${-dy * 12}deg) scale(1.03)`
   }
 
   function handleCardTiltEnd(e: React.MouseEvent<HTMLDivElement>) {
-    const img = e.currentTarget.querySelector('.drawn-card-preview-img') as HTMLElement
-    if (img) {
-      img.style.transition = 'transform 0.5s ease'
-      img.style.transform = ''
-    }
+    e.currentTarget.style.transition = 'transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1)'
+    e.currentTarget.style.transform = ''
   }
 
   return (
@@ -130,7 +163,7 @@ export default function TaroApp() {
           <span className="site-logo-icon" aria-hidden="true">✦</span>
           <span className="site-logo-text">MORA</span>
         </div>
-        <a href="/auth" className="site-signin-btn">Войти</a>
+        <button onClick={() => navigateWithTransition('/auth')} className="site-signin-btn">Войти</button>
       </header>
 
       <div id="stage">
@@ -152,7 +185,7 @@ export default function TaroApp() {
               </div>
             </div>
 
-            <div className="landing-panel landing-panel-day">
+            <div className={`landing-panel landing-panel-day${alreadyDrawn ? ' landing-panel-day--drawn' : ''}`}>
               <div className="landing-panel-day-bg" aria-hidden="true"></div>
               <div className="day-panel-deck-col" style={{position:'relative'}}>
                 {/* карта поверх колоды когда уже вытянута */}
@@ -165,11 +198,11 @@ export default function TaroApp() {
                     <img
                       src={`/assets/cards/${alreadyDrawn.cardId}.png`}
                       alt=""
-                      className="drawn-card-preview-img"
+                      className="drawn-card-art"
                     />
                   </div>
                 )}
-                <div style={alreadyDrawn ? {opacity:0,pointerEvents:'none'} : undefined}>
+                <div style={alreadyDrawn ? {display:'none'} : undefined}>
                 <div className="deck3d" aria-hidden="true">
                   <div className="deck3d-stack">
                     <div className="deck3d-card deck3d-card--layer deck3d-card--layer-3"><div className="deck3d-card-inner"></div></div>
@@ -194,19 +227,16 @@ export default function TaroApp() {
               <div className={`day-panel-content-col${alreadyDrawn ? ' day-panel-content-col--drawn' : ''}`}>
                 {alreadyDrawn ? (
                   <div className="day-text-block">
-                    <span className="landing-panel-badge landing-panel-badge--drawn">Карта дня</span>
+                    <span className="landing-panel-badge landing-panel-badge--drawn">Ваша карта дня</span>
                     <h2 className="landing-panel-title">
                       {CARD_NAMES[alreadyDrawn.cardId]?.name ?? 'Карта'}
                     </h2>
-                    <p className="landing-panel-desc" style={{fontSize:'12px',letterSpacing:'0.1em',opacity:0.5,textTransform:'uppercase',marginBottom:'12px'}}>
-                      {CARD_NAMES[alreadyDrawn.cardId]?.arcana}
-                    </p>
                     <p className="landing-panel-desc">
                       Мора уже открыла тебе карту сегодня. Одна карта — один день. Вернись вечером и расскажи, сбылось ли.
                     </p>
-                    <a href="/auth?intent=save" className="btn" style={{marginTop:'16px',display:'inline-block'}}>
-                      ✦ Сохранить в дневник
-                    </a>
+                    <button onClick={() => setShowSaveModal(true)} className="drawn-save-btn">
+                      Сохранить в дневник
+                    </button>
                     <p className="drawn-today-footer">Новая карта — завтра</p>
                   </div>
                 ) : (
@@ -271,7 +301,8 @@ export default function TaroApp() {
           </div>
           <div className="result-card-actions">
             <a
-              href={isAuthed ? '/dashboard' : '/auth?intent=save'}
+              href={isAuthed ? '/dashboard' : undefined}
+              onClick={!isAuthed ? (e) => { e.preventDefault(); navigateWithTransition('/auth?intent=save') } : undefined}
               className="result-card-action-btn result-card-action-btn--save"
             >
               ✦ Сохранить карту
@@ -305,6 +336,23 @@ export default function TaroApp() {
           <div className="gallery-card-counter" id="galleryCardCounter"></div>
         </div>
       </div>
+
+      {/* Save intent modal */}
+      {showSaveModal && (
+        <div className="save-modal-overlay" onClick={() => setShowSaveModal(false)}>
+          <div className="save-modal" onClick={e => e.stopPropagation()}>
+            <div className="save-modal-icon">✦</div>
+            <h2 className="save-modal-title">Сохрани карту в дневник</h2>
+            <p className="save-modal-desc">Войди — и Мора запомнит твою карту дня</p>
+            <button onClick={() => navigateWithTransition('/auth?intent=save')} className="auth-btn save-modal-cta">
+              Войти
+            </button>
+            <button onClick={() => setShowSaveModal(false)} className="save-modal-later">
+              Позже
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
