@@ -55,10 +55,31 @@ export default function TaroApp() {
     setTimeout(() => loader.setAttribute('hidden', ''), 500)
   }
 
-  function navigateWithTransition(href: string) {
+  function preloadImage(src: string): Promise<void> {
+    return new Promise(resolve => {
+      const img = new Image()
+      img.onload = () => resolve()
+      img.onerror = () => resolve()
+      img.src = src
+    })
+  }
+
+  function getAssetsToPreload(href: string): string[] {
+    if (href.includes('/auth')) return ['/assets/mora-door.png']
+    if (href.includes('/dashboard')) return []
+    return []
+  }
+
+  async function navigateWithTransition(href: string) {
     setShowSaveModal(false)
     showAppLoader()
-    setTimeout(() => { window.location.href = href }, 1650)
+
+    await Promise.all([
+      new Promise<void>(resolve => setTimeout(resolve, 1600)),
+      ...getAssetsToPreload(href).map(preloadImage),
+    ])
+
+    window.location.href = href
   }
 
   useEffect(() => {
