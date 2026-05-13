@@ -32,8 +32,9 @@ function formatDate(dateStr: string): string {
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
   if (dateStr === today) return 'сегодня'
   if (dateStr === yesterday) return 'вчера'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
+  const d = new Date(dateStr + 'T12:00:00')
+  const base = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
+  return d.getFullYear() !== new Date().getFullYear() ? `${base} ${d.getFullYear()}` : base
 }
 
 function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
@@ -43,19 +44,13 @@ function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
     const rect = e.currentTarget.getBoundingClientRect()
     const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2)
     const dy = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2)
-    const img = e.currentTarget.querySelector('.rcw-thumb-img') as HTMLElement
-    if (img) {
-      img.style.transition = 'transform 0.08s ease'
-      img.style.transform = `perspective(400px) rotateY(${dx * 12}deg) rotateX(${-dy * 12}deg) scale(1.03)`
-    }
+    e.currentTarget.style.transition = 'transform 0.08s ease'
+    e.currentTarget.style.transform = `perspective(600px) rotateY(${dx * 10}deg) rotateX(${-dy * 10}deg)`
   }
 
   function handleTiltEnd(e: React.MouseEvent<HTMLDivElement>) {
-    const img = e.currentTarget.querySelector('.rcw-thumb-img') as HTMLElement
-    if (img) {
-      img.style.transition = 'transform 0.4s ease'
-      img.style.transform = ''
-    }
+    e.currentTarget.style.transition = 'transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1)'
+    e.currentTarget.style.transform = ''
   }
 
   return (
@@ -70,7 +65,6 @@ function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
           alt={card?.name ?? cardId}
           className="rcw-thumb-img"
         />
-        <span className="rcw-num">— {card?.num ?? ''} —</span>
       </div>
       <div className="rcw-meta">
         <span className="rcw-name">{card?.name ?? cardId}</span>
@@ -102,7 +96,7 @@ export default function RecentCardsWidget({ draws }: Props) {
   const slots = [0, 1, 2]
 
   return (
-    <div className="db-widget rcw-widget">
+    <div className="db-panel rcw-widget">
       <div className="rcw-head">
         <span className="rcw-title">Дневник карт</span>
         <a href="/journal" className="rcw-link">смотреть все →</a>
