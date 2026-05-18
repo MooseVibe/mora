@@ -3,10 +3,18 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-export default function DrawWidget() {
+const DRAW_PROMPTS = [
+  'Мора приготовила тебе карту. Она расскажет, чего ждать от сегодняшнего дня — предостережёт, поддержит или укажет путь. Но только пока день не закончился',
+  'Каждый день приходит со своей картой. Иногда она предупреждает. Иногда поддерживает. Всегда говорит то, что нужно именно сегодня',
+  'Твоя карта уже выбрана. Она знает, что ждёт тебя сегодня. Вытяни её — пока этот день ещё твой',
+]
+
+export default function DrawWidget({ date }: { date: string }) {
   const [mounted, setMounted] = useState(false)
+  const [prompt, setPrompt] = useState(DRAW_PROMPTS[0])
 
   useEffect(() => {
+    setPrompt(DRAW_PROMPTS[Math.floor(Math.random() * DRAW_PROMPTS.length)])
     setMounted(true)
     ;(window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed = true
 
@@ -81,6 +89,8 @@ export default function DrawWidget() {
   return (
     <>
       {/* Двухколоночный лейаут внутри db-wrap */}
+      <span className="db-panel-date dw-date">{date}</span>
+
       <div className="dw-panel">
 
         <div className="day-panel-deck-col dw-deck-col">
@@ -105,8 +115,8 @@ export default function DrawWidget() {
         </div>
 
         <div className="dw-text-col">
-          <h2 className="dw-title">Карта дня</h2>
-          <p className="dw-desc">Вытяни карту — Мора откроет, что приготовил тебе день</p>
+          <h2 className="dw-title">Твоя карта дня готова</h2>
+          <p className="dw-desc">{prompt}</p>
           <button className="btn dw-draw-btn" data-vis="visible" id="drawBtn">
             Вытянуть карту
           </button>

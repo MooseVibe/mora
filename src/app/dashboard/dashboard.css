@@ -11,6 +11,8 @@
 ───────────────────────────────────────────────── */
 .db-wrap {
   min-height: 100dvh;
+  overflow-y: auto;
+  padding-bottom: 12px;
   display: flex;
   flex-direction: column;
   font-family: 'Raleway', sans-serif;
@@ -119,11 +121,10 @@
 .db-main {
   flex: 1;
   min-height: 0;
-  padding: 16px 80px 16px;
+  padding: 12px 80px 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  overflow: hidden;
+  gap: 12px;
 }
 
 .db-welcome {
@@ -140,11 +141,12 @@
    GRID — natural height, sidebar stretches to match
 ───────────────────────────────────────────────── */
 .db-grid {
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 736px 1fr;
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* ─────────────────────────────────────────────────
@@ -162,6 +164,7 @@
    CARD OF DAY PANEL
 ───────────────────────────────────────────────── */
 .db-panel--card {
+  position: relative;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -182,12 +185,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  z-index: 1;
 }
 .db-panel-date {
   font-size: 10px;
   letter-spacing: 0.18em;
   color: rgba(154, 138, 117, 0.7);
   text-transform: uppercase;
+}
+.dw-date {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 2;
 }
 .db-panel-icons {
   display: flex;
@@ -216,6 +227,8 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .db-card-section-title {
@@ -434,7 +447,7 @@
 .rcw-thumb::before {
   content: '';
   position: absolute;
-  inset: 5px;
+  inset: 3px;
   border: 1px solid rgba(201, 169, 110, 0.32);
   border-radius: 8px;
   pointer-events: none;
@@ -452,9 +465,9 @@
 }
 .rcw-thumb-img {
   position: absolute;
-  inset: 5px;
-  width: calc(100% - 10px);
-  height: calc(100% - 10px);
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
   border-radius: 8px;
   object-fit: cover;
   display: block;
@@ -565,6 +578,7 @@
   border: 1px solid rgba(201, 169, 110, 0.08);
   border-radius: 14px;
   padding: 0 24px;
+  margin: 0 80px 0;
 }
 .db-advice-star { color: var(--gold-dim, #7a6040); font-size: 9px; }
 .db-advice-text {
@@ -579,17 +593,22 @@
    DRAW WIDGET (empty card state)
 ───────────────────────────────────────────────── */
 .dw-panel {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 0;
-  min-height: 260px;
+  min-height: 400px;
   width: 100%;
 }
-.dw-deck-col {
-  flex: 0 0 210px;
-  height: 260px;
+.dw-panel .dw-deck-col {
+  flex: 0 0 270px !important;
+  height: 420px;
+  margin-left: 30px;
 }
-.dw-deck-col .deck3d {
+.dw-panel .dw-deck-col .deck3d {
+  --deck3d-width: 255px;
+  transform: translate(-22px, 0px) rotateZ(0.8deg);
   filter: brightness(0.82) saturate(0.85);
 }
 .dw-text-col {
@@ -597,21 +616,25 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  padding: 0 8px;
+  gap: 16px;
+  padding: 0 0 0 60px;
+  max-width: 420px;
+  margin-top: 60px;
 }
 .dw-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 26px;
+  font-size: 34px;
   font-weight: 300;
-  color: var(--cream, #f0e6d3);
-  line-height: 1.2;
+  color: #e8d4a8;
+  line-height: 1.15;
+  margin: 0;
 }
 .dw-desc {
-  font-size: 13px;
-  color: var(--cream-dim, #9a8a75);
-  line-height: 1.6;
-  max-width: 240px;
+  font-size: 15px;
+  color: rgba(154, 138, 117, 0.85);
+  line-height: 1.65;
+  letter-spacing: 0.03em;
+  margin: 0;
 }
 .dw-draw-btn {
   font-size: 11px;

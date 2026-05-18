@@ -150,7 +150,7 @@ export default async function Dashboard() {
                 </div>
               </>
             ) : (
-              <DrawWidget />
+              <DrawWidget date={`Сегодня ${formatTodayDate()}`} />
             )}
           </div>
 
@@ -168,14 +168,15 @@ export default async function Dashboard() {
 
         </div>
 
-        {/* ADVICE */}
-        <div className="db-advice">
-          <span className="db-advice-star">✦</span>
-          <p className="db-advice-text">Совет дня: не бойся перемен. Иногда разрушение — это начало чего-то лучшего.</p>
-          <span className="db-advice-star">✦</span>
-        </div>
-
       </div>
+
+      {/* ADVICE */}
+      <div className="db-advice">
+        <span className="db-advice-star">✦</span>
+        <p className="db-advice-text">Совет дня: не бойся перемен. Иногда разрушение — это начало чего-то лучшего.</p>
+        <span className="db-advice-star">✦</span>
+      </div>
+
     </div>
   )
 }
