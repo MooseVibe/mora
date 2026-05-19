@@ -3,19 +3,49 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+function getMoonPhase(): string {
+  const knownNewMoon = new Date('2024-01-11').getTime()
+  const daysSince = (Date.now() - knownNewMoon) / 86400000
+  const phase = ((daysSince % 29.53059) + 29.53059) % 29.53059
+  if (phase < 1.85)  return 'Новолуние'
+  if (phase < 7.38)  return 'Растущий серп'
+  if (phase < 11.07) return 'Первая четверть'
+  if (phase < 14.77) return 'Растущая луна'
+  if (phase < 18.46) return 'Полнолуние'
+  if (phase < 22.15) return 'Убывающая луна'
+  if (phase < 25.84) return 'Последняя четверть'
+  return 'Убывающий серп'
+}
+
 const DRAW_PROMPTS = [
   'Мора приготовила тебе карту. Она расскажет, чего ждать от сегодняшнего дня — предостережёт, поддержит или укажет путь. Но только пока день не закончился',
   'Каждый день приходит со своей картой. Иногда она предупреждает. Иногда поддерживает. Всегда говорит то, что нужно именно сегодня',
   'Твоя карта уже выбрана. Она знает, что ждёт тебя сегодня. Вытяни её — пока этот день ещё твой',
 ]
 
+function getTimeUntilMidnight(): string {
+  const now = new Date()
+  const midnight = new Date(now)
+  midnight.setHours(24, 0, 0, 0)
+  const diff = midnight.getTime() - now.getTime()
+  const h = Math.floor(diff / 3600000)
+  const m = Math.floor((diff % 3600000) / 60000)
+  const s = Math.floor((diff % 60000) / 1000)
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
 export default function DrawWidget({ date }: { date: string }) {
   const [mounted, setMounted] = useState(false)
   const [prompt, setPrompt] = useState(DRAW_PROMPTS[0])
+  const [countdown, setCountdown] = useState('00:00:00')
 
   useEffect(() => {
     setPrompt(DRAW_PROMPTS[Math.floor(Math.random() * DRAW_PROMPTS.length)])
+    setCountdown(getTimeUntilMidnight())
     setMounted(true)
+
+    const timer = setInterval(() => setCountdown(getTimeUntilMidnight()), 1000)
+
     ;(window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed = true
 
     const script = document.createElement('script')
@@ -24,6 +54,7 @@ export default function DrawWidget({ date }: { date: string }) {
     document.body.appendChild(script)
 
     return () => {
+      clearInterval(timer)
       delete (window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed
       document.body.classList.remove('is-drawing-card')
       document.body.removeChild(script)
@@ -89,7 +120,10 @@ export default function DrawWidget({ date }: { date: string }) {
   return (
     <>
       {/* Двухколоночный лейаут внутри db-wrap */}
-      <span className="db-panel-date dw-date">{date}</span>
+      <div className="dw-toprow">
+        <span className="db-panel-date">{date}</span>
+        <span className="dw-moon-caption">☽ {getMoonPhase()}</span>
+      </div>
 
       <div className="dw-panel">
 
@@ -115,6 +149,7 @@ export default function DrawWidget({ date }: { date: string }) {
         </div>
 
         <div className="dw-text-col">
+          <span className="dw-timer-badge">До полуночи · <span className="dw-timer-time">{countdown}</span></span>
           <h2 className="dw-title">Твоя карта дня готова</h2>
           <p className="dw-desc">{prompt}</p>
           <button className="btn dw-draw-btn" data-vis="visible" id="drawBtn">

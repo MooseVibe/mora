@@ -35,10 +35,16 @@ function formatTodayDate() {
   return new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ preview?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
+
+  const { preview } = await searchParams
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -58,7 +64,16 @@ export default async function Dashboard() {
 
   const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'Путник'
   const avatarUrl = user.user_metadata?.avatar_url
-  const cardId = todayDraw?.card_id as string | undefined
+
+  // preview overrides: ?preview=empty forces empty state, ?preview=drawn forces a card
+  let cardId: string | undefined
+  if (preview === 'empty') {
+    cardId = undefined
+  } else if (preview === 'drawn') {
+    cardId = todayDraw?.card_id ?? 'sun'
+  } else {
+    cardId = todayDraw?.card_id as string | undefined
+  }
   const card = cardId ? CARDS[cardId] ?? null : null
 
   return (

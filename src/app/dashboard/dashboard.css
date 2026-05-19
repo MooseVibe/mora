@@ -171,12 +171,13 @@
   justify-content: center;
   gap: 20px;
   overflow: hidden;
+  min-height: 559px;
 }
 
 /* Empty / draw state */
 .db-panel--draw {
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: flex-start;
 }
 
 /* Top row: date + icon buttons */
@@ -194,11 +195,11 @@
   color: rgba(154, 138, 117, 0.7);
   text-transform: uppercase;
 }
-.dw-date {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 2;
+.dw-toprow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
 }
 .db-panel-icons {
   display: flex;
@@ -640,6 +641,31 @@
   font-size: 11px;
   padding: 10px 20px;
   margin-top: 4px;
+}
+.dw-moon-caption {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--cream-dim, #9a8a75);
+}
+.dw-timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(201, 169, 110, 0.08);
+  border: 1px solid rgba(201, 169, 110, 0.55);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--gold, #c9a96e);
+  text-transform: uppercase;
+  font-family: 'Raleway', sans-serif;
+  white-space: nowrap;
+}
+.dw-timer-time {
+  font-family: ui-monospace, 'Courier New', monospace;
+  letter-spacing: 0.04em;
 }
 
 /* deck3d hover in draw state */
