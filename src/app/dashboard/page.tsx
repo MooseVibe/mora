@@ -78,7 +78,11 @@ export default async function Dashboard({
 
   return (
     <div className="db-wrap">
-      <CardSyncOnMount />
+      <CardSyncOnMount
+        serverDraw={todayDraw?.card_id && todayDraw?.drawn_at
+          ? { cardId: todayDraw.card_id, drawnAt: todayDraw.drawn_at }
+          : null}
+      />
 
       {/* HEADER */}
       <header className="db-header">

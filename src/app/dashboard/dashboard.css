@@ -450,7 +450,7 @@
   position: absolute;
   inset: 3px;
   border: 1px solid rgba(201, 169, 110, 0.32);
-  border-radius: 8px;
+  border-radius: 11px;
   pointer-events: none;
   z-index: 2;
 }
@@ -469,7 +469,7 @@
   inset: 3px;
   width: calc(100% - 6px);
   height: calc(100% - 6px);
-  border-radius: 8px;
+  border-radius: 11px;
   object-fit: cover;
   display: block;
   z-index: 1;
@@ -609,18 +609,21 @@
 }
 .dw-panel .dw-deck-col .deck3d {
   --deck3d-width: 255px;
-  transform: translate(-22px, 0px) rotateZ(0.8deg);
+  transform: translate(-22px, 28px) rotateZ(0deg);
   filter: brightness(0.82) saturate(0.85);
 }
 .dw-text-col {
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  padding: 0 0 0 60px;
-  max-width: 420px;
+  padding: 0 0 0 52px;
+  max-width: none;
   margin-top: 60px;
+  transform: translateY(40px);
 }
 .dw-title {
   font-family: 'Cormorant Garamond', serif;

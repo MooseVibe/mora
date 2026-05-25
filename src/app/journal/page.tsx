@@ -32,16 +32,56 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-export default async function JournalPage() {
+type JournalPeriod = 'all' | '30' | '7'
+
+const PERIOD_OPTIONS: Array<{ value: JournalPeriod; label: string; href: string }> = [
+  { value: 'all', label: 'Все время', href: '/journal' },
+  { value: '30', label: '30 дней', href: '/journal?period=30' },
+  { value: '7', label: '7 дней', href: '/journal?period=7' },
+]
+
+function getPeriodStartDate(period: JournalPeriod): string | null {
+  if (period === 'all') return null
+
+  const date = new Date()
+  date.setHours(0, 0, 0, 0)
+  date.setDate(date.getDate() - (Number(period) - 1))
+
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
+function getSelectedPeriod(period?: string): JournalPeriod {
+  return period === '30' || period === '7' ? period : 'all'
+}
+
+export default async function JournalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  const { data: draws } = await supabase
+  const { period } = await searchParams
+  const selectedPeriod = getSelectedPeriod(period)
+  const periodStartDate = getPeriodStartDate(selectedPeriod)
+
+  let drawsQuery = supabase
     .from('card_draws')
     .select('card_id, drawn_at')
     .eq('user_id', user.id)
     .order('drawn_at', { ascending: false })
+
+  if (periodStartDate) {
+    drawsQuery = drawsQuery.gte('drawn_at', periodStartDate)
+  }
+
+  const { data: draws } = await drawsQuery
 
   const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'Путник'
   const avatarUrl = user.user_metadata?.avatar_url
@@ -50,26 +90,13 @@ export default async function JournalPage() {
   return (
     <div className="jn-wrap">
 
-      {/* HEADER */}
       <header className="jn-header">
-        <div className="jn-header-left">
-          <a href="/" className="jn-nav-link">
-            <span className="jn-nav-icon">🕯</span>
-            Сходить к тарологу
-          </a>
-          <a href="/" className="jn-nav-link">
-            <span className="jn-nav-icon">✦</span>
-            Карта дня
-          </a>
-        </div>
-
-        <h1 className="jn-title">Дневник карт</h1>
-
+        <a href="/" className="jn-logo">
+          <span className="jn-logo-icon">✦</span>
+          <span className="jn-logo-text">MORA</span>
+        </a>
         <div className="jn-header-right">
-          <a href="/journal" className="jn-header-btn">
-            <span>☰</span>
-            Дневник карт
-          </a>
+          <a href="/auth/logout" className="jn-logout-link">Выйти</a>
           <div className="jn-avatar-wrap">
             {avatarUrl
               ? <img src={avatarUrl} alt={firstName} className="jn-avatar" />
@@ -80,24 +107,22 @@ export default async function JournalPage() {
         </div>
       </header>
 
-      {/* FILTERS */}
+      <div className="jn-title-block">
+        <a href="/dashboard" className="jn-back-link" aria-label="Вернуться на дашборд">‹</a>
+        <h1 className="jn-page-title">Дневник карт</h1>
+      </div>
+
       <div className="jn-filters">
-        <div className="jn-filters-left">
-          <button className="jn-filter-btn">
-            <span>⊞</span> Все карты <span className="jn-chevron">▾</span>
-          </button>
-          <button className="jn-filter-btn">
-            <span>📅</span> За всё время <span className="jn-chevron">▾</span>
-          </button>
-          <div className="jn-search-wrap">
-            <span className="jn-search-icon">🔍</span>
-            <input className="jn-search" type="text" placeholder="Поиск по картам..." disabled />
-          </div>
-        </div>
-        <div className="jn-view-toggle">
-          <button className="jn-view-btn jn-view-btn--active" title="Сетка">⊞</button>
-          <button className="jn-view-btn" title="Список">☰</button>
-        </div>
+        {PERIOD_OPTIONS.map(option => (
+          <a
+            key={option.value}
+            href={option.href}
+            className={`jn-period-chip${selectedPeriod === option.value ? ' jn-period-chip--active' : ''}`}
+            aria-current={selectedPeriod === option.value ? 'page' : undefined}
+          >
+            {option.label}
+          </a>
+        ))}
       </div>
 
       {/* LIST */}

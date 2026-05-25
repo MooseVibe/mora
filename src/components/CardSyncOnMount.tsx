@@ -3,14 +3,33 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function CardSyncOnMount() {
+type DailyDraw = {
+  cardId: string
+  drawnAt: string
+}
+
+type PendingDraw = DailyDraw & {
+  variantIdx: number
+}
+
+export default function CardSyncOnMount({ serverDraw }: { serverDraw?: DailyDraw | null }) {
   const router = useRouter()
 
   useEffect(() => {
+    if (serverDraw) {
+      const draw: PendingDraw = {
+        cardId: serverDraw.cardId,
+        drawnAt: serverDraw.drawnAt,
+        variantIdx: 0,
+      }
+      localStorage.setItem('mora:pendingDraw', JSON.stringify(draw))
+      return
+    }
+
     const raw = localStorage.getItem('mora:pendingDraw')
     if (!raw) return
 
-    let draw: { cardId: string; variantIdx: number; drawnAt: string }
+    let draw: PendingDraw
     try {
       draw = JSON.parse(raw)
     } catch {
@@ -29,7 +48,7 @@ export default function CardSyncOnMount() {
         router.refresh()
       }
     }).catch(() => {})
-  }, [router])
+  }, [router, serverDraw])
 
   return null
 }
