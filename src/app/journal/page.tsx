@@ -107,22 +107,24 @@ export default async function JournalPage({
         </div>
       </header>
 
-      <div className="jn-title-block">
-        <a href="/dashboard" className="jn-back-link" aria-label="Вернуться на дашборд">‹</a>
-        <h1 className="jn-page-title">Дневник карт</h1>
-      </div>
+      <div className="jn-sticky-subhead">
+        <div className="jn-title-block">
+          <a href="/dashboard" className="jn-back-link" aria-label="Вернуться на дашборд">‹</a>
+          <h1 className="jn-page-title">Дневник карт</h1>
+        </div>
 
-      <div className="jn-filters">
-        {PERIOD_OPTIONS.map(option => (
-          <a
-            key={option.value}
-            href={option.href}
-            className={`jn-period-chip${selectedPeriod === option.value ? ' jn-period-chip--active' : ''}`}
-            aria-current={selectedPeriod === option.value ? 'page' : undefined}
-          >
-            {option.label}
-          </a>
-        ))}
+        <div className="jn-filters">
+          {PERIOD_OPTIONS.map(option => (
+            <a
+              key={option.value}
+              href={option.href}
+              className={`jn-period-chip${selectedPeriod === option.value ? ' jn-period-chip--active' : ''}`}
+              aria-current={selectedPeriod === option.value ? 'page' : undefined}
+            >
+              {option.label}
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* LIST */}

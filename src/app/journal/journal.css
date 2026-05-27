@@ -101,18 +101,21 @@
 }
 .jn-avatar-chevron { color: var(--cream-dim, #9a8a75); font-size: 12px; }
 
-.jn-title-block {
+.jn-sticky-subhead {
   flex-shrink: 0;
   position: sticky;
   top: 72px;
   z-index: 95;
+  background: rgba(9, 7, 5, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.jn-title-block {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 80px 6px;
-  background: rgba(9, 7, 5, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 .jn-page-title {
   font-family: 'Cormorant Garamond', serif;
@@ -144,14 +147,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 128px;
-  z-index: 90;
   padding: 16px 80px 18px;
-  background: rgba(9, 7, 5, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 .jn-filters::after {
   content: '';
