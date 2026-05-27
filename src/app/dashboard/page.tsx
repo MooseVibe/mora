@@ -64,10 +64,11 @@ export default async function Dashboard({
 
   const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'Путник'
   const avatarUrl = user.user_metadata?.avatar_url
+  const isEmptyAllPreview = preview === 'empty-all'
 
-  // preview overrides: ?preview=empty forces empty state, ?preview=drawn forces a card
+  // preview overrides: ?preview=empty forces today's empty state, ?preview=empty-all simulates a new user
   let cardId: string | undefined
-  if (preview === 'empty') {
+  if (preview === 'empty' || isEmptyAllPreview) {
     cardId = undefined
   } else if (preview === 'drawn') {
     cardId = todayDraw?.card_id ?? 'sun'
@@ -75,11 +76,12 @@ export default async function Dashboard({
     cardId = todayDraw?.card_id as string | undefined
   }
   const card = cardId ? CARDS[cardId] ?? null : null
+  const recentDrawsForView = isEmptyAllPreview ? [] : recentDraws
 
   return (
     <div className="db-wrap">
       <CardSyncOnMount
-        serverDraw={todayDraw?.card_id && todayDraw?.drawn_at
+        serverDraw={!preview && todayDraw?.card_id && todayDraw?.drawn_at
           ? { cardId: todayDraw.card_id, drawnAt: todayDraw.drawn_at }
           : null}
       />
@@ -176,7 +178,7 @@ export default async function Dashboard({
           {/* RIGHT SIDEBAR */}
           <div className="db-sidebar">
 
-            <RecentCardsWidget draws={recentDraws} />
+            <RecentCardsWidget draws={recentDrawsForView} />
 
             <div className="db-panel db-tarot-stub">
               <span className="db-tarot-stub-label">Походы к тарологу</span>
