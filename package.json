@@ -1,7 +1,13 @@
 {
   "name": "mora",
   "version": "0.1.0",
+  "description": "An early-stage online tarot reader built with Next.js and Supabase.",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MooseVibe/mora.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
