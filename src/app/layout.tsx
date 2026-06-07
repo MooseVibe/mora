@@ -15,10 +15,7 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <link rel="preload" as="image" href="/assets/cards/moose.webp" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Neucha&family=Raleway:wght@200;300;400&display=swap"
-          rel="stylesheet"
-        />
+        <link rel="stylesheet" href="/assets/fonts.css" />
         <link rel="stylesheet" href="/assets/styles.css" />
       </head>
       <body className="app-is-loading" suppressHydrationWarning>

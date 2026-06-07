@@ -40,6 +40,7 @@ Then try `3002` if needed.
 - `/auth` -> login and save-card auth flow
 - `/dashboard` -> authenticated daily card dashboard
 - `/journal` -> authenticated card journal
+- `/qa/cards` -> service QA preview of all tarot cards, images, and prepared daily-card texts. Local URL: `http://localhost:3000/qa/cards` (or the active dev port). Production/Vercel Preview requires `CARD_QA_TOKEN`.
 - `/api/draws` -> stores drawn cards in Supabase
 
 ## Important Files
@@ -50,6 +51,7 @@ Then try `3002` if needed.
 - `docs/design-system.md` -> visual language, colors, animation principles
 - `docs/features.md` -> current MVP, WIP, planned features
 - `docs/decisions.md` -> decisions log
+- `docs/card-style.md` -> tarot card art/text rules and add-card QA checklist
 - `directives/` -> task workflows for redesigns, features, and bugs
 - `docs/competitors.md` -> competitor analysis and market notes
 
@@ -80,5 +82,7 @@ Before edits:
 4. Keep changes scoped to the user's request.
 
 Do not rewrite working mechanics during UI work. Preserve auth, card draw, save, journal, and pending-draw sync behavior unless the user explicitly asks to change them.
+
+When the user asks for "QA preview", "страницу с картами и текстами", or wants to inspect added cards, send the `/qa/cards` link for the active environment. Locally this is usually `http://localhost:3000/qa/cards`; if the dev server is on another port, use that port.
 
 After meaningful product, architecture, or visual decisions, update `docs/decisions.md`.

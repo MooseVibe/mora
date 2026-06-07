@@ -2,36 +2,48 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getTarotCardImageSrc, getTarotCardMeta } from '@/lib/tarot'
 
-const CARD_NAMES: Record<string, { name: string; arcana: string }> = {
-  fool:             { name: 'Шут',               arcana: '0 Аркан'    },
-  magician:         { name: 'Маг',               arcana: 'I Аркан'    },
-  'high-priestess': { name: 'Верховная Жрица',   arcana: 'II Аркан'   },
-  empress:          { name: 'Императрица',        arcana: 'III Аркан'  },
-  emperor:          { name: 'Император',          arcana: 'IV Аркан'   },
-  hierophant:       { name: 'Иерофант',           arcana: 'V Аркан'    },
-  lovers:           { name: 'Влюблённые',         arcana: 'VI Аркан'   },
-  chariot:          { name: 'Колесница',          arcana: 'VII Аркан'  },
-  strength:         { name: 'Сила',              arcana: 'VIII Аркан' },
-  hermit:           { name: 'Отшельник',          arcana: 'IX Аркан'   },
-  wheel:            { name: 'Колесо Фортуны',     arcana: 'X Аркан'    },
-  justice:          { name: 'Справедливость',     arcana: 'XI Аркан'   },
-  'hanged-man':     { name: 'Повешенный',         arcana: 'XII Аркан'  },
-  death:            { name: 'Смерть',             arcana: 'XIII Аркан' },
-  temperance:       { name: 'Умеренность',        arcana: 'XIV Аркан'  },
-  devil:            { name: 'Дьявол',             arcana: 'XV Аркан'   },
-  tower:            { name: 'Башня',              arcana: 'XVI Аркан'  },
-  star:             { name: 'Звезда',             arcana: 'XVII Аркан' },
-  moon:             { name: 'Луна',               arcana: 'XVIII Аркан'},
-  sun:              { name: 'Солнце',             arcana: 'XIX Аркан'  },
-  judgement:        { name: 'Суд',                arcana: 'XX Аркан'   },
-  world:            { name: 'Мир',                arcana: 'XXI Аркан'  },
+type DrawState =
+  | { status: 'checking' }
+  | { status: 'empty' }
+  | { status: 'drawn'; cardId: string }
+
+type PendingDraw = {
+  cardId: string
+  drawnAt: string
+  variantIdx?: number
+}
+
+const APP_TRANSITION_MS = 950
+const APP_TRANSITION_HIDE_MS = 1050
+
+function getPendingDrawCookieMaxAge() {
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setHours(24, 0, 0, 0)
+  return Math.max(60, Math.ceil((tomorrow.getTime() - now.getTime()) / 1000))
+}
+
+function setPendingDrawCookie(draw: PendingDraw) {
+  document.cookie = [
+    `mora_pending_draw=${encodeURIComponent(JSON.stringify(draw))}`,
+    'Path=/',
+    `Max-Age=${getPendingDrawCookieMaxAge()}`,
+    'SameSite=Lax',
+  ].join('; ')
+}
+
+function clearPendingDrawCookie() {
+  document.cookie = 'mora_pending_draw=; Path=/; Max-Age=0; SameSite=Lax'
 }
 
 export default function TaroApp() {
   const [isAuthed, setIsAuthed] = useState(false)
-  const [alreadyDrawn, setAlreadyDrawn] = useState<{ cardId: string } | null>(null)
+  const [drawState, setDrawState] = useState<DrawState>({ status: 'checking' })
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const alreadyDrawn = drawState.status === 'drawn' ? { cardId: drawState.cardId } : null
+  const isCheckingDrawState = drawState.status === 'checking'
 
   function showAppLoader() {
     const loader = document.getElementById('appLoader')
@@ -65,7 +77,7 @@ export default function TaroApp() {
   }
 
   function getAssetsToPreload(href: string): string[] {
-    if (href.includes('/auth')) return ['/assets/mora-door.png']
+    if (href.includes('/auth')) return ['/assets/mora-door.webp']
     if (href.includes('/dashboard')) return []
     return []
   }
@@ -75,7 +87,7 @@ export default function TaroApp() {
     showAppLoader()
 
     await Promise.all([
-      new Promise<void>(resolve => setTimeout(resolve, 1600)),
+      new Promise<void>(resolve => setTimeout(resolve, APP_TRANSITION_MS)),
       ...getAssetsToPreload(href).map(preloadImage),
     ])
 
@@ -86,7 +98,7 @@ export default function TaroApp() {
     const onPageShow = (e: PageTransitionEvent) => {
       if (!e.persisted) return
       showAppLoader()
-      setTimeout(() => hideAppLoader(), 1650)
+      setTimeout(() => hideAppLoader(), APP_TRANSITION_HIDE_MS)
     }
     window.addEventListener('pageshow', onPageShow)
     return () => window.removeEventListener('pageshow', onPageShow)
@@ -109,28 +121,44 @@ export default function TaroApp() {
     const supabase = createClient()
     const today = new Date().toISOString().split('T')[0]
 
+    let pendingDrawForToday: PendingDraw | null = null
+
+    try {
+      const raw = localStorage.getItem('mora:pendingDraw')
+      if (raw) {
+        const draw = JSON.parse(raw)
+        if (draw?.drawnAt === today && typeof draw.cardId === 'string') {
+          pendingDrawForToday = {
+            cardId: draw.cardId,
+            drawnAt: draw.drawnAt,
+            variantIdx: typeof draw.variantIdx === 'number' ? draw.variantIdx : 0,
+          }
+          setPendingDrawCookie(pendingDrawForToday)
+          setDrawState({ status: 'drawn', cardId: draw.cardId })
+        } else {
+          localStorage.removeItem('mora:pendingDraw')
+          clearPendingDrawCookie()
+          setDrawState({ status: 'empty' })
+        }
+      } else {
+        clearPendingDrawCookie()
+        setDrawState({ status: 'empty' })
+      }
+    } catch {
+      localStorage.removeItem('mora:pendingDraw')
+      clearPendingDrawCookie()
+      setDrawState({ status: 'empty' })
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       const authed = !!session
       setIsAuthed(authed)
 
-      try {
-        const raw = localStorage.getItem('mora:pendingDraw')
-        if (raw) {
-          const draw = JSON.parse(raw)
-          if (draw.drawnAt === today) {
-            if (authed) {
-              window.location.href = '/dashboard'
-            } else {
-              setAlreadyDrawn({ cardId: draw.cardId })
-            }
-          } else {
-            // старый draw — чистим
-            localStorage.removeItem('mora:pendingDraw')
-          }
-        }
-      } catch {
-        localStorage.removeItem('mora:pendingDraw')
+      if (authed && pendingDrawForToday) {
+        window.location.href = '/dashboard'
       }
+    }).catch(() => {
+      setIsAuthed(false)
     })
 
     // загружаем app.js как ES-модуль после монтирования DOM
@@ -140,6 +168,7 @@ export default function TaroApp() {
     document.body.appendChild(script)
 
     return () => {
+      document.body.classList.remove('is-drawing-card')
       document.body.removeChild(script)
     }
   }, [])
@@ -217,7 +246,7 @@ export default function TaroApp() {
                     onMouseLeave={handleCardTiltEnd}
                   >
                     <img
-                      src={`/assets/cards/${alreadyDrawn.cardId}.png`}
+                      src={getTarotCardImageSrc(alreadyDrawn.cardId)}
                       alt=""
                       className="drawn-card-art"
                     />
@@ -246,11 +275,19 @@ export default function TaroApp() {
               </div>
 
               <div className={`day-panel-content-col${alreadyDrawn ? ' day-panel-content-col--drawn' : ''}`}>
-                {alreadyDrawn ? (
+                {isCheckingDrawState ? (
+                  <div className="day-text-block">
+                    <span className="landing-panel-badge landing-panel-badge--drawn">Смотрим карту дня</span>
+                    <h2 className="landing-panel-title">Карта дня</h2>
+                    <p className="landing-panel-desc">
+                      Мора сверяется с сегодняшним днём.
+                    </p>
+                  </div>
+                ) : alreadyDrawn ? (
                   <div className="day-text-block">
                     <span className="landing-panel-badge landing-panel-badge--drawn">Ваша карта дня</span>
                     <h2 className="landing-panel-title">
-                      {CARD_NAMES[alreadyDrawn.cardId]?.name ?? 'Карта'}
+                      {getTarotCardMeta(alreadyDrawn.cardId)?.name ?? 'Карта'}
                     </h2>
                     <p className="landing-panel-desc">
                       Мора уже открыла тебе карту сегодня. Одна карта — один день. Вернись вечером и расскажи, сбылось ли.
@@ -270,7 +307,8 @@ export default function TaroApp() {
                   className="btn fu"
                   data-vis="visible"
                   id="drawBtn"
-                  style={alreadyDrawn ? {display:'none'} : undefined}
+                  style={alreadyDrawn || isCheckingDrawState ? {display:'none'} : undefined}
+                  disabled={isCheckingDrawState}
                 >
                   Вытянуть карту
                 </button>

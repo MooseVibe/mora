@@ -12,6 +12,30 @@ type PendingDraw = DailyDraw & {
   variantIdx: number
 }
 
+function getPendingDrawCookieMaxAge() {
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setHours(24, 0, 0, 0)
+  return Math.max(60, Math.ceil((tomorrow.getTime() - now.getTime()) / 1000))
+}
+
+function setPendingDrawCookie(draw: PendingDraw) {
+  document.cookie = [
+    `mora_pending_draw=${encodeURIComponent(JSON.stringify(draw))}`,
+    'Path=/',
+    `Max-Age=${getPendingDrawCookieMaxAge()}`,
+    'SameSite=Lax',
+  ].join('; ')
+}
+
+function clearPendingDrawCookie() {
+  document.cookie = 'mora_pending_draw=; Path=/; Max-Age=0; SameSite=Lax'
+}
+
+function getTodayKey() {
+  return new Date().toISOString().split('T')[0]
+}
+
 export default function CardSyncOnMount({ serverDraw }: { serverDraw?: DailyDraw | null }) {
   const router = useRouter()
 
@@ -23,6 +47,7 @@ export default function CardSyncOnMount({ serverDraw }: { serverDraw?: DailyDraw
         variantIdx: 0,
       }
       localStorage.setItem('mora:pendingDraw', JSON.stringify(draw))
+      setPendingDrawCookie(draw)
       return
     }
 
@@ -34,8 +59,17 @@ export default function CardSyncOnMount({ serverDraw }: { serverDraw?: DailyDraw
       draw = JSON.parse(raw)
     } catch {
       localStorage.removeItem('mora:pendingDraw')
+      clearPendingDrawCookie()
       return
     }
+
+    if (draw.drawnAt !== getTodayKey()) {
+      localStorage.removeItem('mora:pendingDraw')
+      clearPendingDrawCookie()
+      return
+    }
+
+    setPendingDrawCookie(draw)
 
     fetch('/api/draws', {
       method: 'POST',

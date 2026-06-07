@@ -59,7 +59,12 @@ export function preloadCardImages() {
     return;
   }
 
-  const sources = [...new Set(TAROT_CARDS.map(card => card.image).filter(Boolean))];
+  const gallery = document.getElementById('deckGallery');
+  if (!gallery || gallery.hidden) {
+    return;
+  }
+
+  const sources = [...new Set(TAROT_CARDS.slice(0, 3).map(card => card.image).filter(Boolean))];
   const preloadNext = index => {
     if (index >= sources.length) return;
     loadCardImage(sources[index]).catch(() => {});

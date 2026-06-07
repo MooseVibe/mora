@@ -28,7 +28,7 @@ mora/
 │       ├── state.js            # глобальное состояние на клиенте
 │       ├── loader.js           # управление лоадером
 │       ├── image-cache.js      # предзагрузка изображений
-│       └── cards/              # изображения 22 арканов (PNG + WebP-обложка)
+│       └── cards/              # изображения карт; новые карты коммитятся как WebP
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── layout.tsx          # корневой layout (подключает шрифты, styles.css)
@@ -73,8 +73,10 @@ mora/
 |---|---|---|
 | Авторизация | `src/app/auth/` | Google OAuth + Email OTP через Supabase. Callback → `/auth/callback/route.ts` |
 | Вытягивание карты | `public/assets/draw.js` + `src/app/api/draws/route.ts` | Клиентская анимация + POST в БД. Защита: одна карта в день через `drawn_at`. Pending draw у незалогиненных — в localStorage |
+| Данные карт | `public/assets/cards.js` + `src/lib/tarot.ts` | `cards.js` — единый источник текстов/картинок для нативного draw-flow; `tarot.ts` — TypeScript-адаптер для React-экранов |
 | Дашборд | `src/app/dashboard/page.tsx` | Server Component. Загружает карту дня и 3 последних вытягивания из Supabase |
 | Дневник карт | `src/app/journal/page.tsx` | WIP. Полный список вытягиваний пользователя |
+| QA просмотр карт | `src/app/qa/cards/page.tsx` | Служебный noindex-preview всех карт и вариантов текстов. Локально открыт, в production требует `CARD_QA_TOKEN` |
 | Sync pending draw | `src/components/CardSyncOnMount.tsx` | При входе читает `mora:pendingDraw` из localStorage и отправляет в `/api/draws` |
 
 ## Договорённости по коду

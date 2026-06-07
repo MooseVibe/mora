@@ -17,6 +17,7 @@
   flex-direction: column;
   font-family: 'Raleway', sans-serif;
   color: var(--cream, #f0e6d3);
+  animation: mora-page-enter 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 /* ─────────────────────────────────────────────────
@@ -216,9 +217,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s;
+  border-radius: 8px;
+  transition:
+    opacity 0.2s,
+    color 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
 }
-.db-panel-icon-btn:not(:disabled):hover { opacity: 1; color: var(--cream, #f0e6d3); }
+.db-panel-icon-btn:not(:disabled):hover {
+  opacity: 1;
+  color: var(--gold, #c9a96e);
+  background: rgba(201, 169, 110, 0.08);
+}
+.db-panel-icon-btn:not(:disabled):focus-visible {
+  outline: 1px solid rgba(201, 169, 110, 0.68);
+  outline-offset: 4px;
+  opacity: 1;
+  color: var(--gold, #c9a96e);
+  box-shadow: 0 0 18px rgba(201, 169, 110, 0.14);
+}
+.db-panel-icon-btn:not(:disabled):active {
+  background: rgba(201, 169, 110, 0.12);
+  transform: scale(0.97);
+}
+.db-panel-icon-btn--active {
+  opacity: 0.78;
+  cursor: pointer;
+}
 .db-panel-icon-btn:disabled { cursor: default; opacity: 0.3; }
 
 /* Section: "Ваша карта дня" heading + card row */
@@ -689,9 +714,203 @@
    DRAW ANIMATION
 ───────────────────────────────────────────────── */
 body.is-drawing-card .db-wrap {
-  opacity: 0;
+  animation: none;
+  opacity: 0 !important;
   pointer-events: none;
   transition: opacity 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+body.is-dashboard-card-reading .db-wrap {
+  animation: none;
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+body.is-dashboard-card-source-hidden [data-card-reader-source] {
+  opacity: 0;
+}
+
+.db-card-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  min-height: var(--app-height, 100vh);
+  pointer-events: none;
+}
+
+.db-card-reader-card {
+  position: fixed;
+  aspect-ratio: 290 / 477;
+  border-radius: var(--card-radius, 14px);
+  background: transparent;
+  overflow: visible;
+  transform-origin: top left;
+  transition:
+    transform 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
+  will-change: transform;
+}
+
+.db-card-reader-card--interactive {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.db-card-reader-tilt {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--card-border, #3a2e1e);
+  background: var(--card-surface);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+  transform: var(--db-card-reader-tilt, perspective(900px) rotateY(0deg) rotateX(0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+.db-card-reader-card--interactive:hover .db-card-reader-tilt {
+  transition: transform 0.09s ease-out;
+}
+
+.db-card-reader--closing .db-card-reader-card {
+  transition:
+    transform 460ms cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.db-card-reader-tilt::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  z-index: 2;
+  border: 1px solid var(--card-inner-border-color, rgba(201, 169, 110, 0.16));
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.db-card-reader-art {
+  position: absolute;
+  inset: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
+.db-card-reader-panel {
+  position: fixed;
+  color: var(--cream, #f0e6d3);
+  transform: translateY(-50%) translateY(14px);
+  opacity: 0;
+  transition:
+    opacity 520ms cubic-bezier(0.22, 0.61, 0.36, 1) 120ms,
+    transform 520ms cubic-bezier(0.22, 0.61, 0.36, 1) 120ms;
+  pointer-events: none;
+}
+
+.db-card-reader-panel .result-reading-title {
+  width: 100%;
+  max-width: 470px;
+  margin: 0 0 28px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(30px, 3vw, 43px);
+  line-height: 1.06;
+  font-weight: 300;
+  color: var(--cream, #f0e6d3);
+  letter-spacing: 0.01em;
+}
+
+.db-card-reader--opening .db-card-reader-panel,
+.db-card-reader--open .db-card-reader-panel,
+.db-card-reader--closing .db-card-reader-panel {
+  opacity: 1;
+  transform: translateY(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.db-card-reader--closing .db-card-reader-panel {
+  opacity: 0;
+  transform: translateY(-50%) translateY(10px);
+  transition:
+    opacity 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.db-card-reader-back {
+  position: fixed;
+  top: calc(24px + env(safe-area-inset-top));
+  left: var(--db-card-reader-panel-left, 72px);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid rgba(201, 169, 110, 0.28);
+  border-radius: 8px;
+  background: rgba(201, 169, 110, 0.06);
+  color: rgba(240, 230, 211, 0.78);
+  font-family: 'Raleway', sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 360ms cubic-bezier(0.22, 0.61, 0.36, 1) 120ms,
+    transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1) 120ms,
+    border-color 0.22s,
+    color 0.22s,
+    background-color 0.22s;
+  pointer-events: none;
+}
+
+.db-card-reader--opening .db-card-reader-back,
+.db-card-reader--open .db-card-reader-back {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.db-card-reader-back:hover {
+  border-color: rgba(201, 169, 110, 0.62);
+  color: var(--cream, #f0e6d3);
+  background: rgba(201, 169, 110, 0.1);
+}
+
+.db-card-reader-back:focus-visible {
+  outline: 1px solid rgba(201, 169, 110, 0.72);
+  outline-offset: 4px;
+}
+
+.db-card-reader-back:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (max-width: 700px) {
+  .db-card-reader-panel {
+    max-height: calc(var(--app-height, 100vh) - 420px);
+    overflow-y: auto;
+    transform: translateY(12px);
+  }
+
+  .db-card-reader--opening .db-card-reader-panel,
+  .db-card-reader--open .db-card-reader-panel,
+  .db-card-reader--closing .db-card-reader-panel {
+    transform: translateY(0);
+  }
+
+  .db-card-reader--closing .db-card-reader-panel {
+    transform: translateY(10px);
+  }
+
+  .db-card-reader-back {
+    left: 24px;
+  }
 }
 
 /* ─────────────────────────────────────────────────

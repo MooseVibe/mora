@@ -1,13 +1,15 @@
 'use client'
 
 import React from 'react'
+import { getTarotCardImageSrc } from '@/lib/tarot'
 
 interface Props {
   cardId: string
   cardName: string
+  sourceKey?: string
 }
 
-export default function DrawnCardTilt({ cardId, cardName }: Props) {
+export default function DrawnCardTilt({ cardId, cardName, sourceKey }: Props) {
   function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2)
@@ -24,11 +26,12 @@ export default function DrawnCardTilt({ cardId, cardName }: Props) {
   return (
     <div
       className="db-drawn-card"
+      data-card-reader-source={sourceKey}
       onMouseMove={handleTilt}
       onMouseLeave={handleTiltEnd}
     >
       <img
-        src={`/assets/cards/${cardId}.png`}
+        src={getTarotCardImageSrc(cardId)}
         alt={cardName}
         className="db-drawn-card-art"
       />

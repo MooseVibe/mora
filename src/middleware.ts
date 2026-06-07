@@ -1,8 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies
+    .getAll()
+    .some(cookie => cookie.name.startsWith('sb-') && cookie.name.includes('auth-token') && cookie.value.length > 0)
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
+  const isPublicEntry = request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/auth'
+
+  if (isPublicEntry && !hasSupabaseAuthCookie(request)) {
+    return supabaseResponse
+  }
 
   try {
     const supabase = createServerClient(
@@ -24,7 +35,14 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (isPublicEntry && user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
   } catch {
     // если Supabase недоступен — пропускаем, не крашим сайт
   }
@@ -34,6 +52,11 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/',
+    '/auth',
+    '/dashboard/:path*',
+    '/journal/:path*',
+    '/api/draws/:path*',
+    '/auth/logout',
   ],
 }

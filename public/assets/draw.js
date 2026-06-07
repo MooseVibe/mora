@@ -8,12 +8,31 @@ let activeDeck3DFlightHome = null;
 const USE_DECK3D_DRAW_EXPERIMENT = true;
 const DEBUG_DECK3D_FLIGHT_MATCH = false;
 const DECK3D_FLIGHT_SCALE = 1.7;
+const DECK3D_FLIGHT_TARGET_WIDTH = 320;
 const DECK3D_RESULT_SCALE = 2;
+const DECK3D_RESULT_TARGET_WIDTH = 376;
 const DECK3D_RESULT_FLIGHT_START = 720;
 const DECK3D_RESULT_FLIGHT_DURATION = 680;
 
 export function initDraw(deps) {
   d = deps;
+}
+
+function getPendingDrawCookieMaxAge() {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setHours(24, 0, 0, 0);
+  return Math.max(60, Math.ceil((tomorrow.getTime() - now.getTime()) / 1000));
+}
+
+function persistPendingDraw(draw) {
+  localStorage.setItem('mora:pendingDraw', JSON.stringify(draw));
+  document.cookie = [
+    `mora_pending_draw=${encodeURIComponent(JSON.stringify(draw))}`,
+    'Path=/',
+    `Max-Age=${getPendingDrawCookieMaxAge()}`,
+    'SameSite=Lax',
+  ].join('; ');
 }
 
 function savePendingDraw() {
@@ -26,7 +45,7 @@ function savePendingDraw() {
       variantIdx: reading?.variantIdx ?? 0,
       drawnAt: new Date().toISOString().split('T')[0],
     };
-    localStorage.setItem('mora:pendingDraw', JSON.stringify(draw));
+    persistPendingDraw(draw);
     // если контекст дашборда — сохраняем в БД сразу
     if (window.__moraDrawAuthed) {
       fetch('/api/draws', {
@@ -86,11 +105,11 @@ function createDeck3DFlightShell() {
 function flyDeck3DFlightToCenter() {
   if (!activeDeck3DFlight) return;
 
-  const flightScale = DECK3D_FLIGHT_SCALE;
   const sourceLeft = parseFloat(activeDeck3DFlight.style.left) || activeDeck3DFlight.getBoundingClientRect().left;
   const sourceTop = parseFloat(activeDeck3DFlight.style.top) || activeDeck3DFlight.getBoundingClientRect().top;
   const baseWidth = parseFloat(activeDeck3DFlight.style.width) || activeDeck3DFlight.offsetWidth;
   const baseHeight = parseFloat(activeDeck3DFlight.style.height) || activeDeck3DFlight.offsetHeight;
+  const flightScale = getDeck3DFlightScale(baseWidth);
   const headerBottom = document.querySelector('.site-header')?.getBoundingClientRect().bottom || d.getViewportTop();
   const viewportBottom = d.getViewportTop() + d.getViewportHeight();
   const scaledHeight = baseHeight * flightScale;
@@ -100,6 +119,7 @@ function flyDeck3DFlightToCenter() {
 
   activeDeck3DFlight.style.setProperty('--deck3d-flight-x', `${targetLeft - sourceLeft}px`);
   activeDeck3DFlight.style.setProperty('--deck3d-flight-y', `${targetTop - sourceTop}px`);
+  activeDeck3DFlight.style.setProperty('--deck3d-flight-scale', `${flightScale}`);
   activeDeck3DFlight.classList.remove('is-flight-fanned');
   activeDeck3DFlight.classList.add('is-flying-center');
 }
@@ -147,9 +167,9 @@ function handoffDeck3DFlightToRevealCard() {
   if (!activeDeck3DFlight) return;
 
   const rect = activeDeck3DFlight.getBoundingClientRect();
-  const flightScale = DECK3D_FLIGHT_SCALE;
-  const baseWidth = parseFloat(activeDeck3DFlight.style.width) || rect.width / flightScale;
-  const baseHeight = parseFloat(activeDeck3DFlight.style.height) || rect.height / flightScale;
+  const baseWidth = parseFloat(activeDeck3DFlight.style.width) || activeDeck3DFlight.offsetWidth;
+  const baseHeight = parseFloat(activeDeck3DFlight.style.height) || activeDeck3DFlight.offsetHeight;
+  const flightScale = getActiveDeck3DFlightScale(baseWidth);
   const left = rect.left + (rect.width - baseWidth) / 2;
   const top = rect.top + rect.height - baseHeight;
 
@@ -212,7 +232,7 @@ function handoffDeck3DFlightToRevealCard() {
 
 function flyRevealCardToResultSide() {
   const rect = d.dom.revealCard.getBoundingClientRect();
-  const startScale = DECK3D_FLIGHT_SCALE;
+  const startScale = getRevealCardTransformScale();
   const baseWidth = parseFloat(d.dom.revealCard.style.width) || rect.width / startScale;
   const baseHeight = rect.height / startScale;
   const isMobile = window.innerWidth < 600;
@@ -227,7 +247,7 @@ function flyRevealCardToResultSide() {
     const maxByHeight = cardZoneHeight / baseHeight;
     endScale = Math.min(1.2, maxByWidth, maxByHeight);
   } else {
-    endScale = DECK3D_RESULT_SCALE;
+    endScale = Math.min(DECK3D_RESULT_SCALE, DECK3D_RESULT_TARGET_WIDTH / baseWidth);
   }
 
   const visualWidth = baseWidth * endScale;
@@ -259,7 +279,7 @@ function flyRevealCardToResultSide() {
   // With center-center: visual_top = top - baseHeight*(scale - 1)/2
   // Setting visual_top equal: top_cc = top_cb - baseHeight*(scale-1)/2
   const currentTopCb = parseFloat(d.dom.revealCard.style.top) || 0;
-  const currentScale = DECK3D_FLIGHT_SCALE;
+  const currentScale = startScale;
   const topForCenterCenter = currentTopCb - baseHeight * (currentScale - 1) / 2;
 
   d.dom.revealCard.style.transition = 'none';
@@ -317,6 +337,23 @@ function getResultLayoutMetrics(cardVisualWidth) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function getDeck3DFlightScale(baseWidth) {
+  if (!baseWidth) return DECK3D_FLIGHT_SCALE;
+  return Math.min(DECK3D_FLIGHT_SCALE, DECK3D_FLIGHT_TARGET_WIDTH / baseWidth);
+}
+
+function getActiveDeck3DFlightScale(baseWidth) {
+  if (!activeDeck3DFlight) return getDeck3DFlightScale(baseWidth);
+  const cssScale = parseFloat(activeDeck3DFlight.style.getPropertyValue('--deck3d-flight-scale'));
+  return Number.isFinite(cssScale) && cssScale > 0 ? cssScale : getDeck3DFlightScale(baseWidth);
+}
+
+function getRevealCardTransformScale() {
+  const match = String(d.dom.revealCard.style.transform || '').match(/scale\(([^)]+)\)/);
+  const scale = match ? Number.parseFloat(match[1]) : NaN;
+  return Number.isFinite(scale) && scale > 0 ? scale : DECK3D_FLIGHT_SCALE;
 }
 
 export function arcCard(el, dur, done) {

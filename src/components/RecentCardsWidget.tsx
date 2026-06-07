@@ -1,31 +1,8 @@
 'use client'
 
 import React from 'react'
-
-const CARD_DATA: Record<string, { name: string; arcana: string; num: string }> = {
-  fool:             { name: 'Шут',               arcana: '0 Аркан',    num: '0'      },
-  magician:         { name: 'Маг',               arcana: 'I Аркан',    num: 'I'      },
-  'high-priestess': { name: 'Верховная Жрица',   arcana: 'II Аркан',   num: 'II'     },
-  empress:          { name: 'Императрица',        arcana: 'III Аркан',  num: 'III'    },
-  emperor:          { name: 'Император',          arcana: 'IV Аркан',   num: 'IV'     },
-  hierophant:       { name: 'Иерофант',           arcana: 'V Аркан',    num: 'V'      },
-  lovers:           { name: 'Влюблённые',         arcana: 'VI Аркан',   num: 'VI'     },
-  chariot:          { name: 'Колесница',          arcana: 'VII Аркан',  num: 'VII'    },
-  strength:         { name: 'Сила',              arcana: 'VIII Аркан', num: 'VIII'   },
-  hermit:           { name: 'Отшельник',          arcana: 'IX Аркан',   num: 'IX'     },
-  wheel:            { name: 'Колесо Фортуны',     arcana: 'X Аркан',    num: 'X'      },
-  justice:          { name: 'Справедливость',     arcana: 'XI Аркан',   num: 'XI'     },
-  'hanged-man':     { name: 'Повешенный',         arcana: 'XII Аркан',  num: 'XII'    },
-  death:            { name: 'Смерть',             arcana: 'XIII Аркан', num: 'XIII'   },
-  temperance:       { name: 'Умеренность',        arcana: 'XIV Аркан',  num: 'XIV'    },
-  devil:            { name: 'Дьявол',             arcana: 'XV Аркан',   num: 'XV'     },
-  tower:            { name: 'Башня',              arcana: 'XVI Аркан',  num: 'XVI'    },
-  star:             { name: 'Звезда',             arcana: 'XVII Аркан', num: 'XVII'   },
-  moon:             { name: 'Луна',               arcana: 'XVIII Аркан',num: 'XVIII'  },
-  sun:              { name: 'Солнце',             arcana: 'XIX Аркан',  num: 'XIX'    },
-  judgement:        { name: 'Суд',                arcana: 'XX Аркан',   num: 'XX'     },
-  world:            { name: 'Мир',                arcana: 'XXI Аркан',  num: 'XXI'    },
-}
+import { getTarotCardImageSrc, getTarotCardMeta } from '@/lib/tarot'
+import RitualTransitionLink from '@/components/RitualTransitionLink'
 
 function formatDate(dateStr: string): string {
   const today = new Date().toISOString().split('T')[0]
@@ -38,7 +15,7 @@ function formatDate(dateStr: string): string {
 }
 
 function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
-  const card = CARD_DATA[cardId]
+  const card = getTarotCardMeta(cardId)
 
   function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -61,7 +38,7 @@ function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
         onMouseLeave={handleTiltEnd}
       >
         <img
-          src={`/assets/cards/${cardId}.png`}
+          src={getTarotCardImageSrc(cardId)}
           alt={card?.name ?? cardId}
           className="rcw-thumb-img"
         />
@@ -99,7 +76,7 @@ export default function RecentCardsWidget({ draws }: Props) {
     <div className="db-panel rcw-widget">
       <div className="rcw-head">
         <span className="rcw-title">Дневник карт</span>
-        <a href="/journal" className="rcw-link">смотреть все →</a>
+        <RitualTransitionLink href="/journal" className="rcw-link">смотреть все →</RitualTransitionLink>
       </div>
       <div className="rcw-grid">
         {slots.map(i =>

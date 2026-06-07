@@ -81,6 +81,7 @@ const CARD_ZOOM_MAX_SCALE = 2.2;
 const RETURN_DECK_CARD_SCALE = 1.08;
 const RETURN_DECK_MERGE_SCALE = 1.0;
 const DAILY_DATE_DEBUG_PARAM = 'dailyDate';
+const VARIANT_HISTORY_KEY = 'mora:variantHistory';
 
 function byId(id) {
   return document.getElementById(id);
@@ -335,6 +336,55 @@ function hashString(value) {
     hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
   }
   return Math.abs(hash);
+}
+
+function getCardDayVariantCount(card) {
+  const variants = card?.result?.dayVariants;
+  return Array.isArray(variants) && variants.length ? variants.length : 3;
+}
+
+function readVariantHistory() {
+  try {
+    const raw = localStorage.getItem(VARIANT_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeVariantHistory(history) {
+  try {
+    localStorage.setItem(VARIANT_HISTORY_KEY, JSON.stringify(history));
+  } catch (_) {}
+}
+
+function chooseDailyVariantIndex(card) {
+  const variantCount = getCardDayVariantCount(card);
+  if (variantCount <= 1) return 0;
+
+  const history = readVariantHistory();
+  const cardHistory = Array.isArray(history[card.id])
+    ? history[card.id].filter(idx => Number.isInteger(idx) && idx >= 0 && idx < variantCount)
+    : [];
+  const lastVariantIdx = cardHistory[0];
+  const candidates = Array.from({ length: variantCount }, (_, idx) => idx)
+    .filter(idx => idx !== lastVariantIdx);
+
+  const scored = candidates.map(idx => ({
+    idx,
+    recency: cardHistory.indexOf(idx),
+  }));
+  const bestScore = Math.max(...scored.map(item => item.recency === -1 ? 999 : item.recency));
+  const best = scored
+    .filter(item => (item.recency === -1 ? 999 : item.recency) === bestScore)
+    .map(item => item.idx);
+  const chosen = best[Math.floor(Math.random() * best.length)];
+
+  history[card.id] = [chosen, ...cardHistory.filter(idx => idx !== chosen)].slice(0, variantCount);
+  writeVariantHistory(history);
+
+  return chosen;
 }
 
 function pickDailyVariant(card, dateKey = getDailySeedDate()) {
@@ -1089,7 +1139,7 @@ function createReadingDraft(card) {
     question: null,
     style: interpretationStyle,
     cards: [card],
-    variantIdx: Math.floor(Math.random() * 3),
+    variantIdx: chooseDailyVariantIndex(card),
   };
 
   return {
