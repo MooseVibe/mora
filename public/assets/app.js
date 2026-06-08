@@ -1,6 +1,6 @@
 'use strict';
 import { TAROT_CARDS } from './cards.js';
-import { STATE, transition, runSequence } from './state.js';
+import { STATE, transition, resetState, runSequence } from './state.js';
 import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, wait, preloadCardImages } from './image-cache.js';
 import { smoothStep, lerpArc } from './arc.js';
 import { initLoader, scheduleAppLoaderStateTimers, startAppLoaderShuffle, settleInitialAppLoader, reloadFromAppLoader } from './loader.js';
@@ -87,6 +87,14 @@ function byId(id) {
   return document.getElementById(id);
 }
 
+let cleanupFns = [];
+
+function addManagedListener(target, type, handler, options) {
+  if (!target) return;
+  target.addEventListener(type, handler, options);
+  cleanupFns.push(() => target.removeEventListener(type, handler, options));
+}
+
 function getVisualViewport() {
   return window.visualViewport || null;
 }
@@ -155,49 +163,53 @@ function updateViewportVars() {
   document.documentElement.style.setProperty('--app-offset-top', `${offsetTop}px`);
 }
 
-const dom = {
-  appLoader: byId('appLoader'),
-  appLoaderText: byId('appLoaderText'),
-  appLoaderErrorTitle: byId('appLoaderErrorTitle'),
-  appLoaderErrorText: byId('appLoaderErrorText'),
-  appLoaderReload: byId('appLoaderReload'),
-  siteHeader: byId('siteHeader'),
-  stars: byId('stars'),
-  deckWrap: byId('deckWrap'),
-  revealCard: byId('revealCard'),
-  rcInner: byId('rcInner'),
-  rcFront: byId('rcFront'),
-  rcTilt: byId('rcTilt'),
-  rcArt: byId('rcArt'),
-  rcSymbol: byId('rcSymbol'),
-  rcNum: byId('rcNum'),
-  resultOverlay: byId('resultOverlay'),
-  resultReadingPanel: byId('resultReadingPanel'),
-  resultReadingKicker: byId('resultReadingKicker'),
-  resultReadingTitle: byId('resultReadingTitle'),
-  resultReadingTags: byId('resultReadingTags'),
-  resultReadingSections: byId('resultReadingSections'),
-  resultReadingActions: byId('resultReadingActions'),
-  resultStreetBtn: byId('resultStreetBtn'),
-  resultCardName: byId('resultCardName'),
-  resultText: byId('resultText'),
-  streetToggleBtn: byId('streetToggleBtn'),
-  drawBtn: byId('drawBtn'),
-  shuffleBtn: byId('shuffleBtn'),
-  resultAgainBtn: byId('resultAgainBtn'),
-  deckGallery: byId('deckGallery'),
-  galleryDeckGhost: byId('galleryDeckGhost'),
-  galleryCardWrap: byId('galleryCardWrap'),
-  galleryTrack: byId('galleryTrack'),
-  galleryCardTitle: byId('galleryCardTitle'),
-  galleryCardCounter: byId('galleryCardCounter'),
-  galleryCloseBtn: byId('galleryCloseBtn'),
-  galleryPrevBtn: byId('galleryPrevBtn'),
-  galleryNextBtn: byId('galleryNextBtn'),
-  startEls: START_FU_IDS.map(byId).filter(Boolean),
-  resultEls: RESULT_EL_IDS.map(byId).filter(Boolean),
-  stackCards: [0,1,2,3].map(i => byId('sc'+i)).filter(Boolean),
-};
+let dom = null;
+
+function collectDom() {
+  return {
+    appLoader: byId('appLoader'),
+    appLoaderText: byId('appLoaderText'),
+    appLoaderErrorTitle: byId('appLoaderErrorTitle'),
+    appLoaderErrorText: byId('appLoaderErrorText'),
+    appLoaderReload: byId('appLoaderReload'),
+    siteHeader: byId('siteHeader'),
+    stars: byId('stars'),
+    deckWrap: byId('deckWrap'),
+    revealCard: byId('revealCard'),
+    rcInner: byId('rcInner'),
+    rcFront: byId('rcFront'),
+    rcTilt: byId('rcTilt'),
+    rcArt: byId('rcArt'),
+    rcSymbol: byId('rcSymbol'),
+    rcNum: byId('rcNum'),
+    resultOverlay: byId('resultOverlay'),
+    resultReadingPanel: byId('resultReadingPanel'),
+    resultReadingKicker: byId('resultReadingKicker'),
+    resultReadingTitle: byId('resultReadingTitle'),
+    resultReadingTags: byId('resultReadingTags'),
+    resultReadingSections: byId('resultReadingSections'),
+    resultReadingActions: byId('resultReadingActions'),
+    resultStreetBtn: byId('resultStreetBtn'),
+    resultCardName: byId('resultCardName'),
+    resultText: byId('resultText'),
+    streetToggleBtn: byId('streetToggleBtn'),
+    drawBtn: byId('drawBtn'),
+    shuffleBtn: byId('shuffleBtn'),
+    resultAgainBtn: byId('resultAgainBtn'),
+    deckGallery: byId('deckGallery'),
+    galleryDeckGhost: byId('galleryDeckGhost'),
+    galleryCardWrap: byId('galleryCardWrap'),
+    galleryTrack: byId('galleryTrack'),
+    galleryCardTitle: byId('galleryCardTitle'),
+    galleryCardCounter: byId('galleryCardCounter'),
+    galleryCloseBtn: byId('galleryCloseBtn'),
+    galleryPrevBtn: byId('galleryPrevBtn'),
+    galleryNextBtn: byId('galleryNextBtn'),
+    startEls: START_FU_IDS.map(byId).filter(Boolean),
+    resultEls: RESULT_EL_IDS.map(byId).filter(Boolean),
+    stackCards: [0,1,2,3].map(i => byId('sc'+i)).filter(Boolean),
+  };
+}
 
 // ═══════════════════════════════════════
 // STARS
@@ -1509,6 +1521,10 @@ function setShuffleButtonBusy(isBusy) {
   dom.shuffleBtn.setAttribute('aria-label', isBusy ? 'Перетасовываем' : 'Перетасовать колоду');
 }
 
+function handleRevealCardClick() {
+  if (STATE === 'result' && hasCardImage(current) && isMobileTiltDevice()) toggleCardZoom();
+}
+
 // ═══════════════════════════════════════
 // КОЛОДА — слои карт
 // ═══════════════════════════════════════
@@ -1586,41 +1602,61 @@ function fanOutDeckFromStack() {
 }
 
 function bindEvents() {
-  if (dom.appLoaderReload) {
-    dom.appLoaderReload.addEventListener('click', reloadFromAppLoader);
-  }
+  addManagedListener(dom.appLoaderReload, 'click', reloadFromAppLoader);
   // dom.deckWrap.addEventListener('click', openDeckGallery); // gallery временно отключена
-  dom.drawBtn.addEventListener('click', startDrawing);
-  if (dom.shuffleBtn) dom.shuffleBtn.addEventListener('click', shuffleDeck);
-  dom.streetToggleBtn.addEventListener('click', toggleInterpretation);
-  dom.resultOverlay.addEventListener('click', closeCardZoomFromBackdrop);
-  dom.revealCard.addEventListener('click', () => {
-    if (STATE === 'result' && hasCardImage(current) && isMobileTiltDevice()) toggleCardZoom();
-  });
-  dom.revealCard.addEventListener('pointermove', handleCardTiltMove);
-  dom.revealCard.addEventListener('pointerleave', handleCardTiltLeave);
-  if (dom.resultAgainBtn) dom.resultAgainBtn.addEventListener('click', resetScene);
-  if (dom.resultStreetBtn) dom.resultStreetBtn.addEventListener('click', toggleResultPanelStreet);
-  if (dom.galleryCloseBtn) dom.galleryCloseBtn.addEventListener('click', closeDeckGallery);
-  if (dom.galleryPrevBtn) dom.galleryPrevBtn.addEventListener('click', showPrevGalleryCard);
-  if (dom.galleryNextBtn) dom.galleryNextBtn.addEventListener('click', showNextGalleryCard);
-  if (dom.deckGallery) dom.deckGallery.addEventListener('click', handleGalleryBackdropClick);
-  if (dom.galleryTrack) dom.galleryTrack.addEventListener('click', handleGalleryCardClick);
-  if (dom.galleryTrack) dom.galleryTrack.addEventListener('pointermove', handleGalleryTiltMove);
-  if (dom.galleryTrack) dom.galleryTrack.addEventListener('pointerleave', resetGalleryTilt);
-  if (dom.deckGallery) dom.deckGallery.addEventListener('touchstart', handleGalleryTouchStart, { passive:true });
-  if (dom.deckGallery) dom.deckGallery.addEventListener('touchend', handleGalleryTouchEnd);
-  window.addEventListener('keydown', handleGalleryKeydown);
-  window.addEventListener('resize', updateViewportVars);
+  addManagedListener(dom.drawBtn, 'click', startDrawing);
+  addManagedListener(dom.shuffleBtn, 'click', shuffleDeck);
+  addManagedListener(dom.streetToggleBtn, 'click', toggleInterpretation);
+  addManagedListener(dom.resultOverlay, 'click', closeCardZoomFromBackdrop);
+  addManagedListener(dom.revealCard, 'click', handleRevealCardClick);
+  addManagedListener(dom.revealCard, 'pointermove', handleCardTiltMove);
+  addManagedListener(dom.revealCard, 'pointerleave', handleCardTiltLeave);
+  addManagedListener(dom.resultAgainBtn, 'click', resetScene);
+  addManagedListener(dom.resultStreetBtn, 'click', toggleResultPanelStreet);
+  addManagedListener(dom.galleryCloseBtn, 'click', closeDeckGallery);
+  addManagedListener(dom.galleryPrevBtn, 'click', showPrevGalleryCard);
+  addManagedListener(dom.galleryNextBtn, 'click', showNextGalleryCard);
+  addManagedListener(dom.deckGallery, 'click', handleGalleryBackdropClick);
+  addManagedListener(dom.galleryTrack, 'click', handleGalleryCardClick);
+  addManagedListener(dom.galleryTrack, 'pointermove', handleGalleryTiltMove);
+  addManagedListener(dom.galleryTrack, 'pointerleave', resetGalleryTilt);
+  addManagedListener(dom.deckGallery, 'touchstart', handleGalleryTouchStart, { passive:true });
+  addManagedListener(dom.deckGallery, 'touchend', handleGalleryTouchEnd);
+  addManagedListener(window, 'keydown', handleGalleryKeydown);
+  addManagedListener(window, 'resize', updateViewportVars);
 
   const viewport = getVisualViewport();
   if (viewport) {
-    viewport.addEventListener('resize', updateViewportVars);
-    viewport.addEventListener('scroll', updateViewportVars);
+    addManagedListener(viewport, 'resize', updateViewportVars);
+    addManagedListener(viewport, 'scroll', updateViewportVars);
   }
 }
 
+function cleanupApp() {
+  cleanupFns.forEach(cleanup => cleanup());
+  cleanupFns = [];
+  stopMobileTiltListening();
+  document.body.classList.remove('is-drawing-card');
+  resetState('idle');
+  current = null;
+  currentReading = null;
+  readingMode = READING_MODE.DAILY;
+  readingType = READING_TYPE.ONE_CARD;
+  interpretationStyle = INTERPRETATION_STYLE.DEFAULT;
+  interpretationMode = 'poetic';
+  isCardZoomed = false;
+  resultPanelStreet = false;
+  if (dom?.stars) dom.stars.replaceChildren();
+  if (dom?.galleryTrack) dom.galleryTrack.replaceChildren();
+}
+
 function initApp() {
+  cleanupApp();
+  dom = collectDom();
+  if (!dom.deckWrap || !dom.drawBtn || !dom.revealCard || !dom.resultOverlay) return false;
+  initDraw(drawDeps);
+  initGallery(galleryDeps);
+  initLoader(dom, LAYER);
   updateViewportVars();
   initStars();
   initDeck();
@@ -1630,10 +1666,11 @@ function initApp() {
   startAppLoaderShuffle();
   settleInitialAppLoader();
   preloadCardImages();
+  return true;
 }
 
 const drawDeps = {
-  dom,
+  get dom() { return dom; },
   START_DECK_SCALE,
   SHUFFLE_TIMING,
   DRAW_TIMING,
@@ -1679,9 +1716,8 @@ const drawDeps = {
   canUseMobileTilt,
   startMobileTiltListening,
 };
-initDraw(drawDeps);
 const galleryDeps = {
-  dom,
+  get dom() { return dom; },
   CARDS,
   GALLERY_TIMING,
   START_DECK_SCALE,
@@ -1703,9 +1739,11 @@ const galleryDeps = {
   stopMobileTiltListening,
   clampTilt,
 };
-initGallery(galleryDeps);
-initLoader(dom, LAYER);
 // ── Инициализация: убедиться что всё в правильном состоянии ──
+window.__moraNativeApp = {
+  init: initApp,
+  cleanup: cleanupApp,
+};
 initApp();
 
 })();

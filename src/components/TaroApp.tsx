@@ -15,6 +15,13 @@ type PendingDraw = {
   variantIdx?: number
 }
 
+type MoraNativeWindow = Window & {
+  __moraNativeApp?: {
+    init?: () => void
+    cleanup?: () => void
+  }
+}
+
 const APP_TRANSITION_MS = 950
 const APP_TRANSITION_HIDE_MS = 1050
 
@@ -161,15 +168,23 @@ export default function TaroApp() {
       setIsAuthed(false)
     })
 
-    // загружаем app.js как ES-модуль после монтирования DOM
-    const script = document.createElement('script')
-    script.type = 'module'
-    script.src = '/assets/app.js'
-    document.body.appendChild(script)
+    const nativeWindow = window as MoraNativeWindow
+    let script: HTMLScriptElement | null = null
+
+    if (nativeWindow.__moraNativeApp?.init) {
+      nativeWindow.__moraNativeApp.init()
+    } else {
+      // загружаем app.js как ES-модуль после монтирования DOM
+      script = document.createElement('script')
+      script.type = 'module'
+      script.src = '/assets/app.js'
+      document.body.appendChild(script)
+    }
 
     return () => {
+      nativeWindow.__moraNativeApp?.cleanup?.()
       document.body.classList.remove('is-drawing-card')
-      document.body.removeChild(script)
+      if (script?.parentNode) script.parentNode.removeChild(script)
     }
   }, [])
 

@@ -52,6 +52,7 @@ Then try `3002` if needed.
 - `docs/features.md` -> current MVP, WIP, planned features
 - `docs/decisions.md` -> decisions log
 - `docs/card-style.md` -> tarot card art/text rules and add-card QA checklist
+- `BACKLOG.md` -> release backlog for MVP-test bugs, UX debts, and pre-release fixes
 - `directives/` -> task workflows for redesigns, features, and bugs
 - `docs/competitors.md` -> competitor analysis and market notes
 

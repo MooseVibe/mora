@@ -23,6 +23,15 @@ const DRAW_PROMPTS = [
   'Твоя карта уже выбрана. Она знает, что ждёт тебя сегодня. Вытяни её — пока этот день ещё твой',
 ]
 
+type MoraNativeWindow = Window & {
+  __moraDrawAuthed?: boolean
+  __moraDrawPreview?: boolean
+  __moraNativeApp?: {
+    init?: () => void
+    cleanup?: () => void
+  }
+}
+
 function getTimeUntilMidnight(): string {
   const now = new Date()
   const midnight = new Date(now)
@@ -34,7 +43,7 @@ function getTimeUntilMidnight(): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export default function DrawWidget({ date }: { date: string }) {
+export default function DrawWidget({ date, persistDraw = true }: { date: string; persistDraw?: boolean }) {
   const [mounted, setMounted] = useState(false)
   const [prompt, setPrompt] = useState(DRAW_PROMPTS[0])
   const [countdown, setCountdown] = useState('00:00:00')
@@ -46,20 +55,38 @@ export default function DrawWidget({ date }: { date: string }) {
 
     const timer = setInterval(() => setCountdown(getTimeUntilMidnight()), 1000)
 
-    ;(window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed = true
-
-    const script = document.createElement('script')
-    script.type = 'module'
-    script.src = '/assets/app.js'
-    document.body.appendChild(script)
-
     return () => {
       clearInterval(timer)
-      delete (window as Window & { __moraDrawAuthed?: boolean }).__moraDrawAuthed
-      document.body.classList.remove('is-drawing-card')
-      document.body.removeChild(script)
     }
   }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    const nativeWindow = window as MoraNativeWindow
+    nativeWindow.__moraDrawAuthed = true
+    nativeWindow.__moraDrawPreview = !persistDraw
+
+    let script: HTMLScriptElement | null = null
+
+    if (nativeWindow.__moraNativeApp?.init) {
+      nativeWindow.__moraNativeApp.init()
+    } else {
+      const nextScript = document.createElement('script')
+      nextScript.type = 'module'
+      nextScript.src = '/assets/app.js'
+      document.body.appendChild(nextScript)
+      script = nextScript
+    }
+
+    return () => {
+      nativeWindow.__moraNativeApp?.cleanup?.()
+      delete nativeWindow.__moraDrawAuthed
+      delete nativeWindow.__moraDrawPreview
+      document.body.classList.remove('is-drawing-card')
+      if (script?.parentNode) script.parentNode.removeChild(script)
+    }
+  }, [mounted, persistDraw])
 
   const fixedElements = (
     <>

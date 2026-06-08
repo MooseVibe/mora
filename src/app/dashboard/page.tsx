@@ -104,6 +104,7 @@ export default async function Dashboard({
     : !todayDraw && optimisticTodayDraw
       ? [optimisticTodayDraw, ...(recentDraws ?? []).filter(draw => draw.drawn_at !== today)].slice(0, 3)
       : recentDraws
+  const journalHref = preview ? `/journal?returnPreview=${encodeURIComponent(preview)}` : '/journal'
 
   return (
     <div className="db-wrap">
@@ -202,14 +203,14 @@ export default async function Dashboard({
                 </div>
               </>
             ) : (
-              <DrawWidget date={`Сегодня ${formatTodayDate()}`} />
+              <DrawWidget date={`Сегодня ${formatTodayDate()}`} persistDraw={!preview} />
             )}
           </div>
 
           {/* RIGHT SIDEBAR */}
           <div className="db-sidebar">
 
-            <RecentCardsWidget draws={recentDrawsForView} />
+            <RecentCardsWidget draws={recentDrawsForView} journalHref={journalHref} />
 
             <div className="db-panel db-tarot-stub">
               <span className="db-tarot-stub-label">Походы к тарологу</span>

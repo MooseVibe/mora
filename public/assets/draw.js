@@ -37,6 +37,7 @@ function persistPendingDraw(draw) {
 
 function savePendingDraw() {
   try {
+    if (window.__moraDrawPreview) return;
     const card = d.getCurrent();
     const reading = d.getCurrentReading();
     if (!card) return;

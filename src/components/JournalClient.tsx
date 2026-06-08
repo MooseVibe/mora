@@ -6,6 +6,7 @@ import { getTarotCardImageSrc, getTarotCardJournalSummary, getTarotCardMeta } fr
 import RitualTransitionLink from '@/components/RitualTransitionLink'
 
 type JournalPeriod = 'all' | '30' | '7'
+type ReturnPreview = 'empty' | 'empty-all' | 'drawn'
 
 type Draw = {
   card_id: string
@@ -15,12 +16,14 @@ type Draw = {
 type Props = {
   draws: Draw[]
   initialPeriod: JournalPeriod
+  dashboardHref: string
+  returnPreview: ReturnPreview | null
 }
 
-const PERIOD_OPTIONS: Array<{ value: JournalPeriod; label: string; href: string }> = [
-  { value: 'all', label: 'Все время', href: '/journal' },
-  { value: '30', label: '30 дней', href: '/journal?period=30' },
-  { value: '7', label: '7 дней', href: '/journal?period=7' },
+const PERIOD_OPTIONS: Array<{ value: JournalPeriod; label: string }> = [
+  { value: 'all', label: 'Все время' },
+  { value: '30', label: '30 дней' },
+  { value: '7', label: '7 дней' },
 ]
 
 function formatDate(dateStr: string): string {
@@ -42,7 +45,15 @@ function getPeriodStartDate(period: JournalPeriod): string | null {
   ].join('-')
 }
 
-export default function JournalClient({ draws, initialPeriod }: Props) {
+function getPeriodHref(period: JournalPeriod, returnPreview: ReturnPreview | null) {
+  const params = new URLSearchParams()
+  if (period !== 'all') params.set('period', period)
+  if (returnPreview) params.set('returnPreview', returnPreview)
+  const query = params.toString()
+  return query ? `/journal?${query}` : '/journal'
+}
+
+export default function JournalClient({ draws, initialPeriod, dashboardHref, returnPreview }: Props) {
   const [selectedPeriod, setSelectedPeriod] = useState<JournalPeriod>(initialPeriod)
 
   const list = useMemo(() => {
@@ -60,7 +71,7 @@ export default function JournalClient({ draws, initialPeriod }: Props) {
     <>
       <div className="jn-sticky-subhead">
         <div className="jn-title-block">
-          <RitualTransitionLink href="/dashboard" className="jn-back-link" ariaLabel="Вернуться на дашборд">‹</RitualTransitionLink>
+          <RitualTransitionLink href={dashboardHref} className="jn-back-link" ariaLabel="Вернуться на дашборд">‹</RitualTransitionLink>
           <h1 className="jn-page-title">Дневник карт</h1>
         </div>
 
@@ -71,7 +82,7 @@ export default function JournalClient({ draws, initialPeriod }: Props) {
               type="button"
               className={`jn-period-chip${selectedPeriod === option.value ? ' jn-period-chip--active' : ''}`}
               aria-current={selectedPeriod === option.value ? 'page' : undefined}
-              onClick={() => selectPeriod(option.value, option.href)}
+              onClick={() => selectPeriod(option.value, getPeriodHref(option.value, returnPreview))}
             >
               {option.label}
             </button>
@@ -84,7 +95,7 @@ export default function JournalClient({ draws, initialPeriod }: Props) {
           <div className="jn-empty">
             <span className="jn-empty-icon">✦</span>
             <p className="jn-empty-text">Здесь появятся твои карты</p>
-            <Link href="/" prefetch className="jn-empty-btn">Вытянуть первую карту</Link>
+            <Link href={dashboardHref} prefetch className="jn-empty-btn">Вытянуть первую карту</Link>
           </div>
         ) : (
           list.map((draw, i) => {

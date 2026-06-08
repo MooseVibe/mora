@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-06-08 — Native draw-flow переинициализируется после client navigation
+
+**Что:** Для dashboard empty draw-flow `public/assets/app.js` получил явный `window.__moraNativeApp.init()/cleanup()`: DOM-ссылки собираются заново, event listeners снимаются и навешиваются повторно, а state-машина сбрасывается в `idle`. `DrawWidget` вызывает init только после появления portal-узлов `#revealCard` и `#resultOverlay`, чтобы кнопка `#drawBtn` получила рабочий listener после перехода `/journal` → `/dashboard`. Для локальной QA-проверки добавлен `returnPreview` в журнале: `/dashboard?preview=empty` ведёт в `/journal?returnPreview=empty` и возвращается обратно в empty preview, а preview draw запускает анимацию без записи в Supabase/localStorage/cookie.
+
+**Почему:** Dashboard и journal переходят через `router.push`, без полной перезагрузки документа. ES-модуль `/assets/app.js` уже загружен и не выполняет top-level init повторно, поэтому новый DOM после возврата из журнала оставался без обработчика клика на `#drawBtn`. Первый reinit вызывался слишком рано, до portal DOM, поэтому финальный порядок — дождаться mount portal и только потом переинициализировать native draw-flow. Preview-return нужен, чтобы проверять empty-state баги на реальном аккаунте, где карта дня уже вытянута.
+
+**Кто:** автор + агент.
+
+---
+
 ## 2026-06-07 — Новые карты коммитятся как WebP без PNG-source
 
 **Что:** Для новых pilot-карт (`ace-of-cups`, `two-of-swords`, `eight-of-pentacles`, `three-of-wands`, `six-of-swords`, `queen-of-pentacles`) в Git оставлены только production WebP-ассеты. Временные PNG-source удалены из рабочей пачки перед push, а `imageFallback` для этих карт убран из `public/assets/cards.js`. `docs/card-style.md` и `directives/04-add-tarot-cards.md` обновлены: PNG можно использовать локально для генерации и оптимизации, но не коммитить без отдельного решения.

@@ -66,9 +66,10 @@ function EmptyTile() {
 
 interface Props {
   draws: Array<{ card_id: string; drawn_at: string }> | null
+  journalHref?: string
 }
 
-export default function RecentCardsWidget({ draws }: Props) {
+export default function RecentCardsWidget({ draws, journalHref = '/journal' }: Props) {
   const filled = draws ?? []
   const slots = [0, 1, 2]
 
@@ -76,7 +77,7 @@ export default function RecentCardsWidget({ draws }: Props) {
     <div className="db-panel rcw-widget">
       <div className="rcw-head">
         <span className="rcw-title">Дневник карт</span>
-        <RitualTransitionLink href="/journal" className="rcw-link">смотреть все →</RitualTransitionLink>
+        <RitualTransitionLink href={journalHref} className="rcw-link">смотреть все →</RitualTransitionLink>
       </div>
       <div className="rcw-grid">
         {slots.map(i =>

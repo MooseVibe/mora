@@ -22,6 +22,10 @@ export function transition(next) {
   return true;
 }
 
+export function resetState(next = 'idle') {
+  STATE = next;
+}
+
 export function runSequence(steps, guard) {
   const timers = steps.map(([delay, fn]) =>
     setTimeout(() => {
