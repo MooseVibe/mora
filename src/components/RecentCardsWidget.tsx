@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
+import { getDrawReading, type DrawReadingRow } from '@/lib/draw-reading'
 import { getTarotCardImageSrc, getTarotCardMeta } from '@/lib/tarot'
+import DashboardCardReader from '@/components/DashboardCardReader'
 import RitualTransitionLink from '@/components/RitualTransitionLink'
 
 function formatDate(dateStr: string): string {
@@ -14,8 +16,11 @@ function formatDate(dateStr: string): string {
   return d.getFullYear() !== new Date().getFullYear() ? `${base} ${d.getFullYear()}` : base
 }
 
-function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
-  const card = getTarotCardMeta(cardId)
+function CardTile({ draw, index }: { draw: DrawReadingRow; index: number }) {
+  const reading = getDrawReading(draw)
+  const card = getTarotCardMeta(draw.card_id)
+  const sourceKey = `recent-${index}-${draw.drawn_at}-${draw.card_id}`
+  if (!reading || !card) return null
 
   function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -31,23 +36,38 @@ function CardTile({ cardId, drawnAt }: { cardId: string; drawnAt: string }) {
   }
 
   return (
-    <div className="rcw-card">
-      <div
-        className="rcw-thumb"
-        onMouseMove={handleTilt}
-        onMouseLeave={handleTiltEnd}
-      >
-        <img
-          src={getTarotCardImageSrc(cardId)}
-          alt={card?.name ?? cardId}
-          className="rcw-thumb-img"
-        />
-      </div>
-      <div className="rcw-meta">
-        <span className="rcw-name">{card?.name ?? cardId}</span>
-        <span className="rcw-date">{formatDate(drawnAt)}</span>
-      </div>
-    </div>
+    <DashboardCardReader
+      cardId={reading.cardId}
+      title={reading.title}
+      titleMeta={reading.titleMeta}
+      tags={reading.tags}
+      meaningLabel={reading.meaningLabel}
+      paragraphs={reading.paragraphs}
+      sourceKey={sourceKey}
+      readingDate={formatDate(reading.drawnAt)}
+      sourceFrame={{ outerRadius: 8, inset: 3.35, artRadius: 4.5 }}
+    >
+      {openReader => (
+        <button className="rcw-card rcw-card--button" type="button" onClick={openReader} aria-label={`Открыть карту ${card.name}`}>
+          <div
+            className="rcw-thumb"
+            data-card-reader-source={sourceKey}
+            onMouseMove={handleTilt}
+            onMouseLeave={handleTiltEnd}
+          >
+            <img
+              src={getTarotCardImageSrc(reading.cardId)}
+              alt={card.name}
+              className="rcw-thumb-img"
+            />
+          </div>
+          <div className="rcw-meta">
+            <span className="rcw-name">{card.name}</span>
+            <span className="rcw-date">{formatDate(reading.drawnAt)}</span>
+          </div>
+        </button>
+      )}
+    </DashboardCardReader>
   )
 }
 
@@ -65,7 +85,7 @@ function EmptyTile() {
 }
 
 interface Props {
-  draws: Array<{ card_id: string; drawn_at: string }> | null
+  draws: DrawReadingRow[] | null
   journalHref?: string
 }
 
@@ -82,7 +102,7 @@ export default function RecentCardsWidget({ draws, journalHref = '/journal' }: P
       <div className="rcw-grid">
         {slots.map(i =>
           filled[i]
-            ? <CardTile key={i} cardId={filled[i].card_id} drawnAt={filled[i].drawn_at} />
+            ? <CardTile key={i} draw={filled[i]} index={i} />
             : <EmptyTile key={i} />
         )}
       </div>

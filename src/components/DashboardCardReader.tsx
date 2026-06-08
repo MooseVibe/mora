@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { CSSProperties, MouseEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { getTarotCardImageSrc } from '@/lib/tarot'
 
@@ -13,6 +13,15 @@ type Props = {
   meaningLabel: string
   paragraphs: string[]
   sourceKey: string
+  readingDate?: string
+  sourceFrame?: CardFrame
+  children?: (openReader: () => void) => ReactNode
+}
+
+type CardFrame = {
+  outerRadius: number
+  inset: number
+  artRadius: number
 }
 
 type ReaderState = {
@@ -25,11 +34,21 @@ type ReaderState = {
     panelTop: number
     panelWidth: number
   }
+  frame: {
+    start: CardFrame
+    end: CardFrame
+  }
   phase: 'placed' | 'opening' | 'open' | 'closing'
 }
 
 const CARD_ASPECT_HEIGHT = 477
 const CARD_ASPECT_WIDTH = 290
+const CANONICAL_SOURCE_WIDTH = 255
+const CANONICAL_CARD_FRAME: CardFrame = {
+  outerRadius: 14,
+  inset: 6,
+  artRadius: 8,
+}
 const OPEN_MS = 680
 const CLOSE_MS = 460
 const DASHBOARD_REVEAL_BEFORE_CLOSE_MS = 210
@@ -83,6 +102,15 @@ function getResultLayout(sourceRect: DOMRect) {
   }
 }
 
+function getTargetFrame(sourceRect: DOMRect) {
+  const ratio = sourceRect.width / CANONICAL_SOURCE_WIDTH
+  return {
+    outerRadius: CANONICAL_CARD_FRAME.outerRadius * ratio,
+    inset: CANONICAL_CARD_FRAME.inset * ratio,
+    artRadius: CANONICAL_CARD_FRAME.artRadius * ratio,
+  }
+}
+
 export default function DashboardCardReader({
   cardId,
   title,
@@ -91,6 +119,9 @@ export default function DashboardCardReader({
   meaningLabel,
   paragraphs,
   sourceKey,
+  readingDate,
+  sourceFrame,
+  children,
 }: Props) {
   const [mounted, setMounted] = useState(false)
   const [reader, setReader] = useState<ReaderState | null>(null)
@@ -103,6 +134,9 @@ export default function DashboardCardReader({
     return () => {
       document.body.classList.remove('is-dashboard-card-reading')
       document.body.classList.remove('is-dashboard-card-source-hidden')
+      document
+        .querySelectorAll('[data-card-reader-active="true"]')
+        .forEach(source => source.removeAttribute('data-card-reader-active'))
     }
   }, [])
 
@@ -128,9 +162,18 @@ export default function DashboardCardReader({
     const source = document.querySelector(`[data-card-reader-source="${sourceKey}"]`)
     if (!(source instanceof HTMLElement)) return
 
+    source.dataset.cardReaderActive = 'true'
     const sourceRect = source.getBoundingClientRect()
     const target = getResultLayout(sourceRect)
-    setReader({ sourceRect, target, phase: 'placed' })
+    setReader({
+      sourceRect,
+      target,
+      frame: {
+        start: sourceFrame ?? CANONICAL_CARD_FRAME,
+        end: sourceFrame ? getTargetFrame(sourceRect) : CANONICAL_CARD_FRAME,
+      },
+      phase: 'placed',
+    })
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -145,6 +188,10 @@ export default function DashboardCardReader({
   function closeReader() {
     setTiltStyle('')
     setReader(current => current ? { ...current, phase: 'closing' } : current)
+    window.setTimeout(() => {
+      const source = document.querySelector(`[data-card-reader-source="${sourceKey}"]`)
+      if (source instanceof HTMLElement) source.removeAttribute('data-card-reader-active')
+    }, CLOSE_MS)
     window.setTimeout(() => setReader(null), CLOSE_MS + 80)
   }
 
@@ -158,6 +205,18 @@ export default function DashboardCardReader({
 
   function resetCardTilt() {
     setTiltStyle('')
+  }
+
+  function handleCardClick() {
+    if (reader?.phase !== 'open') return
+    closeReader()
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (reader?.phase !== 'open') return
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    closeReader()
   }
 
   const overlay = reader ? (
@@ -184,6 +243,7 @@ export default function DashboardCardReader({
             <span className="result-reading-tag" key={tag}>{tag}</span>
           ))}
         </div>
+        {readingDate && <p className="db-card-reader-date">{readingDate}</p>}
         <h2 className="result-reading-title">
           <span className="result-reading-title-name">{title}</span>
           {titleMeta && <span className="result-reading-title-meta"> — {titleMeta}</span>}
@@ -202,6 +262,11 @@ export default function DashboardCardReader({
 
       <div
         className={`db-card-reader-card${reader.phase === 'open' ? ' db-card-reader-card--interactive' : ''}`}
+        role={reader.phase === 'open' ? 'button' : undefined}
+        tabIndex={reader.phase === 'open' ? 0 : undefined}
+        aria-label={reader.phase === 'open' ? 'Вернуть карту назад' : undefined}
+        onClick={handleCardClick}
+        onKeyDown={handleCardKeyDown}
         onMouseMove={handleCardTilt}
         onMouseLeave={resetCardTilt}
         style={{
@@ -214,7 +279,10 @@ export default function DashboardCardReader({
               ? 'translate3d(0, 0, 0) scale(1)'
               : `translate3d(${reader.target.dx}px, ${reader.target.dy}px, 0) scale(${reader.target.scale})`,
           '--db-card-reader-tilt': tiltStyle || 'perspective(900px) rotateY(0deg) rotateX(0deg)',
-        } as CSSProperties & Record<'--db-card-reader-tilt', string>}
+          '--db-card-reader-outer-radius': `${(reader.phase === 'placed' || reader.phase === 'closing' ? reader.frame.start : reader.frame.end).outerRadius}px`,
+          '--db-card-reader-frame-inset': `${(reader.phase === 'placed' || reader.phase === 'closing' ? reader.frame.start : reader.frame.end).inset}px`,
+          '--db-card-reader-art-radius': `${(reader.phase === 'placed' || reader.phase === 'closing' ? reader.frame.start : reader.frame.end).artRadius}px`,
+        } as CSSProperties & Record<'--db-card-reader-tilt' | '--db-card-reader-outer-radius' | '--db-card-reader-frame-inset' | '--db-card-reader-art-radius', string>}
       >
         <div className="db-card-reader-tilt">
           <img src={imageSrc} alt={title} className="db-card-reader-art" />
@@ -225,11 +293,13 @@ export default function DashboardCardReader({
 
   return (
     <>
-      <button className="db-panel-icon-btn db-panel-icon-btn--active" type="button" onClick={openReader} aria-label="Развернуть карту дня">
-        <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-          <path d="M216 48v56a8 8 0 0 1-16 0V75.31l-58.34 58.35a8 8 0 0 1-11.32-11.32L188.69 64H160a8 8 0 0 1 0-16h56a8 8 0 0 1 8 8ZM98.34 130.34 40 188.69V160a8 8 0 0 0-16 0v56a8 8 0 0 0 8 8h56a8 8 0 0 0 0-16H59.31l58.35-58.34a8 8 0 0 0-11.32-11.32Z"/>
-        </svg>
-      </button>
+      {children ? children(openReader) : (
+        <button className="db-panel-icon-btn db-panel-icon-btn--active" type="button" onClick={openReader} aria-label="Развернуть карту дня">
+          <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+            <path d="M216 48v56a8 8 0 0 1-16 0V75.31l-58.34 58.35a8 8 0 0 1-11.32-11.32L188.69 64H160a8 8 0 0 1 0-16h56a8 8 0 0 1 8 8ZM98.34 130.34 40 188.69V160a8 8 0 0 0-16 0v56a8 8 0 0 0 8 8h56a8 8 0 0 0 0-16H59.31l58.35-58.34a8 8 0 0 0-11.32-11.32Z"/>
+          </svg>
+        </button>
+      )}
       {mounted && overlay ? createPortal(overlay, document.body) : null}
     </>
   )

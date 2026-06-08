@@ -456,26 +456,46 @@
   gap: 10px;
   cursor: pointer;
 }
+.rcw-card--button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.rcw-card--button .rcw-thumb,
+.rcw-card--button .rcw-meta,
+.rcw-card--button .rcw-name,
+.rcw-card--button .rcw-date {
+  cursor: pointer;
+}
+.rcw-card--button:focus-visible {
+  outline: 1px solid rgba(201, 169, 110, 0.72);
+  outline-offset: 5px;
+  border-radius: var(--card-radius, 14px);
+}
 .rcw-card--empty { cursor: default; }
 
 .rcw-thumb {
   position: relative;
   width: 100%;
   aspect-ratio: 290 / 477;
-  border-radius: var(--card-radius, 14px);
+  border-radius: 8px;
   border: 1px solid var(--card-border, #3a2e1e);
   background: var(--card-surface);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
   will-change: transform;
   overflow: hidden;
 }
-/* inner border — same as db-drawn-card */
 .rcw-thumb::before {
   content: '';
   position: absolute;
-  inset: 3px;
-  border: 1px solid rgba(201, 169, 110, 0.32);
-  border-radius: 11px;
+  inset: 3.35px;
+  border: 1px solid var(--card-inner-border-color, rgba(201, 169, 110, 0.16));
+  border-radius: 4.5px;
   pointer-events: none;
   z-index: 2;
 }
@@ -491,10 +511,10 @@
 }
 .rcw-thumb-img {
   position: absolute;
-  inset: 3px;
-  width: calc(100% - 6px);
-  height: calc(100% - 6px);
-  border-radius: 11px;
+  inset: 3.35px;
+  width: calc(100% - 6.7px);
+  height: calc(100% - 6.7px);
+  border-radius: 4.5px;
   object-fit: cover;
   display: block;
   z-index: 1;
@@ -727,7 +747,7 @@ body.is-dashboard-card-reading .db-wrap {
   transition: opacity 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-body.is-dashboard-card-source-hidden [data-card-reader-source] {
+body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   opacity: 0;
 }
 
@@ -742,17 +762,23 @@ body.is-dashboard-card-source-hidden [data-card-reader-source] {
 .db-card-reader-card {
   position: fixed;
   aspect-ratio: 290 / 477;
-  border-radius: var(--card-radius, 14px);
+  border-radius: var(--db-card-reader-outer-radius, var(--card-radius, 14px));
   background: transparent;
   overflow: visible;
   transform-origin: top left;
   transition:
-    transform 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
+    transform 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
+    border-radius 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
   will-change: transform;
 }
 
 .db-card-reader-card--interactive {
   pointer-events: auto;
+  cursor: pointer;
+}
+
+.db-card-reader-card--interactive .db-card-reader-tilt,
+.db-card-reader-card--interactive .db-card-reader-art {
   cursor: pointer;
 }
 
@@ -766,7 +792,9 @@ body.is-dashboard-card-source-hidden [data-card-reader-source] {
   overflow: hidden;
   transform: var(--db-card-reader-tilt, perspective(900px) rotateY(0deg) rotateX(0deg));
   transform-style: preserve-3d;
-  transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition:
+    transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-radius 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
   will-change: transform;
 }
 
@@ -776,27 +804,42 @@ body.is-dashboard-card-source-hidden [data-card-reader-source] {
 
 .db-card-reader--closing .db-card-reader-card {
   transition:
-    transform 460ms cubic-bezier(0.45, 0, 0.2, 1);
+    transform 460ms cubic-bezier(0.45, 0, 0.2, 1),
+    border-radius 460ms cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.db-card-reader--closing .db-card-reader-tilt::before,
+.db-card-reader--closing .db-card-reader-art {
+  transition-duration: 460ms;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
 }
 
 .db-card-reader-tilt::before {
   content: '';
   position: absolute;
-  inset: 6px;
+  inset: var(--db-card-reader-frame-inset, 6px);
   z-index: 2;
   border: 1px solid var(--card-inner-border-color, rgba(201, 169, 110, 0.16));
-  border-radius: 8px;
+  border-radius: var(--db-card-reader-art-radius, 8px);
   pointer-events: none;
+  transition:
+    inset 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
+    border-radius 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
 }
 
 .db-card-reader-art {
   position: absolute;
-  inset: 6px;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  border-radius: 8px;
+  inset: var(--db-card-reader-frame-inset, 6px);
+  width: calc(100% - (var(--db-card-reader-frame-inset, 6px) * 2));
+  height: calc(100% - (var(--db-card-reader-frame-inset, 6px) * 2));
+  border-radius: var(--db-card-reader-art-radius, 8px);
   object-fit: cover;
   display: block;
+  transition:
+    inset 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
+    width 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
+    height 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
+    border-radius 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
 }
 
 .db-card-reader-panel {
@@ -820,6 +863,16 @@ body.is-dashboard-card-source-hidden [data-card-reader-source] {
   font-weight: 300;
   color: var(--cream, #f0e6d3);
   letter-spacing: 0.01em;
+}
+
+.db-card-reader-date {
+  margin: 12px 0 10px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cream-dim, #9a8a75);
 }
 
 .db-card-reader--opening .db-card-reader-panel,

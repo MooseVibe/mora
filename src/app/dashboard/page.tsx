@@ -67,10 +67,16 @@ export default async function Dashboard({
     .eq('drawn_at', today)
     .single()
 
-  const { data: recentDraws } = await supabase
+  let recentDrawsQuery = supabase
     .from('card_draws')
-    .select('card_id, drawn_at')
+    .select('card_id, drawn_at, variant_idx, reading_snapshot')
     .eq('user_id', user.id)
+
+  if (todayDraw || pendingDraw) {
+    recentDrawsQuery = recentDrawsQuery.lt('drawn_at', today)
+  }
+
+  const { data: recentDraws } = await recentDrawsQuery
     .order('drawn_at', { ascending: false })
     .limit(3)
 
@@ -101,9 +107,7 @@ export default async function Dashboard({
   const cardMeaning = cardId ? getTarotCardDailyMeaning(cardId, variantIdx) : null
   const recentDrawsForView = isEmptyAllPreview
     ? []
-    : !todayDraw && optimisticTodayDraw
-      ? [optimisticTodayDraw, ...(recentDraws ?? []).filter(draw => draw.drawn_at !== today)].slice(0, 3)
-      : recentDraws
+    : recentDraws
   const journalHref = preview ? `/journal?returnPreview=${encodeURIComponent(preview)}` : '/journal'
 
   return (

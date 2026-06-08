@@ -30,6 +30,8 @@ export type TarotCardId =
   | 'ace-of-wands'
   | 'six-of-swords'
   | 'queen-of-pentacles'
+  | 'seven-of-cups'
+  | 'ten-of-wands'
 
 type TarotCardMeta = {
   id: TarotCardId
