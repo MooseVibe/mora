@@ -26,6 +26,8 @@ export default async function QACardsPage({
     redirect('/')
   }
 
+  const cardsNewestFirst = TAROT_CARD_LIST.slice().reverse()
+
   return (
     <main className="qa-cards-wrap">
       <header className="qa-cards-header">
@@ -43,7 +45,7 @@ export default async function QACardsPage({
       </header>
 
       <div className="qa-cards-list">
-        {TAROT_CARD_LIST.map(card => {
+        {cardsNewestFirst.map(card => {
           const meta = getTarotCardMeta(card.id)
           const variants = card.result?.dayVariants?.length ? card.result.dayVariants : [[card.description]]
 

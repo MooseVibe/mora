@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-06-08 — Добавлен Туз Жезлов
+
+**Что:** В колоду Mora добавлен `ace-of-wands` / «Туз Жезлов»: WebP-ассет 1024×1536 весом 308 KB, карточные поля в `public/assets/cards.js`, ID в `src/lib/tarot.ts`, три варианта “Смысла карты дня” и три street-варианта. Визуал принят автором после сверки с Rider-Waite-Smith: сохранены рука из облака/дыма, один живой жезл с ростками, нижний ландшафт с водой и башней, номер `I` как ранг туза в масти Жезлов.
+
+**Почему:** Туз Жезлов добавляет в daily-card retention архетип первого импульса, действия и живой искры. Это хорошо дополняет уже добавленные младшие карты: не про ожидание результата, ремесло или переход, а про момент начала.
+
+**Кто:** автор + агент.
+
+---
+
 ## 2026-06-08 — Native draw-flow переинициализируется после client navigation
 
 **Что:** Для dashboard empty draw-flow `public/assets/app.js` получил явный `window.__moraNativeApp.init()/cleanup()`: DOM-ссылки собираются заново, event listeners снимаются и навешиваются повторно, а state-машина сбрасывается в `idle`. `DrawWidget` вызывает init только после появления portal-узлов `#revealCard` и `#resultOverlay`, чтобы кнопка `#drawBtn` получила рабочий listener после перехода `/journal` → `/dashboard`. Для локальной QA-проверки добавлен `returnPreview` в журнале: `/dashboard?preview=empty` ведёт в `/journal?returnPreview=empty` и возвращается обратно в empty preview, а preview draw запускает анимацию без записи в Supabase/localStorage/cookie.
