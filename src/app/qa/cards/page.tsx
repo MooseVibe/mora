@@ -1,10 +1,6 @@
 import { redirect } from 'next/navigation'
-import {
-  getTarotCardDailyMeaning,
-  getTarotCardImageSrc,
-  getTarotCardMeta,
-  TAROT_CARD_LIST,
-} from '@/lib/tarot'
+import { TAROT_CARD_LIST } from '@/lib/tarot'
+import { QACardsBrowser } from './qa-cards-browser'
 import './qa-cards.css'
 
 export const metadata = {
@@ -26,8 +22,6 @@ export default async function QACardsPage({
     redirect('/')
   }
 
-  const cardsNewestFirst = TAROT_CARD_LIST.slice().reverse()
-
   return (
     <main className="qa-cards-wrap">
       <header className="qa-cards-header">
@@ -44,55 +38,7 @@ export default async function QACardsPage({
         </div>
       </header>
 
-      <div className="qa-cards-list">
-        {cardsNewestFirst.map(card => {
-          const meta = getTarotCardMeta(card.id)
-          const variants = card.result?.dayVariants?.length ? card.result.dayVariants : [[card.description]]
-
-          return (
-            <section className="qa-card" key={card.id}>
-              <div className="qa-card-art-wrap">
-                <img
-                  src={getTarotCardImageSrc(card.id)}
-                  alt={card.name}
-                  className="qa-card-art"
-                />
-              </div>
-
-              <div className="qa-card-content">
-                <div className="qa-card-topline">
-                  <span className="qa-card-tag">{meta?.journalArcana ?? 'Карта'}</span>
-                  <span className="qa-card-id">{card.id}</span>
-                </div>
-                <h2 className="qa-card-name">{card.name}</h2>
-                <p className="qa-card-summary">{card.description}</p>
-
-                <div className="qa-variants">
-                  {variants.map((_, variantIdx) => {
-                    const meaning = getTarotCardDailyMeaning(card.id, variantIdx)
-                    if (!meaning) return null
-
-                    return (
-                      <article className="qa-variant" key={variantIdx}>
-                        <div className="qa-variant-head">
-                          <span className="qa-variant-label">Вариант {variantIdx + 1}</span>
-                          <span className="qa-variant-meta">{meaning.titleMeta}</span>
-                        </div>
-                        <h3 className="qa-variant-title">{meaning.title}</h3>
-                        <div className="qa-variant-text">
-                          {meaning.paragraphs.map((paragraph, i) => (
-                            <p key={i}>{paragraph}</p>
-                          ))}
-                        </div>
-                      </article>
-                    )
-                  })}
-                </div>
-              </div>
-            </section>
-          )
-        })}
-      </div>
+      <QACardsBrowser cards={TAROT_CARD_LIST} />
     </main>
   )
 }

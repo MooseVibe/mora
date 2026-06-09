@@ -808,6 +808,11 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
     border-radius 460ms cubic-bezier(0.45, 0, 0.2, 1);
 }
 
+.db-card-reader--handoff .db-card-reader-card {
+  opacity: 0;
+  transition: opacity 90ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
 .db-card-reader--closing .db-card-reader-tilt::before,
 .db-card-reader--closing .db-card-reader-art {
   transition-duration: 460ms;

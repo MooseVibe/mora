@@ -30,6 +30,9 @@ type ReaderState = {
     dx: number
     dy: number
     scale: number
+    cardLeft: number
+    cardTop: number
+    cardWidth: number
     panelLeft: number
     panelTop: number
     panelWidth: number
@@ -38,12 +41,11 @@ type ReaderState = {
     start: CardFrame
     end: CardFrame
   }
-  phase: 'placed' | 'opening' | 'open' | 'closing'
+  phase: 'placed' | 'opening' | 'open' | 'closing' | 'handoff'
 }
 
 const CARD_ASPECT_HEIGHT = 477
 const CARD_ASPECT_WIDTH = 290
-const CANONICAL_SOURCE_WIDTH = 255
 const CANONICAL_CARD_FRAME: CardFrame = {
   outerRadius: 14,
   inset: 6,
@@ -51,6 +53,7 @@ const CANONICAL_CARD_FRAME: CardFrame = {
 }
 const OPEN_MS = 680
 const CLOSE_MS = 460
+const HANDOFF_MS = 90
 const DASHBOARD_REVEAL_BEFORE_CLOSE_MS = 210
 
 function clamp(value: number, min: number, max: number) {
@@ -75,6 +78,9 @@ function getResultLayout(sourceRect: DOMRect) {
       dx: targetLeft - sourceRect.left,
       dy: targetTop - sourceRect.top,
       scale: targetWidth / sourceRect.width,
+      cardLeft: targetLeft,
+      cardTop: targetTop,
+      cardWidth: targetWidth,
       panelLeft: 24,
       panelTop,
       panelWidth: viewportWidth - 48,
@@ -96,19 +102,62 @@ function getResultLayout(sourceRect: DOMRect) {
     dx: targetLeft - sourceRect.left,
     dy: targetTop - sourceRect.top,
     scale: targetWidth / sourceRect.width,
+    cardLeft: targetLeft,
+    cardTop: targetTop,
+    cardWidth: targetWidth,
     panelLeft: layoutLeft,
     panelTop: viewportHeight / 2,
     panelWidth: textWidth,
   }
 }
 
-function getTargetFrame(sourceRect: DOMRect) {
-  const ratio = sourceRect.width / CANONICAL_SOURCE_WIDTH
+function getTargetFrame(sourceRect: DOMRect, sourceFrame: CardFrame | undefined, targetWidth: number) {
+  const frame = sourceFrame ?? CANONICAL_CARD_FRAME
+  const ratio = targetWidth / sourceRect.width
   return {
-    outerRadius: CANONICAL_CARD_FRAME.outerRadius * ratio,
-    inset: CANONICAL_CARD_FRAME.inset * ratio,
-    artRadius: CANONICAL_CARD_FRAME.artRadius * ratio,
+    outerRadius: frame.outerRadius * ratio,
+    inset: frame.inset * ratio,
+    artRadius: frame.artRadius * ratio,
   }
+}
+
+function resetSourceTransform(source: HTMLElement) {
+  source.style.transition = 'none'
+  source.style.transform = ''
+  void source.offsetWidth
+  source.style.transition = ''
+}
+
+function fadeSourceClone(source: HTMLElement) {
+  const rect = source.getBoundingClientRect()
+  const clone = source.cloneNode(true) as HTMLElement
+
+  clone.removeAttribute('data-card-reader-source')
+  clone.removeAttribute('data-card-reader-active')
+  clone.setAttribute('aria-hidden', 'true')
+  Object.assign(clone.style, {
+    position: 'fixed',
+    left: `${rect.left}px`,
+    top: `${rect.top}px`,
+    width: `${rect.width}px`,
+    height: `${rect.height}px`,
+    margin: '0',
+    opacity: '1',
+    pointerEvents: 'none',
+    transform: 'none',
+    transition: `opacity ${HANDOFF_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`,
+    zIndex: '69',
+  })
+
+  document.body.appendChild(clone)
+
+  requestAnimationFrame(() => {
+    clone.style.opacity = '0'
+  })
+
+  window.setTimeout(() => {
+    clone.remove()
+  }, HANDOFF_MS + 40)
 }
 
 export default function DashboardCardReader({
@@ -141,13 +190,24 @@ export default function DashboardCardReader({
   }, [])
 
   useEffect(() => {
+    const image = new Image()
+    image.decoding = 'async'
+    image.src = imageSrc
+    if (image.decode) void image.decode().catch(() => {})
+  }, [imageSrc])
+
+  useEffect(() => {
     if (!isReaderOpen) return
     document.body.classList.add('is-dashboard-card-source-hidden')
     return () => document.body.classList.remove('is-dashboard-card-source-hidden')
   }, [isReaderOpen])
 
   useEffect(() => {
-    if (!reader) return
+    if (!reader || reader.phase === 'handoff') {
+      document.body.classList.remove('is-dashboard-card-reading')
+      return undefined
+    }
+
     document.body.classList.add('is-dashboard-card-reading')
     if (reader.phase === 'closing') {
       const timer = window.setTimeout(() => {
@@ -162,6 +222,7 @@ export default function DashboardCardReader({
     const source = document.querySelector(`[data-card-reader-source="${sourceKey}"]`)
     if (!(source instanceof HTMLElement)) return
 
+    resetSourceTransform(source)
     source.dataset.cardReaderActive = 'true'
     const sourceRect = source.getBoundingClientRect()
     const target = getResultLayout(sourceRect)
@@ -170,7 +231,7 @@ export default function DashboardCardReader({
       target,
       frame: {
         start: sourceFrame ?? CANONICAL_CARD_FRAME,
-        end: sourceFrame ? getTargetFrame(sourceRect) : CANONICAL_CARD_FRAME,
+        end: getTargetFrame(sourceRect, sourceFrame, target.cardWidth),
       },
       phase: 'placed',
     })
@@ -189,10 +250,18 @@ export default function DashboardCardReader({
     setTiltStyle('')
     setReader(current => current ? { ...current, phase: 'closing' } : current)
     window.setTimeout(() => {
-      const source = document.querySelector(`[data-card-reader-source="${sourceKey}"]`)
-      if (source instanceof HTMLElement) source.removeAttribute('data-card-reader-active')
+      setReader(current => current ? { ...current, phase: 'handoff' } : current)
+
+      requestAnimationFrame(() => {
+        const source = document.querySelector(`[data-card-reader-source="${sourceKey}"]`)
+        if (source instanceof HTMLElement) {
+          resetSourceTransform(source)
+          fadeSourceClone(source)
+          source.removeAttribute('data-card-reader-active')
+        }
+      })
     }, CLOSE_MS)
-    window.setTimeout(() => setReader(null), CLOSE_MS + 80)
+    window.setTimeout(() => setReader(null), CLOSE_MS + HANDOFF_MS)
   }
 
   function handleCardTilt(event: MouseEvent<HTMLDivElement>) {
@@ -270,18 +339,20 @@ export default function DashboardCardReader({
         onMouseMove={handleCardTilt}
         onMouseLeave={resetCardTilt}
         style={{
-          left: `${reader.sourceRect.left}px`,
-          top: `${reader.sourceRect.top}px`,
-          width: `${reader.sourceRect.width}px`,
-          transform: reader.phase === 'closing'
-            ? 'translate3d(0, 0, 0) scale(1)'
+          left: `${reader.target.cardLeft}px`,
+          top: `${reader.target.cardTop}px`,
+          width: `${reader.target.cardWidth}px`,
+          transform: reader.phase === 'closing' || reader.phase === 'handoff'
+            ? `translate3d(${reader.sourceRect.left - reader.target.cardLeft}px, ${reader.sourceRect.top - reader.target.cardTop}px, 0) scale(${reader.sourceRect.width / reader.target.cardWidth})`
             : reader.phase === 'placed'
-              ? 'translate3d(0, 0, 0) scale(1)'
-              : `translate3d(${reader.target.dx}px, ${reader.target.dy}px, 0) scale(${reader.target.scale})`,
+              ? `translate3d(${reader.sourceRect.left - reader.target.cardLeft}px, ${reader.sourceRect.top - reader.target.cardTop}px, 0) scale(${reader.sourceRect.width / reader.target.cardWidth})`
+              : reader.phase === 'open'
+                ? 'translate3d(0, 0, 0) scale(1)'
+                : 'translate3d(0, 0, 0) scale(1)',
           '--db-card-reader-tilt': tiltStyle || 'perspective(900px) rotateY(0deg) rotateX(0deg)',
-          '--db-card-reader-outer-radius': `${(reader.phase === 'placed' || reader.phase === 'closing' ? reader.frame.start : reader.frame.end).outerRadius}px`,
-          '--db-card-reader-frame-inset': `${(reader.phase === 'placed' || reader.phase === 'closing' ? reader.frame.start : reader.frame.end).inset}px`,
-          '--db-card-reader-art-radius': `${(reader.phase === 'placed' || reader.phase === 'closing' ? reader.frame.start : reader.frame.end).artRadius}px`,
+          '--db-card-reader-outer-radius': `${reader.frame.end.outerRadius}px`,
+          '--db-card-reader-frame-inset': `${reader.frame.end.inset}px`,
+          '--db-card-reader-art-radius': `${reader.frame.end.artRadius}px`,
         } as CSSProperties & Record<'--db-card-reader-tilt' | '--db-card-reader-outer-radius' | '--db-card-reader-frame-inset' | '--db-card-reader-art-radius', string>}
       >
         <div className="db-card-reader-tilt">
