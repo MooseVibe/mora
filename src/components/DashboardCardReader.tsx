@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { getTarotCardImageSrc } from '@/lib/tarot'
@@ -10,8 +10,10 @@ type Props = {
   title: string
   titleMeta: string
   tags: string[]
+  tarotBrief?: string[]
   meaningLabel: string
   paragraphs: string[]
+  fullParagraphs?: string[]
   sourceKey: string
   readingDate?: string
   sourceFrame?: CardFrame
@@ -167,6 +169,7 @@ export default function DashboardCardReader({
   tags,
   meaningLabel,
   paragraphs,
+  fullParagraphs,
   sourceKey,
   readingDate,
   sourceFrame,
@@ -175,8 +178,12 @@ export default function DashboardCardReader({
   const [mounted, setMounted] = useState(false)
   const [reader, setReader] = useState<ReaderState | null>(null)
   const [tiltStyle, setTiltStyle] = useState('')
+  const [isFullMeaningOpen, setIsFullMeaningOpen] = useState(false)
   const isReaderOpen = reader !== null
   const imageSrc = useMemo(() => getTarotCardImageSrc(cardId), [cardId])
+  const fullMeaning = fullParagraphs?.length ? fullParagraphs : paragraphs
+  const hasFullMeaning = fullMeaning.join('\n') !== paragraphs.join('\n')
+  const lastPreviewParagraphIndex = paragraphs.length - 1
 
   useEffect(() => {
     setMounted(true)
@@ -247,6 +254,7 @@ export default function DashboardCardReader({
   }
 
   function closeReader() {
+    setIsFullMeaningOpen(false)
     setTiltStyle('')
     setReader(current => current ? { ...current, phase: 'closing' } : current)
     window.setTimeout(() => {
@@ -307,12 +315,12 @@ export default function DashboardCardReader({
           width: `${reader.target.panelWidth}px`,
         }}
       >
+        {readingDate && <p className="db-card-reader-date">{readingDate}</p>}
         <div className="result-reading-tags" aria-label="Теги карты">
           {tags.map(tag => (
             <span className="result-reading-tag" key={tag}>{tag}</span>
           ))}
         </div>
-        {readingDate && <p className="db-card-reader-date">{readingDate}</p>}
         <h2 className="result-reading-title">
           <span className="result-reading-title-name">{title}</span>
           {titleMeta && <span className="result-reading-title-meta"> — {titleMeta}</span>}
@@ -321,13 +329,56 @@ export default function DashboardCardReader({
           <section className="result-reading-section">
             <h3 className="result-reading-section-title">{meaningLabel}</h3>
             <div className="result-reading-section-text">
-              {paragraphs.map((paragraph, index) => (
-                <p className="result-reading-paragraph" key={index}>{paragraph}</p>
-              ))}
+              {paragraphs.map((paragraph, index) => {
+                const showInlineMore = hasFullMeaning && index === lastPreviewParagraphIndex
+                return (
+                  <p className="result-reading-paragraph" key={index}>
+                    {showInlineMore ? `${paragraph} ` : paragraph}
+                    {showInlineMore && (
+                      <button
+                        className="result-reading-inline-more"
+                        type="button"
+                        onClick={() => setIsFullMeaningOpen(true)}
+                      >
+                        Читать дальше
+                      </button>
+                    )}
+                  </p>
+                )
+              })}
             </div>
           </section>
         </div>
       </section>
+
+      {isFullMeaningOpen && (
+        <div className="db-card-reader-modal" role="dialog" aria-modal="true" aria-label={meaningLabel}>
+          <button
+            className="db-card-reader-modal-backdrop"
+            type="button"
+            aria-label="Закрыть полный текст"
+            onClick={() => setIsFullMeaningOpen(false)}
+          />
+          <section className="db-card-reader-modal-panel">
+            <button className="db-card-reader-modal-close" type="button" onClick={() => setIsFullMeaningOpen(false)}>
+              Закрыть
+            </button>
+            <h2 className="db-card-reader-modal-title">{meaningLabel}</h2>
+            <div className="db-card-reader-modal-text">
+              {fullMeaning.map((paragraph, index) => (
+                <Fragment key={index}>
+                  {index === paragraphs.length && (
+                    <div className="result-reading-modal-separator">Продолжение</div>
+                  )}
+                  <p className={`result-reading-modal-paragraph ${index < paragraphs.length ? 'result-reading-modal-paragraph--preview' : 'result-reading-modal-paragraph--new'}`}>
+                    {paragraph}
+                  </p>
+                </Fragment>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       <div
         className={`db-card-reader-card${reader.phase === 'open' ? ' db-card-reader-card--interactive' : ''}`}

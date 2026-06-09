@@ -24,6 +24,7 @@ export type TarotCardId =
   | 'judgement'
   | 'world'
   | 'ace-of-cups'
+  | 'four-of-cups'
   | 'two-of-swords'
   | 'eight-of-pentacles'
   | 'three-of-wands'
@@ -42,13 +43,19 @@ type TarotCardMeta = {
   num: string
 }
 
+type TarotDayVariant = string[] | {
+  preview: string[]
+  full?: string[]
+}
+
 type TarotCardResult = {
   label?: string
   title?: string
   titleMeta?: string
   tags?: string[]
+  tarotBrief?: string[]
   meaningLabel?: string
-  dayVariants?: string[][]
+  dayVariants?: TarotDayVariant[]
   streetVariants?: string[][]
 }
 
@@ -68,8 +75,10 @@ export type TarotDailyMeaning = {
   title: string
   titleMeta: string
   tags: string[]
+  tarotBrief: string[]
   meaningLabel: string
   paragraphs: string[]
+  fullParagraphs: string[]
   variantIdx: number
 }
 
@@ -125,15 +134,19 @@ export function getTarotCardDailyMeaning(cardId: string, variantIdx = 0): TarotD
 
   const variants = card.result?.dayVariants ?? []
   const safeVariantIdx = variants.length > 0 ? variantIdx % variants.length : 0
-  const paragraphs = variants[safeVariantIdx] ?? [card.description]
+  const variant = variants[safeVariantIdx]
+  const paragraphs = Array.isArray(variant) ? variant : variant?.preview
+  const fullParagraphs = !Array.isArray(variant) && variant?.full?.length ? variant.full : paragraphs
 
   return {
     label: card.result?.label ?? 'Карта дня',
     title: card.result?.title ?? card.name,
     titleMeta: card.result?.titleMeta ?? card.archetype,
     tags: card.result?.tags ?? ['Старший аркан'],
+    tarotBrief: card.result?.tarotBrief ?? [],
     meaningLabel: card.result?.meaningLabel ?? 'Смысл карты дня',
-    paragraphs,
+    paragraphs: paragraphs ?? [card.description],
+    fullParagraphs: fullParagraphs ?? paragraphs ?? [card.description],
     variantIdx: safeVariantIdx,
   }
 }

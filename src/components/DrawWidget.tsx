@@ -120,9 +120,9 @@ export default function DrawWidget({ date, persistDraw = true }: { date: string;
       {/* resultOverlay — тоже портал, независим от db-wrap */}
       <div id="resultOverlay">
         <section className="result-el result-reading-panel" id="resultReadingPanel" aria-live="polite">
+          <div className="result-reading-kicker" id="resultReadingKicker"></div>
           <div className="result-reading-tags" id="resultReadingTags" aria-label="Теги карты"></div>
           <h2 className="result-reading-title" id="resultReadingTitle"></h2>
-          <div className="result-reading-kicker" id="resultReadingKicker" hidden></div>
           <div className="result-reading-sections" id="resultReadingSections"></div>
           <div className="result-reading-actions" id="resultReadingActions">
             <button className="btn result-reading-action" id="resultStreetBtn" type="button" hidden>Перевести на пацанский</button>

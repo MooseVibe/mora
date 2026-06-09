@@ -6,8 +6,10 @@ export type ReadingSnapshot = {
   title: string
   titleMeta: string
   tags: string[]
+  tarotBrief?: string[]
   meaningLabel: string
   paragraphs: string[]
+  fullParagraphs?: string[]
 }
 
 export type DrawReadingRow = {
@@ -24,8 +26,10 @@ export type DrawReading = {
   title: string
   titleMeta: string
   tags: string[]
+  tarotBrief: string[]
   meaningLabel: string
   paragraphs: string[]
+  fullParagraphs: string[]
   source: 'snapshot' | 'fallback'
 }
 
@@ -60,8 +64,10 @@ export function createReadingSnapshot(cardId: string, variantIdx: number): Readi
     title: meaning.title,
     titleMeta: meaning.titleMeta,
     tags: meaning.tags,
+    tarotBrief: meaning.tarotBrief,
     meaningLabel: meaning.meaningLabel,
     paragraphs: meaning.paragraphs,
+    fullParagraphs: meaning.fullParagraphs,
   }
 }
 
@@ -76,8 +82,10 @@ export function getDrawReading(row: DrawReadingRow): DrawReading | null {
       title: row.reading_snapshot.title,
       titleMeta: row.reading_snapshot.titleMeta,
       tags: row.reading_snapshot.tags,
+      tarotBrief: row.reading_snapshot.tarotBrief ?? [],
       meaningLabel: row.reading_snapshot.meaningLabel,
       paragraphs: row.reading_snapshot.paragraphs,
+      fullParagraphs: row.reading_snapshot.fullParagraphs ?? row.reading_snapshot.paragraphs,
       source: 'snapshot',
     }
   }
@@ -92,8 +100,10 @@ export function getDrawReading(row: DrawReadingRow): DrawReading | null {
     title: fallback.title,
     titleMeta: fallback.titleMeta,
     tags: fallback.tags,
+    tarotBrief: fallback.tarotBrief,
     meaningLabel: fallback.meaningLabel,
     paragraphs: fallback.paragraphs,
+    fullParagraphs: fallback.fullParagraphs,
     source: 'fallback',
   }
 }

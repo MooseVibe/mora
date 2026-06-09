@@ -76,11 +76,12 @@ const START_DECK_SCALE = 1.18;
 const REVEAL_CARD_WIDTH = 150;
 const CARD_ASPECT_WIDTH = 290;
 const CARD_ASPECT_HEIGHT = 477;
-const FORCE_CARD_ID = null; // set a card id, e.g. 'fool', to force a test draw
 const CARD_ZOOM_MAX_SCALE = 2.2;
 const RETURN_DECK_CARD_SCALE = 1.08;
 const RETURN_DECK_MERGE_SCALE = 1.0;
 const DAILY_DATE_DEBUG_PARAM = 'dailyDate';
+const FORCE_CARD_DEBUG_PARAM = 'forceCard';
+const FORCE_VARIANT_DEBUG_PARAM = 'forceVariant';
 const VARIANT_HISTORY_KEY = 'mora:variantHistory';
 
 function byId(id) {
@@ -308,11 +309,35 @@ function validateCards(cards) {
 
 validateCards(CARDS);
 
+function isLocalDebugHost() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+}
+
+function isDebugDrawEnabled() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  return isLocalDebugHost() || new URLSearchParams(window.location.search).get('debugDraw') === '1';
+}
+
+function getForcedCardId() {
+  if (!isDebugDrawEnabled()) return '';
+  return new URLSearchParams(window.location.search).get(FORCE_CARD_DEBUG_PARAM) || '';
+}
+
+function getForcedVariantIdx(card) {
+  if (!isDebugDrawEnabled()) return null;
+  const value = new URLSearchParams(window.location.search).get(FORCE_VARIANT_DEBUG_PARAM);
+  if (!/^\d+$/.test(value || '')) return null;
+  const variantCount = getCardDayVariantCount(card);
+  return Math.min(Number(value), Math.max(variantCount - 1, 0));
+}
+
 function pickCard() {
-  if (FORCE_CARD_ID) {
-    const forcedCard = CARDS.find(card => card.id === FORCE_CARD_ID);
+  const forcedCardId = getForcedCardId();
+  if (forcedCardId) {
+    const forcedCard = CARDS.find(card => card.id === forcedCardId);
     if (!forcedCard) {
-      throw new Error(`FORCE_CARD_ID not found: ${FORCE_CARD_ID}`);
+      throw new Error(`forceCard not found: ${forcedCardId}`);
     }
     return forcedCard;
   }
@@ -340,6 +365,11 @@ function getDailySeedDate(date = new Date()) {
     String(date.getMonth() + 1).padStart(2, '0'),
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
+}
+
+function formatResultDate(dateStr = getDailySeedDate()) {
+  const date = new Date(`${dateStr}T12:00:00`);
+  return date.toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
 }
 
 function hashString(value) {
@@ -372,6 +402,9 @@ function writeVariantHistory(history) {
 }
 
 function chooseDailyVariantIndex(card) {
+  const forcedVariantIdx = getForcedVariantIdx(card);
+  if (forcedVariantIdx !== null) return forcedVariantIdx;
+
   const variantCount = getCardDayVariantCount(card);
   if (variantCount <= 1) return 0;
 
@@ -394,7 +427,9 @@ function chooseDailyVariantIndex(card) {
   const chosen = best[Math.floor(Math.random() * best.length)];
 
   history[card.id] = [chosen, ...cardHistory.filter(idx => idx !== chosen)].slice(0, variantCount);
-  writeVariantHistory(history);
+  if (!isDebugDrawEnabled()) {
+    writeVariantHistory(history);
+  }
 
   return chosen;
 }
@@ -453,7 +488,9 @@ function getResultContent(card) {
       ? currentReading.variantIdx
       : hashString(`${getDailySeedDate()}:${card.id}`) % 3;
     if (Array.isArray(content.dayVariants) && content.dayVariants.length) {
-      content.dayMeaning = content.dayVariants[idx % content.dayVariants.length];
+      const variant = normalizeDayVariant(content.dayVariants[idx % content.dayVariants.length]);
+      content.dayMeaning = variant.preview;
+      content.dayFullMeaning = variant.full;
     }
     if (Array.isArray(content.streetVariants) && content.streetVariants.length) {
       content.streetMeaning = content.streetVariants[idx % content.streetVariants.length];
@@ -473,6 +510,7 @@ function getResultContent(card) {
     titleMeta:cleanArchetype,
     tags:['Старший аркан'],
     meaningLabel:'Смысл карты дня',
+    tarotBrief: [],
     dayMeaning:[
       `Сегодня эта карта просит заметить тему “${cleanArchetype || card.name.toLowerCase()}” в конкретном деле.`,
       'Выбери один разговор, задачу или решение, где можно применить этот смысл уже сегодня.',
@@ -481,9 +519,21 @@ function getResultContent(card) {
   };
 }
 
+function normalizeDayVariant(variant) {
+  if (variant && !Array.isArray(variant) && typeof variant === 'object') {
+    const preview = normalizeMeaningParagraphs(variant.preview || variant.paragraphs || variant.full || '');
+    const full = normalizeMeaningParagraphs(variant.full || preview);
+    return { preview, full };
+  }
+
+  const paragraphs = normalizeMeaningParagraphs(variant || '');
+  return { preview: paragraphs, full: paragraphs };
+}
+
 function renderResultContent(card) {
   const content = getResultContent(card);
-  dom.resultReadingKicker.textContent = content.label || 'Смысл карты';
+  dom.resultReadingKicker.textContent = formatResultDate();
+  dom.resultReadingKicker.hidden = false;
   dom.resultReadingTitle.textContent = '';
   const titleName = document.createElement('span');
   titleName.className = 'result-reading-title-name';
@@ -498,25 +548,116 @@ function renderResultContent(card) {
   renderResultTags(content.tags || ['Старший аркан']);
   dom.resultReadingSections.innerHTML = '';
 
+  const meaningParagraphs = normalizeMeaningParagraphs(content.dayMeaning || content.meaning || content.lead || card.description || '');
+  const fullMeaning = normalizeMeaningParagraphs(content.dayFullMeaning || []);
+  dom.resultReadingSections.appendChild(
+    createResultReadingSection(
+      content.meaningLabel || 'Смысл карты дня',
+      meaningParagraphs,
+      'result-reading-section--meaning',
+      {
+        fullParagraphs: fullMeaning,
+        fullTitle: content.meaningLabel || 'Смысл карты дня',
+      }
+    )
+  );
+
+  clearResultReadMoreAction();
+}
+
+function createResultReadingSection(label, paragraphs, modifier, options = {}) {
   const item = document.createElement('section');
-  item.className = 'result-reading-section result-reading-section--meaning';
+  item.className = `result-reading-section ${modifier}`;
 
   const title = document.createElement('h3');
   title.className = 'result-reading-section-title';
-  title.textContent = content.meaningLabel || 'Смысл карты дня';
+  title.textContent = label;
 
   const textWrap = document.createElement('div');
   textWrap.className = 'result-reading-section-text';
-  const meaningParagraphs = normalizeMeaningParagraphs(content.dayMeaning || content.meaning || content.lead || card.description || '');
-  meaningParagraphs.forEach(paragraph => {
+  const full = normalizeMeaningParagraphs(options.fullParagraphs || []);
+  const shouldShowInlineMore = full.length > paragraphs.length || full.join('\n') !== paragraphs.join('\n');
+  paragraphs.forEach((paragraph, index) => {
     const p = document.createElement('p');
     p.className = 'result-reading-paragraph';
-    p.textContent = paragraph;
+    const isLastPreviewParagraph = shouldShowInlineMore && index === paragraphs.length - 1;
+    p.textContent = isLastPreviewParagraph ? `${paragraph} ` : paragraph;
+    if (isLastPreviewParagraph) {
+      const button = document.createElement('button');
+      button.className = 'result-reading-inline-more';
+      button.type = 'button';
+      button.textContent = 'Читать дальше';
+      button.addEventListener('click', () => openResultFullMeaning(options.fullTitle || label, full, paragraphs));
+      p.appendChild(button);
+    }
     textWrap.appendChild(p);
   });
 
   item.append(title, textWrap);
-  dom.resultReadingSections.appendChild(item);
+  return item;
+}
+
+function clearResultReadMoreAction() {
+  const existing = dom.resultReadingActions.querySelector('[data-result-read-more]');
+  if (existing) existing.remove();
+}
+
+function openResultFullMeaning(title, paragraphs, previewParagraphs = []) {
+  const previous = document.querySelector('.result-reading-modal');
+  if (previous) previous.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'result-reading-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', title);
+
+  const backdrop = document.createElement('button');
+  backdrop.className = 'result-reading-modal-backdrop';
+  backdrop.type = 'button';
+  backdrop.setAttribute('aria-label', 'Закрыть полный текст');
+
+  const panel = document.createElement('section');
+  panel.className = 'result-reading-modal-panel';
+
+  const close = document.createElement('button');
+  close.className = 'result-reading-modal-close';
+  close.type = 'button';
+  close.textContent = 'Закрыть';
+
+  const heading = document.createElement('h2');
+  heading.className = 'result-reading-modal-title';
+  heading.textContent = title;
+
+  const text = document.createElement('div');
+  text.className = 'result-reading-modal-text';
+  const preview = normalizeMeaningParagraphs(previewParagraphs);
+  normalizeMeaningParagraphs(paragraphs).forEach((paragraph, index) => {
+    if (preview.length > 0 && index === preview.length) {
+      const separator = document.createElement('div');
+      separator.className = 'result-reading-modal-separator';
+      separator.textContent = 'Продолжение';
+      text.appendChild(separator);
+    }
+    const p = document.createElement('p');
+    p.className = index < preview.length
+      ? 'result-reading-modal-paragraph result-reading-modal-paragraph--preview'
+      : 'result-reading-modal-paragraph result-reading-modal-paragraph--new';
+    p.textContent = paragraph;
+    text.appendChild(p);
+  });
+
+  function closeModal() {
+    modal.classList.remove('is-open');
+    setTimeout(() => modal.remove(), 180);
+  }
+
+  backdrop.addEventListener('click', closeModal);
+  close.addEventListener('click', closeModal);
+  panel.append(close, heading, text);
+  modal.append(backdrop, panel);
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('is-open'));
 }
 
 function toggleResultPanelStreet() {
@@ -531,7 +672,7 @@ function toggleResultPanelStreet() {
       : content.dayMeaning
   );
 
-  const textEl = dom.resultReadingSections.querySelector('.result-reading-section-text');
+  const textEl = dom.resultReadingSections.querySelector('.result-reading-section--meaning .result-reading-section-text');
   if (!textEl) return;
 
   textEl.style.transition = 'opacity 0.18s ease';

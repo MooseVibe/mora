@@ -7,12 +7,8 @@ import DashboardCardReader from '@/components/DashboardCardReader'
 import RitualTransitionLink from '@/components/RitualTransitionLink'
 
 function formatDate(dateStr: string): string {
-  const today = new Date().toISOString().split('T')[0]
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-  if (dateStr === today) return 'сегодня'
-  if (dateStr === yesterday) return 'вчера'
   const d = new Date(dateStr + 'T12:00:00')
-  const base = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '')
+  const base = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
   return d.getFullYear() !== new Date().getFullYear() ? `${base} ${d.getFullYear()}` : base
 }
 
@@ -41,8 +37,10 @@ function CardTile({ draw, index }: { draw: DrawReadingRow; index: number }) {
       title={reading.title}
       titleMeta={reading.titleMeta}
       tags={reading.tags}
+      tarotBrief={reading.tarotBrief}
       meaningLabel={reading.meaningLabel}
       paragraphs={reading.paragraphs}
+      fullParagraphs={reading.fullParagraphs}
       sourceKey={sourceKey}
       readingDate={formatDate(reading.drawnAt)}
       sourceFrame={{ outerRadius: 8, inset: 3.35, artRadius: 4.5 }}

@@ -62,6 +62,7 @@ After generation, compare the output against the canonical composition before op
 - Vertical 2:3 frame.
 - One clear central archetype or symbol.
 - Main figure/object should occupy roughly 55-75% of the card height.
+- The meaning-bearing figure or object must read instantly as a distinct silhouette, even in a small dashboard thumbnail. Separate it from the scene with value contrast, rim light, negative space, or a darker/lighter background plane; do not let the main figure merge into trees, ruins, smoke, fabric, or other surrounding texture.
 - Keep the lower 10-14% visually dark enough for the Roman numeral or symbolic footer.
 - Use a centered or slightly off-center composition with strong silhouette readability.
 - Background should feel like a ritual space: stone, ruins, mountains, night sky, columns, forest, cave, temple, smoke, storm, or celestial void.
@@ -195,18 +196,38 @@ Rules:
 
 ## Text Direction
 
-Each card needs short, UI-safe texts.
+The daily-card text is a core product surface, not filler copy. Until the AI tarot reader exists, hardcoded card texts must feel like intentional mini-readings, not generated placeholders or encyclopedia excerpts.
 
 For `public/assets/cards.js`:
 
-- `description`: one short sentence for fallback/simple UI.
-- `result.titleMeta`: one compact phrase.
-- `result.dayVariants`: 3-5 variants.
-- Each variant should be 3 short paragraphs.
-- Each paragraph should be 1 sentence where possible.
-- Keep each paragraph under roughly 90 characters when possible.
+- `description`: one short sentence for fallback/simple UI and journal summaries.
+- `result.titleMeta`: one compact phrase after the card name, usually 4-8 words.
+- `result.tags`: classification only, for example `Старший аркан`, `Младший аркан`, `Мечи`, `Придворная карта`.
+- `result.meaningLabel`: use `Что это значит сегодня` for the main result block.
+- `result.dayVariants`: 3-4 approved variants in the new `preview/full` format.
+- `preview`: 1-2 paragraphs that are useful on their own and give the user a complete daily-card meaning.
+- `full`: the exact same `preview` paragraphs first, followed by 1-3 additional paragraphs. `preview` must be a strict prefix of `full`, not a separate retelling.
+- The classic Rider-Waite-Smith meaning should be embedded into the daily interpretation, not shown as a separate "what this card means in tarot" encyclopedia block.
+- Use Rider-Waite-Smith as an internal writing reference, but do not expose niche deck names in user-facing readings. Prefer plain phrases like `в классическом таро`, `в канонах таро`, or `традиционно эта карта`.
+- Do not force every text into three paragraphs. Use paragraph breaks only when they help reading and each paragraph adds a new thought.
 - Tone: clear human advice for the day, not vague esoteric noise.
+- Mora is a fictional tarot-reader character, and the text should carry her presence. It is allowed and encouraged to use phrasing like `Мора говорит`, `Мора советует`, `Мора считает`, when it feels natural.
+- Do not overuse the name Mora in every paragraph. One clear Mora-presence per reading is often enough.
+- The voice is wise, calm, slightly mystical, and personal. It should not sound like stock tarot copy, corporate coaching, or generic AI output.
 - No marketing excitement, no emoji, no overpromising.
+
+The result screen layout is:
+
+1. date, quiet and visually separate;
+2. classification tags;
+3. card title + `titleMeta`;
+4. one main text block: `Что это значит сегодня`;
+5. inline `Читать дальше` only when `full` has more text than `preview`;
+6. actions.
+
+Do not show a separate `Карта в таро` block on the main result screen. If a classic tarot meaning is useful, weave it into the daily-card interpretation.
+
+Every new or rewritten `dayVariants` text must be manually approved by the author before the card is considered ready. The agent proposes 3-4 variants, the author reads them, rejects or edits weak variants, and only approved variants are integrated.
 
 Good Mora-style text:
 
@@ -228,7 +249,10 @@ The draw flow stores a `variantIdx` for the drawn card and uses local `mora:vari
 
 When adding new cards:
 
-- Add 3-5 `dayVariants`.
+- Add 3-4 approved `dayVariants`.
+- Prefer the object format `{ preview: string[], full: string[] }`.
+- Ensure every `preview` is a strict prefix of its `full`.
+- Make variants meaningfully different by daily scenario, not only by wording.
 - Add matching `streetVariants` only if the street-mode interaction is still part of the card result UI.
 - Preserve the saved variant: once a draw is created, dashboard/journal should show the same `variantIdx`, not recalculate a fresh text on every render.
 - Do not add separate text tables in React screens. Dashboard, journal, recent cards, and QA previews should use helpers from `src/lib/tarot.ts`.
@@ -247,6 +271,9 @@ Before a new card is considered ready:
 - [ ] `src/lib/tarot.ts` derives metadata, daily meanings, journal summary, and image paths from `cards.js`.
 - [ ] No separate dashboard/journal/recent-card text table was added.
 - [ ] `/qa/cards` shows the card image, summary, and all prepared `dayVariants`.
+- [ ] Each `dayVariants` entry uses `preview/full` unless there is an explicit compatibility reason.
+- [ ] Each `preview` is a strict prefix of its `full`.
+- [ ] Author has manually approved every text variant.
 - [ ] Text variants fit the landing result panel, dashboard daily-card block, journal rows, and recent-card tiles.
 - [ ] Landing draw result checked on mobile `375px`.
 - [ ] Landing draw result checked on desktop `1440px`.

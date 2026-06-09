@@ -160,8 +160,11 @@ export default async function Dashboard({
                       title={cardMeaning.title}
                       titleMeta={cardMeaning.titleMeta}
                       tags={cardMeaning.tags}
+                      tarotBrief={cardMeaning.tarotBrief}
                       meaningLabel={cardMeaning.meaningLabel}
                       paragraphs={cardMeaning.paragraphs}
+                      fullParagraphs={cardMeaning.fullParagraphs}
+                      readingDate={formatTodayDate()}
                       sourceKey="today"
                     />
                   </div>
@@ -183,6 +186,15 @@ export default async function Dashboard({
                           )}
                         </h3>
                         <div className="db-card-descs">
+                          {cardMeaning.tarotBrief.length > 0 && (
+                            <div className="db-card-tarot-brief">
+                              <span>Карта в таро</span>
+                              {cardMeaning.tarotBrief.map((para, i) => (
+                                <p key={i}>{para}</p>
+                              ))}
+                            </div>
+                          )}
+                          <span className="db-card-meaning-label">{cardMeaning.meaningLabel}</span>
                           {cardMeaning.paragraphs.map((para, i) => (
                             <p key={i} className="db-card-desc">{para}</p>
                           ))}

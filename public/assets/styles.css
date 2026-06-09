@@ -28,6 +28,7 @@
     --card-inner-border-color: rgba(201,169,110,0.16);
     --deck-shadow: 0 24px 58px rgba(0,0,0,0.3);
     --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --duration-quick: 250ms;
     --app-height: 100vh;
     --app-offset-top: 0px;
   }
@@ -1193,25 +1194,15 @@
     position:relative;
     display:inline-flex;
     align-items:center;
-    gap:12px;
-    margin-bottom:16px;
-    color:var(--gold);
-    font-family:'Cormorant Garamond',serif;
-    font-size:16px;
+    margin-bottom:22px;
+    color:rgba(154,138,117,0.78);
+    font-family:'Raleway',sans-serif;
+    font-size:11px;
     line-height:1;
-    letter-spacing:0.08em;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
     margin-left:0;
     margin-right:0;
-  }
-  #resultReadingKicker.result-reading-kicker::before,
-  #resultReadingKicker.result-reading-kicker::after {
-    content:'';
-    width:22px;
-    height:1px;
-    background:linear-gradient(90deg, transparent, rgba(201,169,110,0.62));
-  }
-  #resultReadingKicker.result-reading-kicker::after {
-    background:linear-gradient(90deg, rgba(201,169,110,0.62), transparent);
   }
   #resultReadingTitle.result-reading-title {
     width:100%;
@@ -1260,6 +1251,10 @@
   .result-reading-section {
     padding:0;
   }
+  .result-reading-section--brief {
+    margin-bottom:24px;
+    opacity:0.82;
+  }
   .result-reading-section-title {
     position:relative;
     display:inline-flex;
@@ -1283,6 +1278,9 @@
   .result-reading-section-title::after {
     background:linear-gradient(90deg, rgba(201,169,110,0.62), transparent);
   }
+  .result-reading-section--brief .result-reading-section-title {
+    color:var(--gold-dim);
+  }
   .result-reading-section-text {
     margin:0;
     max-width:520px;
@@ -1291,11 +1289,38 @@
     line-height:1.58;
     letter-spacing:0.015em;
   }
+  .result-reading-section--brief .result-reading-section-text {
+    color:rgba(154,138,117,0.78);
+    font-size:13px;
+    line-height:1.6;
+  }
   .result-reading-paragraph {
     margin:0 0 16px;
   }
   .result-reading-paragraph:last-child {
     margin-bottom:0;
+  }
+  .result-reading-inline-more {
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    min-height:24px;
+    margin:0 0 0 2px;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:var(--gold);
+    font:inherit;
+    font-size:0.92em;
+    line-height:inherit;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    text-decoration:none;
+    transition:color var(--duration-quick) var(--ease), opacity var(--duration-quick) var(--ease);
+  }
+  .result-reading-inline-more:hover,
+  .result-reading-inline-more:focus-visible {
+    color:var(--cream);
   }
   .result-reading-actions {
     display:flex;
@@ -1311,12 +1336,119 @@
     border-color:transparent;
     color:#fff;
   }
+  .result-reading-action--more {
+    background:rgba(201,169,110,0.06);
+    border-color:rgba(201,169,110,0.28);
+    color:rgba(240,230,211,0.82);
+  }
+  .result-reading-action--more:hover {
+    background:rgba(201,169,110,0.1);
+    border-color:rgba(201,169,110,0.62);
+    color:var(--cream);
+  }
   .result-reading-action:disabled {
     opacity:0.5;
     cursor:default;
   }
   /* Отступ сверху, чтобы текст шёл под картой */
   #resultSpacer { height:clamp(294px, 38vh, 320px); flex-shrink:0; }
+
+  .result-reading-modal {
+    position:fixed;
+    inset:0;
+    z-index:140;
+    display:grid;
+    place-items:center;
+    padding:28px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 180ms var(--ease);
+  }
+  .result-reading-modal.is-open {
+    opacity:1;
+    pointer-events:auto;
+  }
+  .result-reading-modal-backdrop {
+    position:absolute;
+    inset:0;
+    border:0;
+    background:rgba(5,4,3,0.72);
+    cursor:pointer;
+  }
+  .result-reading-modal-panel {
+    position:relative;
+    z-index:1;
+    width:min(620px, calc(100vw - 48px));
+    max-height:min(720px, calc(100dvh - 56px));
+    overflow-y:auto;
+    border:1px solid rgba(201,169,110,0.22);
+    border-radius:12px;
+    background:rgba(18,14,10,0.98);
+    box-shadow:0 28px 90px rgba(0,0,0,0.58);
+    padding:28px;
+  }
+  .result-reading-modal-close {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:34px;
+    margin-bottom:22px;
+    padding:0 14px;
+    border:1px solid rgba(201,169,110,0.22);
+    border-radius:8px;
+    background:rgba(201,169,110,0.05);
+    color:var(--cream-dim);
+    font-family:'Raleway',sans-serif;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .result-reading-modal-title {
+    margin:0 0 20px;
+    color:#e8d4a8;
+    font-family:'Cormorant Garamond',serif;
+    font-size:32px;
+    font-weight:300;
+    line-height:1.1;
+  }
+  .result-reading-modal-text {
+    color:rgba(240,230,211,0.8);
+    font-size:15px;
+    line-height:1.75;
+    letter-spacing:0.015em;
+  }
+  .result-reading-modal-text p {
+    margin:0 0 16px;
+  }
+  .result-reading-modal-text .result-reading-modal-paragraph--preview {
+    color:rgba(154,138,117,0.82);
+  }
+  .result-reading-modal-text .result-reading-modal-paragraph--new {
+    color:rgba(240,230,211,0.88);
+  }
+  .result-reading-modal-separator {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:22px 0 18px;
+    color:rgba(201,169,110,0.72);
+    font-family:'Raleway',sans-serif;
+    font-size:10px;
+    font-weight:400;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+  }
+  .result-reading-modal-separator::before,
+  .result-reading-modal-separator::after {
+    content:'';
+    height:1px;
+    flex:1;
+    background:rgba(201,169,110,0.16);
+  }
+  .result-reading-modal-text p:last-child {
+    margin-bottom:0;
+  }
 
   /* Элементы результата — по умолчанию невидимы */
   .result-el {
@@ -2841,8 +2973,8 @@
     #resultReadingKicker.result-reading-kicker {
       display:flex;
       justify-content:center;
-      font-size:13px;
-      margin-bottom:8px;
+      font-size:10px;
+      margin-bottom:18px;
     }
     #resultReadingTitle.result-reading-title {
       font-size:32px;

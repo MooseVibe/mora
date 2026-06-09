@@ -356,7 +356,34 @@
 .db-card-descs {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+.db-card-tarot-brief {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 4px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(201, 169, 110, 0.18);
+}
+.db-card-tarot-brief span,
+.db-card-meaning-label {
+  color: var(--gold-dim, #7a6040);
+  font-family: 'Raleway', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.db-card-tarot-brief p {
+  margin: 0;
+  color: rgba(154, 138, 117, 0.72);
+  font-size: 12px;
+  line-height: 1.58;
+  letter-spacing: 0.02em;
+}
+.db-card-meaning-label {
+  margin-top: 4px;
+  color: var(--gold, #c9a96e);
 }
 .db-card-desc {
   font-size: 13px;
@@ -871,13 +898,130 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
 }
 
 .db-card-reader-date {
-  margin: 12px 0 10px;
+  margin: 0 0 22px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(154, 138, 117, 0.78);
+}
+
+.db-card-reader-panel .result-reading-section--brief {
+  margin-bottom: 24px;
+  opacity: 0.82;
+}
+
+.db-card-reader-panel .result-reading-section--brief .result-reading-section-title {
+  color: var(--gold-dim, #7a6040);
+}
+
+.db-card-reader-panel .result-reading-section--brief .result-reading-section-text {
+  color: rgba(154, 138, 117, 0.78);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.db-card-reader-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  pointer-events: auto;
+}
+
+.db-card-reader-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(5, 4, 3, 0.72);
+  cursor: pointer;
+}
+
+.db-card-reader-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(620px, calc(100vw - 48px));
+  max-height: min(720px, calc(100dvh - 56px));
+  overflow-y: auto;
+  border: 1px solid rgba(201, 169, 110, 0.22);
+  border-radius: 12px;
+  background: rgba(18, 14, 10, 0.98);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.58);
+  padding: 28px;
+}
+
+.db-card-reader-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  margin-bottom: 22px;
+  padding: 0 14px;
+  border: 1px solid rgba(201, 169, 110, 0.22);
+  border-radius: 8px;
+  background: rgba(201, 169, 110, 0.05);
+  color: var(--cream-dim, #9a8a75);
   font-family: 'Raleway', sans-serif;
   font-size: 10px;
-  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.db-card-reader-modal-title {
+  margin: 0 0 20px;
+  color: #e8d4a8;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1.1;
+}
+
+.db-card-reader-modal-text {
+  color: rgba(240, 230, 211, 0.8);
+  font-size: 15px;
+  line-height: 1.75;
+  letter-spacing: 0.015em;
+}
+
+.db-card-reader-modal-text p {
+  margin: 0 0 16px;
+}
+
+.db-card-reader-modal-text .result-reading-modal-paragraph--preview {
+  color: rgba(154, 138, 117, 0.82);
+}
+
+.db-card-reader-modal-text .result-reading-modal-paragraph--new {
+  color: rgba(240, 230, 211, 0.88);
+}
+
+.db-card-reader-modal-text .result-reading-modal-separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 18px;
+  color: rgba(201, 169, 110, 0.72);
+  font-family: 'Raleway', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--cream-dim, #9a8a75);
+}
+
+.db-card-reader-modal-text .result-reading-modal-separator::before,
+.db-card-reader-modal-text .result-reading-modal-separator::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: rgba(201, 169, 110, 0.16);
+}
+
+.db-card-reader-modal-text p:last-child {
+  margin-bottom: 0;
 }
 
 .db-card-reader--opening .db-card-reader-panel,
