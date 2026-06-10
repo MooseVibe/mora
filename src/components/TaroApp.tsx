@@ -45,6 +45,12 @@ function clearPendingDrawCookie() {
   document.cookie = 'mora_pending_draw=; Path=/; Max-Age=0; SameSite=Lax'
 }
 
+function isLocalDebugDrawUrl() {
+  if (typeof window === 'undefined') return false
+  return window.location.search.includes('debugDraw=1') &&
+    ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+}
+
 export default function TaroApp() {
   const [isAuthed, setIsAuthed] = useState(false)
   const [drawState, setDrawState] = useState<DrawState>({ status: 'checking' })
@@ -127,41 +133,48 @@ export default function TaroApp() {
   useEffect(() => {
     const supabase = createClient()
     const today = new Date().toISOString().split('T')[0]
+    const isDebugDraw = isLocalDebugDrawUrl()
 
     let pendingDrawForToday: PendingDraw | null = null
 
-    try {
-      const raw = localStorage.getItem('mora:pendingDraw')
-      if (raw) {
-        const draw = JSON.parse(raw)
-        if (draw?.drawnAt === today && typeof draw.cardId === 'string') {
-          pendingDrawForToday = {
-            cardId: draw.cardId,
-            drawnAt: draw.drawnAt,
-            variantIdx: typeof draw.variantIdx === 'number' ? draw.variantIdx : 0,
-          }
-          setPendingDrawCookie(pendingDrawForToday)
-          setDrawState({ status: 'drawn', cardId: draw.cardId })
-        } else {
-          localStorage.removeItem('mora:pendingDraw')
-          clearPendingDrawCookie()
-          setDrawState({ status: 'empty' })
-        }
-      } else {
-        clearPendingDrawCookie()
-        setDrawState({ status: 'empty' })
-      }
-    } catch {
+    if (isDebugDraw) {
       localStorage.removeItem('mora:pendingDraw')
       clearPendingDrawCookie()
       setDrawState({ status: 'empty' })
+    } else {
+      try {
+        const raw = localStorage.getItem('mora:pendingDraw')
+        if (raw) {
+          const draw = JSON.parse(raw)
+          if (draw?.drawnAt === today && typeof draw.cardId === 'string') {
+            pendingDrawForToday = {
+              cardId: draw.cardId,
+              drawnAt: draw.drawnAt,
+              variantIdx: typeof draw.variantIdx === 'number' ? draw.variantIdx : 0,
+            }
+            setPendingDrawCookie(pendingDrawForToday)
+            setDrawState({ status: 'drawn', cardId: draw.cardId })
+          } else {
+            localStorage.removeItem('mora:pendingDraw')
+            clearPendingDrawCookie()
+            setDrawState({ status: 'empty' })
+          }
+        } else {
+          clearPendingDrawCookie()
+          setDrawState({ status: 'empty' })
+        }
+      } catch {
+        localStorage.removeItem('mora:pendingDraw')
+        clearPendingDrawCookie()
+        setDrawState({ status: 'empty' })
+      }
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const authed = !!session
       setIsAuthed(authed)
 
-      if (authed && pendingDrawForToday) {
+      if (!isDebugDraw && authed && pendingDrawForToday) {
         window.location.href = '/dashboard'
       }
     }).catch(() => {
@@ -177,7 +190,7 @@ export default function TaroApp() {
       // загружаем app.js как ES-модуль после монтирования DOM
       script = document.createElement('script')
       script.type = 'module'
-      script.src = '/assets/app.js'
+      script.src = isDebugDraw ? `/assets/app.js?debugDraw=${Date.now()}` : '/assets/app.js'
       document.body.appendChild(script)
     }
 
@@ -381,7 +394,7 @@ export default function TaroApp() {
             >
               ✦ Сохранить карту
             </a>
-            <button className="result-card-action-btn result-card-action-btn--share" type="button" disabled>
+            <button className="result-card-action-btn result-card-action-btn--share" id="resultShareBtn" type="button" disabled>
               ↗ Поделиться
             </button>
           </div>

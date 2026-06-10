@@ -207,6 +207,7 @@ For `public/assets/cards.js`:
 - `result.dayVariants`: 3-4 approved variants in the new `preview/full` format.
 - `preview`: 1-2 paragraphs that are useful on their own and give the user a complete daily-card meaning.
 - `full`: the exact same `preview` paragraphs first, followed by 1-3 additional paragraphs. `preview` must be a strict prefix of `full`, not a separate retelling.
+- `share`: one short approved share text for the exact variant. This is a separate public-facing hook, not an automatic excerpt from `preview` or `full`.
 - The classic Rider-Waite-Smith meaning should be embedded into the daily interpretation, not shown as a separate "what this card means in tarot" encyclopedia block.
 - Use Rider-Waite-Smith as an internal writing reference, but do not expose niche deck names in user-facing readings. Prefer plain phrases like `в классическом таро`, `в канонах таро`, or `традиционно эта карта`.
 - Do not force every text into three paragraphs. Use paragraph breaks only when they help reading and each paragraph adds a new thought.
@@ -227,7 +228,7 @@ The result screen layout is:
 
 Do not show a separate `Карта в таро` block on the main result screen. If a classic tarot meaning is useful, weave it into the daily-card interpretation.
 
-Every new or rewritten `dayVariants` text must be manually approved by the author before the card is considered ready. The agent proposes 3-4 variants, the author reads them, rejects or edits weak variants, and only approved variants are integrated.
+Every new or rewritten `dayVariants` text must be manually approved by the author before the card is considered ready. The agent proposes 3-4 variants, the author reads them, rejects or edits weak variants, and only approved variants are integrated. Share texts require the same explicit visual/manual approval as `preview/full`: do not integrate `share` just because the main reading was approved.
 
 Good Mora-style text:
 
@@ -255,6 +256,8 @@ When adding new cards:
 - Make variants meaningfully different by daily scenario, not only by wording.
 - Add matching `streetVariants` only if the street-mode interaction is still part of the card result UI.
 - Preserve the saved variant: once a draw is created, dashboard/journal should show the same `variantIdx`, not recalculate a fresh text on every render.
+- Add an explicitly author-approved `share` string to every new or rewritten `dayVariants` object. Share text is used when the user shares a freshly drawn card and must match the same `variantIdx`.
+- Keep share unavailable for legacy variants without approved `share`: the UI may show the share icon disabled, but must not auto-generate production share copy from old text.
 - Do not add separate text tables in React screens. Dashboard, journal, recent cards, and QA previews should use helpers from `src/lib/tarot.ts`.
 
 ## Code Integration Checklist
@@ -273,6 +276,8 @@ Before a new card is considered ready:
 - [ ] `/qa/cards` shows the card image, summary, and all prepared `dayVariants`.
 - [ ] Each `dayVariants` entry uses `preview/full` unless there is an explicit compatibility reason.
 - [ ] Each `preview` is a strict prefix of its `full`.
+- [ ] Each new or rewritten `dayVariants` entry includes an author-approved `share` text.
+- [ ] Author has manually approved every `share` text separately from `preview/full`.
 - [ ] Author has manually approved every text variant.
 - [ ] Text variants fit the landing result panel, dashboard daily-card block, journal rows, and recent-card tiles.
 - [ ] Landing draw result checked on mobile `375px`.

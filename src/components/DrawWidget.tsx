@@ -131,7 +131,7 @@ export default function DrawWidget({ date, persistDraw = true }: { date: string;
             <a href="/dashboard" className="result-card-action-btn result-card-action-btn--save">
               ✦ В кабинет
             </a>
-            <button className="result-card-action-btn result-card-action-btn--share" type="button" disabled>
+            <button className="result-card-action-btn result-card-action-btn--share" id="resultShareBtn" type="button" disabled>
               ↗ Поделиться
             </button>
           </div>

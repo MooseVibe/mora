@@ -1,5 +1,5 @@
 'use strict';
-import { TAROT_CARDS } from './cards.js';
+import { TAROT_CARDS } from './cards.js?v=cards-20260611-1';
 import { STATE, transition, resetState, runSequence } from './state.js';
 import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, wait, preloadCardImages } from './image-cache.js';
 import { smoothStep, lerpArc } from './arc.js';
@@ -83,6 +83,7 @@ const DAILY_DATE_DEBUG_PARAM = 'dailyDate';
 const FORCE_CARD_DEBUG_PARAM = 'forceCard';
 const FORCE_VARIANT_DEBUG_PARAM = 'forceVariant';
 const VARIANT_HISTORY_KEY = 'mora:variantHistory';
+const SHARE_BASE_URL = 'https://mora-vnkt.vercel.app';
 
 function byId(id) {
   return document.getElementById(id);
@@ -191,6 +192,7 @@ function collectDom() {
     resultReadingSections: byId('resultReadingSections'),
     resultReadingActions: byId('resultReadingActions'),
     resultStreetBtn: byId('resultStreetBtn'),
+    resultShareBtn: byId('resultShareBtn'),
     resultCardName: byId('resultCardName'),
     resultText: byId('resultText'),
     streetToggleBtn: byId('streetToggleBtn'),
@@ -491,6 +493,7 @@ function getResultContent(card) {
       const variant = normalizeDayVariant(content.dayVariants[idx % content.dayVariants.length]);
       content.dayMeaning = variant.preview;
       content.dayFullMeaning = variant.full;
+      content.shareText = variant.share;
     }
     if (Array.isArray(content.streetVariants) && content.streetVariants.length) {
       content.streetMeaning = content.streetVariants[idx % content.streetVariants.length];
@@ -523,15 +526,19 @@ function normalizeDayVariant(variant) {
   if (variant && !Array.isArray(variant) && typeof variant === 'object') {
     const preview = normalizeMeaningParagraphs(variant.preview || variant.paragraphs || variant.full || '');
     const full = normalizeMeaningParagraphs(variant.full || preview);
-    return { preview, full };
+    const share = typeof variant.share === 'string' && variant.share.trim()
+      ? variant.share.trim()
+      : '';
+    return { preview, full, share };
   }
 
   const paragraphs = normalizeMeaningParagraphs(variant || '');
-  return { preview: paragraphs, full: paragraphs };
+  return { preview: paragraphs, full: paragraphs, share: '' };
 }
 
 function renderResultContent(card) {
   const content = getResultContent(card);
+  updateShareAvailability(content.shareText);
   dom.resultReadingKicker.textContent = formatResultDate();
   dom.resultReadingKicker.hidden = false;
   dom.resultReadingTitle.textContent = '';
@@ -600,6 +607,133 @@ function createResultReadingSection(label, paragraphs, modifier, options = {}) {
 function clearResultReadMoreAction() {
   const existing = dom.resultReadingActions.querySelector('[data-result-read-more]');
   if (existing) existing.remove();
+}
+
+function updateShareAvailability(shareText = '') {
+  if (!dom.resultShareBtn) return;
+  const hasApprovedShare = typeof shareText === 'string' && shareText.trim().length > 0;
+  dom.resultShareBtn.disabled = !hasApprovedShare;
+  dom.resultShareBtn.setAttribute(
+    'aria-label',
+    hasApprovedShare ? 'Поделиться картой дня' : 'Поделиться картой дня — текст ещё не готов'
+  );
+}
+
+function syncResultShareAvailability() {
+  if (STATE !== 'result' || !current) {
+    updateShareAvailability('');
+    return;
+  }
+  const content = getResultContent(current);
+  updateShareAvailability(content.shareText);
+}
+
+function getCurrentShareContent() {
+  if (STATE !== 'result' || !current) return null;
+  const content = getResultContent(current);
+  const shareText = typeof content.shareText === 'string' ? content.shareText.trim() : '';
+  if (!shareText) return null;
+
+  const cardTitle = current.name || content.title || 'Карта дня';
+  const url = SHARE_BASE_URL;
+  const title = `Моя карта дня — ${cardTitle}`;
+  const text = [
+    `Сегодня моя карта дня — ${cardTitle}.`,
+    '',
+    shareText,
+    '',
+    'Вытащи свою карту дня:',
+  ].join('\n');
+  const fallbackText = `${text}\n${url}`;
+  const imagePath = typeof current.image === 'string' ? current.image.trim() : '';
+  const imageUrl = imagePath
+    ? new URL(imagePath.startsWith('/') ? imagePath : `/${imagePath}`, window.location.origin).href
+    : '';
+
+  return { title, text, fallbackText, url, imageUrl, fileName: `${current.id || 'mora-card'}.webp` };
+}
+
+function getTelegramShareUrl({ text, url }) {
+  return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+}
+
+function isShareAbort(error) {
+  return error && error.name === 'AbortError';
+}
+
+function isDesktopShareContext() {
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
+async function copyShareText(text) {
+  if (!navigator.clipboard?.writeText) return false;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function createShareFile({ imageUrl, fileName }) {
+  if (!imageUrl || typeof File === 'undefined' || !navigator.canShare) return null;
+
+  try {
+    const response = await fetch(imageUrl, { cache: 'force-cache' });
+    if (!response.ok) return null;
+
+    const blob = await response.blob();
+    const file = new File([blob], fileName, { type: blob.type || 'image/webp' });
+    return navigator.canShare({ files: [file] }) ? file : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function flashShareButton(label) {
+  if (!dom.resultShareBtn) return;
+  const initial = dom.resultShareBtn.textContent;
+  dom.resultShareBtn.textContent = label;
+  window.setTimeout(() => {
+    if (dom.resultShareBtn) dom.resultShareBtn.textContent = initial || '↗ Поделиться';
+  }, 1500);
+}
+
+async function handleResultShareClick() {
+  const share = getCurrentShareContent();
+  if (!share || !dom.resultShareBtn || dom.resultShareBtn.disabled) return;
+  const telegramUrl = getTelegramShareUrl(share);
+
+  if (isDesktopShareContext()) {
+    const popup = window.open(telegramUrl, '_blank', 'noopener,noreferrer');
+    if (popup) return;
+
+    const copied = await copyShareText(share.fallbackText);
+    flashShareButton(copied ? 'Скопировано' : 'Не удалось');
+    return;
+  }
+
+  if (navigator.share) {
+    try {
+      const file = await createShareFile(share);
+      const files = file ? [file] : undefined;
+      await navigator.share({
+        title: share.title,
+        text: share.text,
+        url: share.url,
+        ...(files ? { files } : {}),
+      });
+      return;
+    } catch (error) {
+      if (isShareAbort(error)) return;
+    }
+  }
+
+  const popup = window.open(telegramUrl, '_blank', 'noopener,noreferrer');
+  if (popup) return;
+
+  const copied = await copyShareText(share.fallbackText);
+  flashShareButton(copied ? 'Скопировано' : 'Не удалось');
 }
 
 function openResultFullMeaning(title, paragraphs, previewParagraphs = []) {
@@ -1245,6 +1379,7 @@ function setVis(el, visible) {
 
 function hideResultElsImmediately() {
   resultPanelStreet = false;
+  updateShareAvailability('');
   if (dom.resultStreetBtn) {
     dom.resultStreetBtn.textContent = 'Перевести на пацанский';
   }
@@ -1754,6 +1889,7 @@ function bindEvents() {
   addManagedListener(dom.revealCard, 'pointerleave', handleCardTiltLeave);
   addManagedListener(dom.resultAgainBtn, 'click', resetScene);
   addManagedListener(dom.resultStreetBtn, 'click', toggleResultPanelStreet);
+  addManagedListener(dom.resultShareBtn, 'click', handleResultShareClick);
   addManagedListener(dom.galleryCloseBtn, 'click', closeDeckGallery);
   addManagedListener(dom.galleryPrevBtn, 'click', showPrevGalleryCard);
   addManagedListener(dom.galleryNextBtn, 'click', showNextGalleryCard);
@@ -1844,6 +1980,7 @@ const drawDeps = {
   clearDeckInlineMotion,
   settleDeckToIdlePose,
   freezeDeckIdleMotion,
+  isDebugDrawEnabled,
   pickCard,
   createReadingDraft,
   resetInterpretation,
@@ -1851,6 +1988,7 @@ const drawDeps = {
   getCurrentInterpretationName,
   getCurrentInterpretationText,
   renderResultContent,
+  syncResultShareAvailability,
   updateCardZoomAvailability,
   clearCardZoomState,
   prepareMobileTilt,

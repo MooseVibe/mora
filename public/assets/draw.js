@@ -38,6 +38,7 @@ function persistPendingDraw(draw) {
 function savePendingDraw() {
   try {
     if (window.__moraDrawPreview) return;
+    if (d.isDebugDrawEnabled?.()) return;
     const card = d.getCurrent();
     const reading = d.getCurrentReading();
     if (!card) return;
@@ -220,6 +221,7 @@ function handoffDeck3DFlightToRevealCard() {
   window.setTimeout(() => {
     if (STATE !== 'drawing') return;
     transition('result');
+    d.syncResultShareAvailability();
     savePendingDraw();
     const backdrop = document.getElementById('drawBackdrop');
     if (backdrop) backdrop.style.display = 'block';
@@ -545,6 +547,7 @@ export async function startDrawing() {
     [d.DRAW_TIMING.finish, () => {
       cleanupDeck3DFlight();
       transition('result');
+      d.syncResultShareAvailability();
       savePendingDraw();
       d.dom.resultOverlay.style.pointerEvents = 'auto';
       d.updateCardZoomAvailability();

@@ -24,6 +24,7 @@ export type TarotCardId =
   | 'judgement'
   | 'world'
   | 'ace-of-cups'
+  | 'three-of-cups'
   | 'four-of-cups'
   | 'two-of-swords'
   | 'two-of-pentacles'
@@ -48,6 +49,7 @@ type TarotCardMeta = {
 type TarotDayVariant = string[] | {
   preview: string[]
   full?: string[]
+  share?: string
 }
 
 type TarotCardResult = {
@@ -81,6 +83,7 @@ export type TarotDailyMeaning = {
   meaningLabel: string
   paragraphs: string[]
   fullParagraphs: string[]
+  shareText?: string
   variantIdx: number
 }
 
@@ -139,6 +142,9 @@ export function getTarotCardDailyMeaning(cardId: string, variantIdx = 0): TarotD
   const variant = variants[safeVariantIdx]
   const paragraphs = Array.isArray(variant) ? variant : variant?.preview
   const fullParagraphs = !Array.isArray(variant) && variant?.full?.length ? variant.full : paragraphs
+  const shareText = !Array.isArray(variant) && typeof variant?.share === 'string'
+    ? variant.share.trim()
+    : ''
 
   return {
     label: card.result?.label ?? 'Карта дня',
@@ -149,6 +155,7 @@ export function getTarotCardDailyMeaning(cardId: string, variantIdx = 0): TarotD
     meaningLabel: card.result?.meaningLabel ?? 'Смысл карты дня',
     paragraphs: paragraphs ?? [card.description],
     fullParagraphs: fullParagraphs ?? paragraphs ?? [card.description],
+    shareText: shareText || undefined,
     variantIdx: safeVariantIdx,
   }
 }

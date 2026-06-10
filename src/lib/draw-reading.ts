@@ -10,6 +10,7 @@ export type ReadingSnapshot = {
   meaningLabel: string
   paragraphs: string[]
   fullParagraphs?: string[]
+  shareText?: string
 }
 
 export type DrawReadingRow = {
@@ -30,6 +31,7 @@ export type DrawReading = {
   meaningLabel: string
   paragraphs: string[]
   fullParagraphs: string[]
+  shareText?: string
   source: 'snapshot' | 'fallback'
 }
 
@@ -39,6 +41,10 @@ function normalizeVariantIdx(value: unknown) {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(item => typeof item === 'string')
+}
+
+function normalizeShareText(value: unknown) {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
 function isReadingSnapshot(value: unknown): value is ReadingSnapshot {
@@ -68,6 +74,7 @@ export function createReadingSnapshot(cardId: string, variantIdx: number): Readi
     meaningLabel: meaning.meaningLabel,
     paragraphs: meaning.paragraphs,
     fullParagraphs: meaning.fullParagraphs,
+    shareText: meaning.shareText,
   }
 }
 
@@ -86,6 +93,7 @@ export function getDrawReading(row: DrawReadingRow): DrawReading | null {
       meaningLabel: row.reading_snapshot.meaningLabel,
       paragraphs: row.reading_snapshot.paragraphs,
       fullParagraphs: row.reading_snapshot.fullParagraphs ?? row.reading_snapshot.paragraphs,
+      shareText: normalizeShareText(row.reading_snapshot.shareText),
       source: 'snapshot',
     }
   }
@@ -104,6 +112,7 @@ export function getDrawReading(row: DrawReadingRow): DrawReading | null {
     meaningLabel: fallback.meaningLabel,
     paragraphs: fallback.paragraphs,
     fullParagraphs: fallback.fullParagraphs,
+    shareText: fallback.shareText,
     source: 'fallback',
   }
 }

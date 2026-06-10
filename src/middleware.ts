@@ -7,9 +7,19 @@ function hasSupabaseAuthCookie(request: NextRequest) {
     .some(cookie => cookie.name.startsWith('sb-') && cookie.name.includes('auth-token') && cookie.value.length > 0)
 }
 
+function isLocalDebugDrawRequest(request: NextRequest) {
+  return request.nextUrl.pathname === '/' &&
+    request.nextUrl.searchParams.get('debugDraw') === '1' &&
+    ['localhost', '127.0.0.1', '::1'].includes(request.nextUrl.hostname)
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
   const isPublicEntry = request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/auth'
+
+  if (isLocalDebugDrawRequest(request)) {
+    return supabaseResponse
+  }
 
   if (isPublicEntry && !hasSupabaseAuthCookie(request)) {
     return supabaseResponse
