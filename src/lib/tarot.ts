@@ -24,6 +24,7 @@ export type TarotCardId =
   | 'judgement'
   | 'world'
   | 'ace-of-cups'
+  | 'ace-of-swords'
   | 'three-of-cups'
   | 'four-of-cups'
   | 'two-of-swords'

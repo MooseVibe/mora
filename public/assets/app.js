@@ -628,6 +628,15 @@ function syncResultShareAvailability() {
   updateShareAvailability(content.shareText);
 }
 
+function syncCurrentShareAvailability() {
+  if (!current) {
+    updateShareAvailability('');
+    return;
+  }
+  const content = getResultContent(current);
+  updateShareAvailability(content.shareText);
+}
+
 function getCurrentShareContent() {
   if (STATE !== 'result' || !current) return null;
   const content = getResultContent(current);
@@ -1989,6 +1998,7 @@ const drawDeps = {
   getCurrentInterpretationText,
   renderResultContent,
   syncResultShareAvailability,
+  syncCurrentShareAvailability,
   updateCardZoomAvailability,
   clearCardZoomState,
   prepareMobileTilt,

@@ -66,6 +66,11 @@ Working MVP:
 - automatic save to journal
 - dashboard with daily card and recent cards
 - journal with drawn card history
+- deck currently has 37 cards: 22 major arcana and 15 minor/court cards
+- share-ready cards currently: `emperor`, `hierophant`, `lovers`, `ace-of-swords`, `three-of-cups`, `two-of-pentacles`, `six-of-pentacles`
+- latest card addition: `ace-of-swords` / «Туз Мечей»; approved visual benchmark for strong main-scene contrast
+- latest old-card text update: `lovers` / «Влюблённые» in `preview/full/share`
+- dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 
 Current work phase:
 

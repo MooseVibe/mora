@@ -150,6 +150,7 @@ function runDeck3DDrawExperiment() {
   d.dom.resultCardName.textContent = d.getCurrentInterpretationName();
   d.dom.resultText.textContent = d.getCurrentInterpretationText();
   d.hideResultElsImmediately();
+  d.syncCurrentShareAvailability();
   d.dom.resultOverlay.style.pointerEvents = 'none';
   d.dom.revealCard.classList.remove('is-deck3d-handoff-card');
   d.dom.revealCard.style.opacity = '0';
@@ -461,6 +462,7 @@ export async function startDrawing() {
   d.resetInterpretation();
 
   d.setCardFace(d.getCurrent());
+  d.renderResultContent(d.getCurrent());
 
   d.dom.resultCardName.textContent = d.getCurrentInterpretationName();
   d.dom.resultText.textContent     = d.getCurrentInterpretationText();
@@ -471,6 +473,7 @@ export async function startDrawing() {
   d.dom.revealCard.style.opacity    = '0';
 
   d.hideResultElsImmediately();
+  d.syncCurrentShareAvailability();
   d.dom.resultOverlay.style.pointerEvents = 'none';
 
   runSequence([

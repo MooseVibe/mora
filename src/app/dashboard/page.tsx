@@ -6,6 +6,7 @@ import DrawWidget from '@/components/DrawWidget'
 import RecentCardsWidget from '@/components/RecentCardsWidget'
 import DrawnCardTilt from '@/components/DrawnCardTilt'
 import DashboardCardReader from '@/components/DashboardCardReader'
+import DashboardShareButton from '@/components/DashboardShareButton'
 import { getTarotCardDailyMeaning, getTarotCardDefinition, getTarotCardMeta } from '@/lib/tarot'
 import './dashboard.css'
 
@@ -150,11 +151,11 @@ export default async function Dashboard({
                 <div className="db-panel-toprow">
                   <span className="db-panel-date">Сегодня {formatTodayDate()}</span>
                   <div className="db-panel-icons">
-                    <button className="db-panel-icon-btn" type="button" disabled aria-label="Поделиться">
-                      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                        <path d="M176 160a48.07 48.07 0 0 0-33.88 14.09L96.28 145.9a48.14 48.14 0 0 0 0-35.8l45.84-28.19A48 48 0 1 0 128 48a47.47 47.47 0 0 0 2.65 15.49L82.75 91.91a48 48 0 1 0 0 72.18l47.9 28.42A47.47 47.47 0 0 0 128 208a48 48 0 1 0 48-48z"/>
-                      </svg>
-                    </button>
+                    <DashboardShareButton
+                      cardId={cardId}
+                      cardTitle={cardMeaning.title}
+                      shareText={cardMeaning.shareText}
+                    />
                     <DashboardCardReader
                       cardId={cardId}
                       title={cardMeaning.title}
