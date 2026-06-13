@@ -7,9 +7,10 @@ interface Props {
   cardId: string
   cardName: string
   sourceKey?: string
+  onOpen?: () => void
 }
 
-export default function DrawnCardTilt({ cardId, cardName, sourceKey }: Props) {
+export default function DrawnCardTilt({ cardId, cardName, sourceKey, onOpen }: Props) {
   function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2)
@@ -23,10 +24,21 @@ export default function DrawnCardTilt({ cardId, cardName, sourceKey }: Props) {
     e.currentTarget.style.transform = ''
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (!onOpen || (e.key !== 'Enter' && e.key !== ' ')) return
+    e.preventDefault()
+    onOpen()
+  }
+
   return (
     <div
-      className="db-drawn-card"
+      className={`db-drawn-card${onOpen ? ' db-drawn-card--button' : ''}`}
       data-card-reader-source={sourceKey}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-label={onOpen ? `Развернуть карту ${cardName}` : undefined}
+      onClick={onOpen}
+      onKeyDown={handleKeyDown}
       onMouseMove={handleTilt}
       onMouseLeave={handleTiltEnd}
     >

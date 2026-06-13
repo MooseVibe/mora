@@ -8,6 +8,8 @@ type Props = {
   cardId: string
   cardTitle: string
   shareText?: string
+  variant?: 'icon' | 'action'
+  label?: string
 }
 
 function getTelegramShareUrl({ text, url }: { text: string; url: string }) {
@@ -49,10 +51,17 @@ async function createShareFile(cardId: string) {
   }
 }
 
-export default function DashboardShareButton({ cardId, cardTitle, shareText }: Props) {
+export default function DashboardShareButton({
+  cardId,
+  cardTitle,
+  shareText,
+  variant = 'icon',
+  label = '↗ Поделиться',
+}: Props) {
   const approvedShareText = shareText?.trim()
   const [feedback, setFeedback] = useState('')
   const isEnabled = Boolean(approvedShareText)
+  const isAction = variant === 'action'
 
   function flashFeedback(label: string) {
     setFeedback(label)
@@ -108,16 +117,21 @@ export default function DashboardShareButton({ cardId, cardTitle, shareText }: P
 
   return (
     <button
-      className={`db-panel-icon-btn${isEnabled ? ' db-panel-icon-btn--active' : ''}`}
+      className={isAction
+        ? 'result-card-action-btn result-card-action-btn--share'
+        : `db-panel-icon-btn${isEnabled ? ' db-panel-icon-btn--active' : ''}`
+      }
       type="button"
       disabled={!isEnabled}
       aria-label={isEnabled ? 'Поделиться картой дня' : 'Поделиться картой дня — текст ещё не готов'}
       title={feedback || (isEnabled ? 'Поделиться картой дня' : 'Поделиться картой дня — текст ещё не готов')}
       onClick={handleShare}
     >
-      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-        <path d="M176 160a48.07 48.07 0 0 0-33.88 14.09L96.28 145.9a48.14 48.14 0 0 0 0-35.8l45.84-28.19A48 48 0 1 0 128 48a47.47 47.47 0 0 0 2.65 15.49L82.75 91.91a48 48 0 1 0 0 72.18l47.9 28.42A47.47 47.47 0 0 0 128 208a48 48 0 1 0 48-48z"/>
-      </svg>
+      {isAction ? (feedback || label) : (
+        <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+          <path d="M176 160a48.07 48.07 0 0 0-33.88 14.09L96.28 145.9a48.14 48.14 0 0 0 0-35.8l45.84-28.19A48 48 0 1 0 128 48a47.47 47.47 0 0 0 2.65 15.49L82.75 91.91a48 48 0 1 0 0 72.18l47.9 28.42A47.47 47.47 0 0 0 128 208a48 48 0 1 0 48-48z"/>
+        </svg>
+      )}
     </button>
   )
 }

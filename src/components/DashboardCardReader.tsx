@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { getTarotCardImageSrc } from '@/lib/tarot'
+import DashboardShareButton from '@/components/DashboardShareButton'
 
 type Props = {
   cardId: string
@@ -14,6 +15,7 @@ type Props = {
   meaningLabel: string
   paragraphs: string[]
   fullParagraphs?: string[]
+  shareText?: string
   sourceKey: string
   readingDate?: string
   sourceFrame?: CardFrame
@@ -170,6 +172,7 @@ export default function DashboardCardReader({
   meaningLabel,
   paragraphs,
   fullParagraphs,
+  shareText,
   sourceKey,
   readingDate,
   sourceFrame,
@@ -349,6 +352,16 @@ export default function DashboardCardReader({
             </div>
           </section>
         </div>
+        {shareText && (
+          <div className="result-card-actions db-card-reader-actions">
+            <DashboardShareButton
+              cardId={cardId}
+              cardTitle={title}
+              shareText={shareText}
+              variant="action"
+            />
+          </div>
+        )}
       </section>
 
       {isFullMeaningOpen && (
@@ -360,8 +373,13 @@ export default function DashboardCardReader({
             onClick={() => setIsFullMeaningOpen(false)}
           />
           <section className="db-card-reader-modal-panel">
-            <button className="db-card-reader-modal-close" type="button" onClick={() => setIsFullMeaningOpen(false)}>
-              Закрыть
+            <button
+              className="db-card-reader-modal-close"
+              type="button"
+              aria-label="Закрыть полный текст"
+              onClick={() => setIsFullMeaningOpen(false)}
+            >
+              ×
             </button>
             <h2 className="db-card-reader-modal-title">{meaningLabel}</h2>
             <div className="db-card-reader-modal-text">

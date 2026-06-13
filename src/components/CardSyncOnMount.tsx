@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 type DailyDraw = {
   cardId: string
   drawnAt: string
+  variantIdx?: number
 }
 
 type PendingDraw = DailyDraw & {
@@ -44,7 +45,7 @@ export default function CardSyncOnMount({ serverDraw }: { serverDraw?: DailyDraw
       const draw: PendingDraw = {
         cardId: serverDraw.cardId,
         drawnAt: serverDraw.drawnAt,
-        variantIdx: 0,
+        variantIdx: serverDraw.variantIdx ?? 0,
       }
       localStorage.setItem('mora:pendingDraw', JSON.stringify(draw))
       setPendingDrawCookie(draw)

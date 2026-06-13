@@ -290,6 +290,16 @@
   will-change: transform;
   box-shadow: var(--card-shadow, 0 18px 46px rgba(0, 0, 0, 0.28));
 }
+.db-drawn-card--button {
+  cursor: pointer;
+}
+.db-drawn-card--button:focus-visible {
+  outline: 1px solid rgba(201, 169, 110, 0.72);
+  outline-offset: 6px;
+  box-shadow:
+    var(--card-shadow, 0 18px 46px rgba(0, 0, 0, 0.28)),
+    0 0 28px rgba(201, 169, 110, 0.16);
+}
 .db-drawn-card::before {
   content: '';
   position: absolute;
@@ -481,6 +491,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
   cursor: pointer;
 }
 .rcw-card--button {
@@ -551,9 +562,12 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
   text-align: center;
 }
 .rcw-name {
+  display: block;
+  max-width: 100%;
   font-family: 'Cormorant Garamond', serif;
   font-size: 14px;
   font-weight: 400;
@@ -561,6 +575,9 @@
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rcw-name--dim { opacity: 0.35; }
 .rcw-date {
@@ -922,6 +939,10 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   line-height: 1.6;
 }
 
+.db-card-reader-actions {
+  margin-top: 22px;
+}
+
 .db-card-reader-modal {
   position: fixed;
   inset: 0;
@@ -954,25 +975,44 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
 }
 
 .db-card-reader-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  margin-bottom: 22px;
-  padding: 0 14px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: 1px solid rgba(201, 169, 110, 0.22);
   border-radius: 8px;
   background: rgba(201, 169, 110, 0.05);
   color: var(--cream-dim, #9a8a75);
-  font-family: 'Raleway', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24px;
+  line-height: 0;
+  letter-spacing: 0;
+  text-indent: 0;
+  transform: translateY(-1px);
   cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.db-card-reader-modal-close:hover,
+.db-card-reader-modal-close:focus-visible {
+  border-color: rgba(201, 169, 110, 0.52);
+  background: rgba(201, 169, 110, 0.1);
+  color: var(--cream, #f0e6d3);
+}
+
+.db-card-reader-modal-close:focus-visible {
+  outline: 1px solid rgba(201, 169, 110, 0.72);
+  outline-offset: 4px;
 }
 
 .db-card-reader-modal-title {
   margin: 0 0 20px;
+  padding-right: 42px;
   color: #e8d4a8;
   font-family: 'Cormorant Garamond', serif;
   font-size: 32px;

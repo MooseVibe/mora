@@ -24,6 +24,7 @@ type MoraNativeWindow = Window & {
 
 const APP_TRANSITION_MS = 950
 const APP_TRANSITION_HIDE_MS = 1050
+const NATIVE_APP_VERSION = '20260612-4'
 
 function getPendingDrawCookieMaxAge() {
   const now = new Date()
@@ -190,7 +191,7 @@ export default function TaroApp() {
       // загружаем app.js как ES-модуль после монтирования DOM
       script = document.createElement('script')
       script.type = 'module'
-      script.src = isDebugDraw ? `/assets/app.js?debugDraw=${Date.now()}` : '/assets/app.js'
+      script.src = isDebugDraw ? `/assets/app.js?v=${NATIVE_APP_VERSION}&debugDraw=${Date.now()}` : `/assets/app.js?v=${NATIVE_APP_VERSION}`
       document.body.appendChild(script)
     }
 
@@ -379,6 +380,15 @@ export default function TaroApp() {
 
       <div id="resultOverlay">
         <section className="result-el result-reading-panel" id="resultReadingPanel" aria-live="polite">
+          {!isAuthed && (
+            <button
+              className="result-reading-back-link"
+              type="button"
+              onClick={() => navigateWithTransition('/')}
+            >
+              ‹ На главную
+            </button>
+          )}
           <div className="result-reading-kicker" id="resultReadingKicker"></div>
           <div className="result-reading-tags" id="resultReadingTags" aria-label="Теги карты"></div>
           <h2 className="result-reading-title" id="resultReadingTitle"></h2>

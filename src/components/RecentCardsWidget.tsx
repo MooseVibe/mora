@@ -60,7 +60,7 @@ function CardTile({ draw, index }: { draw: DrawReadingRow; index: number }) {
             />
           </div>
           <div className="rcw-meta">
-            <span className="rcw-name">{card.name}</span>
+            <span className="rcw-name" title={card.name}>{card.name}</span>
             <span className="rcw-date">{formatDate(reading.drawnAt)}</span>
           </div>
         </button>

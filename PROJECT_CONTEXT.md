@@ -65,12 +65,14 @@ Working MVP:
 - authenticated daily card draw, limited to once per day
 - automatic save to journal
 - dashboard with daily card and recent cards
-- journal with drawn card history
-- deck currently has 38 cards: 22 major arcana and 16 minor/court cards
-- share-ready cards currently: `emperor`, `hierophant`, `lovers`, `chariot`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `two-of-pentacles`, `six-of-pentacles`
-- latest card addition: `page-of-cups` / «Паж Кубков»; approved court-card marker uses a `P` with a small crown, matching the Queen of Pentacles direction
-- latest old-card text update: `chariot` / «Колесница» in `preview/full/share`
+- dashboard recent cards open through the full-result reader with the saved/fallback reading text
+- journal with drawn card history, period filters, and visual outcome/note actions; full-result reader for journal entries is still WIP
+- deck currently has 43 cards: 22 major arcana and 21 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-swords`, `two-of-pentacles`, `six-of-pentacles`, `two-of-wands`, `four-of-wands`
+- latest card addition: `four-of-swords` / «Четвёрка Мечей»; approved visual preserves the Rider-Waite-Smith resting figure, three swords above, one sword below, chapel/resting slab composition, and translates pause/recovery into Mora's darker ritual style
+- latest old-card text/image update: `high-priestess` / «Жрица» in `preview/full/share`, with a regenerated canonical visual: B/J columns, pomegranate veil, scroll, lunar crown, crescent moon, and only `II` in the footer marker zone
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
+- recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
 Current work phase:
 
@@ -92,3 +94,5 @@ Do not rewrite working mechanics during UI work. Preserve auth, card draw, save,
 When the user asks for "QA preview", "страницу с картами и текстами", or wants to inspect added cards, send the `/qa/cards` link for the active environment. Locally this is usually `http://localhost:3000/qa/cards`; if the dev server is on another port, use that port.
 
 After meaningful product, architecture, or visual decisions, update `docs/decisions.md`.
+
+If changes have been deployed, pushed to production, or used for a production preview, they must be committed. Do not leave production behavior only in the local working tree; git history is the source of truth for the next chat.

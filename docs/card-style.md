@@ -65,6 +65,7 @@ After generation, compare the output against the canonical composition before op
 - The meaning-bearing figure or object must read instantly as a distinct silhouette, even in a small dashboard thumbnail. Separate it from the scene with value contrast, rim light, negative space, or a darker/lighter background plane; do not let the main figure merge into trees, ruins, smoke, fabric, or other surrounding texture.
 - Treat `ace-of-swords` as the current quality benchmark for main-scene contrast: the core symbol must be brighter, cleaner, and more legible than the surrounding ritual environment while the background stays atmospheric and subordinate.
 - Keep the lower 10-14% visually dark enough for the Roman numeral or symbolic footer.
+- Reserve a consistent footer-marker zone for the card rank: horizontally centered, visually placed in the lower dark band, with the marker center around 91-92% of image height and its bottom leaving roughly 5-6% image height as margin. The marker should be large enough to read as part of the deck system, not a tiny caption: target visual height about 5-6% of the full card height for Roman numerals or rank letters, and about 6-8% including a small court crown. Use `queen-of-pentacles` (`Q` with crown) and `six-of-swords` (`VI`) as the size/placement benchmark; avoid the too-small `eight-of-pentacles` marker.
 - Use a centered or slightly off-center composition with strong silhouette readability.
 - Background should feel like a ritual space: stone, ruins, mountains, night sky, columns, forest, cave, temple, smoke, storm, or celestial void.
 - Add secondary symbols around the main subject, but keep them subordinate.
@@ -82,7 +83,7 @@ After generation, compare the output against the canonical composition before op
 
 - Use archetypal tarot symbols: moon, sun, stars, flame, cup, sword, coin, wand, scale, key, crown, veil, gate, wheel, thread, mirror, hand, mountain, water, path, animal, arch, tower, laurel.
 - Symbols should be integrated into the scene, not pasted as flat icons.
-- Existing card images include a Roman numeral at the bottom. New numbered cards should also include a small antique-gold Roman numeral, centered near the bottom. Court cards can use a compact rank marker such as `Q` with a tiny crown instead of a misleading Roman numeral.
+- Existing card images include a Roman numeral or rank marker at the bottom. New numbered cards should include an antique-gold Roman numeral in the consistent footer-marker zone; court cards can use a compact rank marker such as `Q` with a tiny crown instead of a misleading Roman numeral. The marker is part of deck consistency, so it must not be tiny, oversized, off-center, too close to the edge, or hidden in texture.
 - Do not put Russian card names on the image. Text belongs in UI, not in the artwork.
 - Do not add a decorative card frame, corner ornaments, rounded border, or separate footer plaque. Existing Mora UI provides the card framing; the artwork should bleed to the edge with only natural dark vignette.
 
@@ -124,13 +125,13 @@ Light rules:
 Use this as the base and replace bracketed parts.
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, small antique-gold Roman numeral [NUMERAL] embedded naturally in the dark lower area, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, antique-gold Roman numeral [NUMERAL] centered in the lower dark footer-marker zone, marker sized consistently with Mora queen-of-pentacles Q and six-of-swords VI, not tiny, marker center around 91-92% of image height with comfortable bottom margin, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 Example:
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, small antique-gold Roman numeral I embedded naturally in the dark lower area, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, antique-gold Roman numeral I centered in the lower dark footer-marker zone, marker sized consistently with Mora queen-of-pentacles Q and six-of-swords VI, not tiny, marker center around 91-92% of image height with comfortable bottom margin, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 ## Negative Prompt
@@ -211,11 +212,15 @@ For `public/assets/cards.js`:
 - `share`: one short approved share text for the exact variant. This is a separate public-facing hook, not an automatic excerpt from `preview` or `full`.
 - The classic Rider-Waite-Smith meaning should be embedded into the daily interpretation, not shown as a separate "what this card means in tarot" encyclopedia block.
 - Use Rider-Waite-Smith as an internal writing reference, but do not expose niche deck names in user-facing readings. Prefer plain phrases like `в классическом таро`, `в канонах таро`, or `традиционно эта карта`.
+- Prefer a tarot-session bridge in `full`: briefly name what is visible on the classic card, explain what that symbol means, then translate it into the user's day. The reader should feel that Mora is looking at the card with them, not just using the card as a prompt for generic advice.
+- If the visual symbol is central to the day's advice, the bridge may start in `preview` so the user can read the result while looking at the card image and immediately understand what matters in the artwork.
+- Do not make the bridge formulaic. It can sound like `на карте изображено… это говорит о… для тебя сегодня это значит…`, but it should remain a living reading, not an encyclopedia entry.
 - Do not force every text into three paragraphs. Use paragraph breaks only when they help reading and each paragraph adds a new thought.
 - Tone: clear human advice for the day, not vague esoteric noise.
 - Mora is a fictional tarot-reader character, and the text should carry her presence. It is allowed and encouraged to use phrasing like `Мора говорит`, `Мора советует`, `Мора считает`, when it feels natural.
 - Do not overuse the name Mora in every paragraph. One clear Mora-presence per reading is often enough.
 - The voice is wise, calm, slightly mystical, and personal. It should not sound like stock tarot copy, corporate coaching, or generic AI output.
+- Avoid vague translated-sounding abstractions and spatial metaphors that create unintended meanings. Prefer plain Russian phrasing: write `где можно выдохнуть рядом со своими` instead of `где тебя встретят без лишней защиты`; write `на что уже можно опереться` instead of `место, которое тебя держит`.
 - No marketing excitement, no emoji, no overpromising.
 
 The result screen layout is:

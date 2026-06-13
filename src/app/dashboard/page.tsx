@@ -4,10 +4,9 @@ import { redirect } from 'next/navigation'
 import CardSyncOnMount from '@/components/CardSyncOnMount'
 import DrawWidget from '@/components/DrawWidget'
 import RecentCardsWidget from '@/components/RecentCardsWidget'
-import DrawnCardTilt from '@/components/DrawnCardTilt'
-import DashboardCardReader from '@/components/DashboardCardReader'
-import DashboardShareButton from '@/components/DashboardShareButton'
-import { getTarotCardDailyMeaning, getTarotCardDefinition, getTarotCardMeta } from '@/lib/tarot'
+import DashboardTodayCard from '@/components/DashboardTodayCard'
+import { getDrawReading, type DrawReadingRow } from '@/lib/draw-reading'
+import { getTarotCardDefinition, getTarotCardMeta } from '@/lib/tarot'
 import './dashboard.css'
 
 function formatTodayDate() {
@@ -24,6 +23,7 @@ type DrawRow = {
   card_id: string
   drawn_at: string
   variant_idx?: number | null
+  reading_snapshot?: unknown
 }
 
 function parsePendingDrawCookie(value: string | undefined, today: string): PendingDraw | null {
@@ -49,13 +49,15 @@ function parsePendingDrawCookie(value: string | undefined, today: string): Pendi
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ preview?: string }>
+  searchParams: Promise<{ preview?: string; shareQa?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  const { preview } = await searchParams
+  const { preview, shareQa } = await searchParams
+  const isShareQa = shareQa === '1' && process.env.NODE_ENV !== 'production'
+  const isShareQaDraw = isShareQa && preview === 'empty'
 
   const today = new Date().toISOString().split('T')[0]
   const cookieStore = await cookies()
@@ -86,26 +88,25 @@ export default async function Dashboard({
   const isEmptyAllPreview = preview === 'empty-all'
 
   // preview overrides: ?preview=empty forces today's empty state, ?preview=empty-all simulates a new user
-  const optimisticTodayDraw: DrawRow | null = todayDraw ?? (
-    pendingDraw ? { card_id: pendingDraw.cardId, drawn_at: pendingDraw.drawnAt } : null
-  )
+  const pendingTodayDraw = pendingDraw
+    ? { card_id: pendingDraw.cardId, drawn_at: pendingDraw.drawnAt, variant_idx: pendingDraw.variantIdx ?? 0 }
+    : null
+  const optimisticTodayDraw: DrawRow | null = isShareQa
+    ? pendingTodayDraw ?? todayDraw
+    : todayDraw ?? pendingTodayDraw
 
-  let cardId: string | undefined
+  let todayReadingRow: DrawReadingRow | null
   if (preview === 'empty' || isEmptyAllPreview) {
-    cardId = undefined
+    todayReadingRow = null
   } else if (preview === 'drawn') {
-    cardId = optimisticTodayDraw?.card_id ?? 'sun'
+    todayReadingRow = optimisticTodayDraw ?? { card_id: 'sun', drawn_at: today, variant_idx: 0 }
   } else {
-    cardId = optimisticTodayDraw?.card_id as string | undefined
+    todayReadingRow = optimisticTodayDraw
   }
+  const cardMeaning = todayReadingRow ? getDrawReading(todayReadingRow) : null
+  const cardId = cardMeaning?.cardId
   const cardDefinition = cardId ? getTarotCardDefinition(cardId) : null
   const cardMeta = cardId ? getTarotCardMeta(cardId) : null
-  const variantIdx = typeof optimisticTodayDraw?.variant_idx === 'number'
-    ? optimisticTodayDraw.variant_idx
-    : pendingDraw && pendingDraw.cardId === cardId
-      ? pendingDraw.variantIdx ?? 0
-      : 0
-  const cardMeaning = cardId ? getTarotCardDailyMeaning(cardId, variantIdx) : null
   const recentDrawsForView = isEmptyAllPreview
     ? []
     : recentDraws
@@ -114,8 +115,12 @@ export default async function Dashboard({
   return (
     <div className="db-wrap">
       <CardSyncOnMount
-        serverDraw={!preview && todayDraw?.card_id && todayDraw?.drawn_at
-          ? { cardId: todayDraw.card_id, drawnAt: todayDraw.drawn_at }
+        serverDraw={!preview && !isShareQa && todayDraw?.card_id && todayDraw?.drawn_at
+          ? {
+              cardId: todayDraw.card_id,
+              drawnAt: todayDraw.drawn_at,
+              variantIdx: typeof todayDraw.variant_idx === 'number' ? todayDraw.variant_idx : 0,
+            }
           : null}
       />
 
@@ -147,80 +152,26 @@ export default async function Dashboard({
           {/* LEFT: CARD OF DAY */}
           <div className={`db-panel db-panel--card${!cardDefinition ? ' db-panel--draw' : ''}`}>
             {cardDefinition && cardMeaning && cardId ? (
-              <>
-                <div className="db-panel-toprow">
-                  <span className="db-panel-date">Сегодня {formatTodayDate()}</span>
-                  <div className="db-panel-icons">
-                    <DashboardShareButton
-                      cardId={cardId}
-                      cardTitle={cardMeaning.title}
-                      shareText={cardMeaning.shareText}
-                    />
-                    <DashboardCardReader
-                      cardId={cardId}
-                      title={cardMeaning.title}
-                      titleMeta={cardMeaning.titleMeta}
-                      tags={cardMeaning.tags}
-                      tarotBrief={cardMeaning.tarotBrief}
-                      meaningLabel={cardMeaning.meaningLabel}
-                      paragraphs={cardMeaning.paragraphs}
-                      fullParagraphs={cardMeaning.fullParagraphs}
-                      readingDate={formatTodayDate()}
-                      sourceKey="today"
-                    />
-                  </div>
-                </div>
-
-                <div className="db-card-section">
-                  <h2 className="db-card-section-title">Ваша карта дня</h2>
-
-                  <div className="db-card-row">
-                    <DrawnCardTilt cardId={cardId} cardName={cardMeaning.title} sourceKey="today" />
-
-                    <div className="db-card-info">
-                      <div className="db-card-info-top">
-                        <div className="db-card-badge">{cardMeta?.journalArcana ?? 'Старший аркан'}</div>
-                        <h3 className="db-card-title">
-                          <span className="db-card-title-name">{cardMeaning.title}</span>
-                          {cardMeaning.titleMeta && (
-                            <span className="db-card-title-sub"> — {cardMeaning.titleMeta}</span>
-                          )}
-                        </h3>
-                        <div className="db-card-descs">
-                          {cardMeaning.tarotBrief.length > 0 && (
-                            <div className="db-card-tarot-brief">
-                              <span>Карта в таро</span>
-                              {cardMeaning.tarotBrief.map((para, i) => (
-                                <p key={i}>{para}</p>
-                              ))}
-                            </div>
-                          )}
-                          <span className="db-card-meaning-label">{cardMeaning.meaningLabel}</span>
-                          {cardMeaning.paragraphs.map((para, i) => (
-                            <p key={i} className="db-card-desc">{para}</p>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="db-outcome-btns">
-                        <button className="db-outcome-btn db-outcome-btn--yes" type="button">
-                          <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                            <path d="M229.66 77.66l-128 128a8 8 0 0 1-11.32 0l-56-56a8 8 0 0 1 11.32-11.32L96 188.69 218.34 66.34a8 8 0 0 1 11.32 11.32Z"/>
-                          </svg>
-                          Сбылось
-                        </button>
-                        <button className="db-outcome-btn db-outcome-btn--no" type="button">
-                          <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                            <path d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128 50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/>
-                          </svg>
-                          Не сбылось
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
+              <DashboardTodayCard
+                cardId={cardId}
+                title={cardMeaning.title}
+                titleMeta={cardMeaning.titleMeta}
+                tags={cardMeaning.tags}
+                tarotBrief={cardMeaning.tarotBrief}
+                meaningLabel={cardMeaning.meaningLabel}
+                paragraphs={cardMeaning.paragraphs}
+                fullParagraphs={cardMeaning.fullParagraphs}
+                shareText={cardMeaning.shareText}
+                readingDate={formatTodayDate()}
+                journalArcana={cardMeta?.journalArcana ?? 'Старший аркан'}
+              />
             ) : (
-              <DrawWidget date={`Сегодня ${formatTodayDate()}`} persistDraw={!preview} />
+              <DrawWidget
+                date={`Сегодня ${formatTodayDate()}`}
+                persistDraw={!preview || isShareQaDraw}
+                shareQa={isShareQaDraw}
+                returnHref={isShareQaDraw ? '/dashboard?shareQa=1' : '/dashboard'}
+              />
             )}
           </div>
 

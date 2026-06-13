@@ -1,7 +1,7 @@
 'use strict';
-import { TAROT_CARDS } from './cards.js?v=cards-20260611-1';
+import { TAROT_CARDS } from './cards.js?v=cards-20260612-4';
 import { STATE, transition, resetState, runSequence } from './state.js';
-import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, wait, preloadCardImages } from './image-cache.js';
+import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, preloadCardImage, wait } from './image-cache.js';
 import { smoothStep, lerpArc } from './arc.js';
 import { initLoader, scheduleAppLoaderStateTimers, startAppLoaderShuffle, settleInitialAppLoader, reloadFromAppLoader } from './loader.js';
 import { initDraw, arcCard, shuffleDeck, startDrawing, resetScene } from './draw.js';
@@ -248,6 +248,7 @@ const REQUIRED_CARD_FIELDS = [
   'symbol',
 ];
 let current = null;
+let pendingDrawCard = null;
 const READING_MODE = Object.freeze({
   DAILY: 'daily',
   QUESTION: 'question',
@@ -318,7 +319,13 @@ function isLocalDebugHost() {
 
 function isDebugDrawEnabled() {
   if (typeof window === 'undefined' || !window.location) return false;
-  return isLocalDebugHost() || new URLSearchParams(window.location.search).get('debugDraw') === '1';
+  const params = new URLSearchParams(window.location.search);
+  return isLocalDebugHost() && (
+    params.get('debugDraw') === '1' ||
+    params.has(FORCE_CARD_DEBUG_PARAM) ||
+    params.has(FORCE_VARIANT_DEBUG_PARAM) ||
+    params.has(DAILY_DATE_DEBUG_PARAM)
+  );
 }
 
 function getForcedCardId() {
@@ -334,18 +341,39 @@ function getForcedVariantIdx(card) {
   return Math.min(Number(value), Math.max(variantCount - 1, 0));
 }
 
-function pickCard() {
+function pickRandomCard() {
+  const pool = current ? CARDS.filter(c => c !== current) : CARDS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function preparePendingDrawCard() {
   const forcedCardId = getForcedCardId();
   if (forcedCardId) {
     const forcedCard = CARDS.find(card => card.id === forcedCardId);
     if (!forcedCard) {
       throw new Error(`forceCard not found: ${forcedCardId}`);
     }
-    return forcedCard;
+    pendingDrawCard = forcedCard;
+    return pendingDrawCard;
   }
 
-  const pool = current ? CARDS.filter(c => c !== current) : CARDS;
-  return pool[Math.floor(Math.random() * pool.length)];
+  if (!pendingDrawCard) {
+    pendingDrawCard = pickRandomCard();
+  }
+
+  return pendingDrawCard;
+}
+
+function preloadPendingDrawCard() {
+  const card = preparePendingDrawCard();
+  if (!card) return;
+  preloadCardImage(card);
+}
+
+function pickCard() {
+  const card = preparePendingDrawCard();
+  pendingDrawCard = null;
+  return card;
 }
 
 function getPoeticText(card) {
@@ -766,7 +794,8 @@ function openResultFullMeaning(title, paragraphs, previewParagraphs = []) {
   const close = document.createElement('button');
   close.className = 'result-reading-modal-close';
   close.type = 'button';
-  close.textContent = 'Закрыть';
+  close.setAttribute('aria-label', 'Закрыть полный текст');
+  close.textContent = '×';
 
   const heading = document.createElement('h2');
   heading.className = 'result-reading-modal-title';
@@ -901,6 +930,19 @@ function loadCardFaceImage(card, src, fallbackSrc = '') {
       }
       showCardImageFallback(card);
     });
+}
+
+function waitForCardFaceImage(card, timeoutMs = 1600) {
+  if (!hasCardImage(card)) return Promise.resolve();
+  return Promise.race([
+    loadCardImage(card.image).catch(() => {
+      if (card.imageFallback && card.imageFallback !== card.image) {
+        return loadCardImage(card.imageFallback).catch(() => {});
+      }
+      return undefined;
+    }),
+    wait(timeoutMs),
+  ]);
 }
 
 function setCardFace(card) {
@@ -1290,7 +1332,7 @@ function handleCardTiltMove(event) {
   const rect = dom.revealCard.getBoundingClientRect();
   const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
   const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-  const maxTilt = isCardZoomed ? 5.8 : 8.2;
+  const maxTilt = isCardZoomed ? 4.6 : 5.8;
 
   pendingTilt = {
     x: -y * maxTilt,
@@ -1320,7 +1362,7 @@ function handleMobileOrientation(event) {
     mobileTiltBaseline = { beta: event.beta, gamma: event.gamma };
   }
 
-  const maxTilt = isCardZoomed ? 6.5 : 8.6;
+  const maxTilt = isCardZoomed ? 4.8 : 6.2;
   const deadZone = 0.65;
   const betaDelta = event.beta - mobileTiltBaseline.beta;
   const gammaDelta = event.gamma - mobileTiltBaseline.gamma;
@@ -1388,7 +1430,7 @@ function setVis(el, visible) {
 
 function hideResultElsImmediately() {
   resultPanelStreet = false;
-  updateShareAvailability('');
+  if (!current) updateShareAvailability('');
   if (dom.resultStreetBtn) {
     dom.resultStreetBtn.textContent = 'Перевести на пацанский';
   }
@@ -1925,6 +1967,7 @@ function cleanupApp() {
   document.body.classList.remove('is-drawing-card');
   resetState('idle');
   current = null;
+  pendingDrawCard = null;
   currentReading = null;
   readingMode = READING_MODE.DAILY;
   readingType = READING_TYPE.ONE_CARD;
@@ -1951,7 +1994,7 @@ function initApp() {
   scheduleAppLoaderStateTimers();
   startAppLoaderShuffle();
   settleInitialAppLoader();
-  preloadCardImages();
+  preloadPendingDrawCard();
   return true;
 }
 
@@ -1994,6 +2037,7 @@ const drawDeps = {
   createReadingDraft,
   resetInterpretation,
   setCardFace,
+  waitForCardFaceImage,
   getCurrentInterpretationName,
   getCurrentInterpretationText,
   renderResultContent,

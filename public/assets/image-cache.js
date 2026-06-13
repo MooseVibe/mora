@@ -1,5 +1,4 @@
 'use strict';
-import { TAROT_CARDS } from './cards.js';
 
 export const IMAGE_LOAD_STATUS = {
   IDLE: 'idle',
@@ -53,28 +52,12 @@ export function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function preloadCardImages() {
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (connection && (connection.saveData || /2g/.test(connection.effectiveType || ''))) {
-    return;
-  }
-
-  const gallery = document.getElementById('deckGallery');
-  if (!gallery || gallery.hidden) {
-    return;
-  }
-
-  const sources = [...new Set(TAROT_CARDS.slice(0, 3).map(card => card.image).filter(Boolean))];
-  const preloadNext = index => {
-    if (index >= sources.length) return;
-    loadCardImage(sources[index]).catch(() => {});
-    setTimeout(() => preloadNext(index + 1), 650);
-  };
-
-  const startPreload = () => preloadNext(0);
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(startPreload, { timeout: 1800 });
-  } else {
-    setTimeout(startPreload, 1200);
-  }
+export function preloadCardImage(card) {
+  if (!card?.image) return Promise.resolve();
+  return loadCardImage(card.image).catch(() => {
+    if (card.imageFallback && card.imageFallback !== card.image) {
+      return loadCardImage(card.imageFallback).catch(() => {});
+    }
+    return undefined;
+  });
 }

@@ -38,7 +38,7 @@ function persistPendingDraw(draw) {
 function savePendingDraw() {
   try {
     if (window.__moraDrawPreview) return;
-    if (d.isDebugDrawEnabled?.()) return;
+    if (d.isDebugDrawEnabled?.() && !window.__moraDrawShareQa) return;
     const card = d.getCurrent();
     const reading = d.getCurrentReading();
     if (!card) return;
@@ -146,6 +146,7 @@ function runDeck3DDrawExperiment() {
   d.setCurrentReading(d.createReadingDraft(d.getCurrent()));
   d.resetInterpretation();
   d.setCardFace(d.getCurrent());
+  const cardFaceReady = d.waitForCardFaceImage(d.getCurrent(), 1800);
   d.renderResultContent(d.getCurrent());
   d.dom.resultCardName.textContent = d.getCurrentInterpretationName();
   d.dom.resultText.textContent = d.getCurrentInterpretationText();
@@ -160,7 +161,9 @@ function runDeck3DDrawExperiment() {
     if (!DEBUG_DECK3D_FLIGHT_MATCH) flyDeck3DFlightToCenter();
   }));
 
-  window.setTimeout(() => {
+  window.setTimeout(async () => {
+    if (STATE !== 'drawing') return;
+    await cardFaceReady;
     if (STATE !== 'drawing') return;
     handoffDeck3DFlightToRevealCard();
   }, 780);
@@ -462,6 +465,7 @@ export async function startDrawing() {
   d.resetInterpretation();
 
   d.setCardFace(d.getCurrent());
+  const cardFaceReady = d.waitForCardFaceImage(d.getCurrent(), 1800);
   d.renderResultContent(d.getCurrent());
 
   d.dom.resultCardName.textContent = d.getCurrentInterpretationName();

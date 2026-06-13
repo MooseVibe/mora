@@ -26,11 +26,14 @@ const DRAW_PROMPTS = [
 type MoraNativeWindow = Window & {
   __moraDrawAuthed?: boolean
   __moraDrawPreview?: boolean
+  __moraDrawShareQa?: boolean
   __moraNativeApp?: {
     init?: () => void
     cleanup?: () => void
   }
 }
+
+const NATIVE_APP_VERSION = '20260612-4'
 
 function getTimeUntilMidnight(): string {
   const now = new Date()
@@ -43,7 +46,17 @@ function getTimeUntilMidnight(): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export default function DrawWidget({ date, persistDraw = true }: { date: string; persistDraw?: boolean }) {
+export default function DrawWidget({
+  date,
+  persistDraw = true,
+  shareQa = false,
+  returnHref = '/dashboard',
+}: {
+  date: string
+  persistDraw?: boolean
+  shareQa?: boolean
+  returnHref?: string
+}) {
   const [mounted, setMounted] = useState(false)
   const [prompt, setPrompt] = useState(DRAW_PROMPTS[0])
   const [countdown, setCountdown] = useState('00:00:00')
@@ -66,6 +79,7 @@ export default function DrawWidget({ date, persistDraw = true }: { date: string;
     const nativeWindow = window as MoraNativeWindow
     nativeWindow.__moraDrawAuthed = true
     nativeWindow.__moraDrawPreview = !persistDraw
+    nativeWindow.__moraDrawShareQa = shareQa
 
     let script: HTMLScriptElement | null = null
 
@@ -74,7 +88,7 @@ export default function DrawWidget({ date, persistDraw = true }: { date: string;
     } else {
       const nextScript = document.createElement('script')
       nextScript.type = 'module'
-      nextScript.src = '/assets/app.js'
+      nextScript.src = `/assets/app.js?v=${NATIVE_APP_VERSION}`
       document.body.appendChild(nextScript)
       script = nextScript
     }
@@ -83,10 +97,11 @@ export default function DrawWidget({ date, persistDraw = true }: { date: string;
       nativeWindow.__moraNativeApp?.cleanup?.()
       delete nativeWindow.__moraDrawAuthed
       delete nativeWindow.__moraDrawPreview
+      delete nativeWindow.__moraDrawShareQa
       document.body.classList.remove('is-drawing-card')
       if (script?.parentNode) script.parentNode.removeChild(script)
     }
-  }, [mounted, persistDraw])
+  }, [mounted, persistDraw, shareQa])
 
   const fixedElements = (
     <>
@@ -128,7 +143,7 @@ export default function DrawWidget({ date, persistDraw = true }: { date: string;
             <button className="btn result-reading-action" id="resultStreetBtn" type="button" hidden>Перевести на пацанский</button>
           </div>
           <div className="result-card-actions">
-            <a href="/dashboard" className="result-card-action-btn result-card-action-btn--save">
+            <a href={returnHref} className="result-card-action-btn result-card-action-btn--save">
               ✦ В кабинет
             </a>
             <button className="result-card-action-btn result-card-action-btn--share" id="resultShareBtn" type="button" disabled>

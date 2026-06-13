@@ -6,7 +6,7 @@
 - **Язык:** TypeScript / JavaScript (агент: проверь по `package.json` перед началом работы)
 - **Стили:** Vanilla CSS — единый файл `public/assets/styles.css` + отдельные CSS-файлы для страниц (`dashboard.css`, `journal.css`). Никаких CSS Modules, Tailwind, styled-components или UI-библиотек.
 - **Авторизация:** Google OAuth + обычная авторизация
-- **БД / хранилище:** Supabase (PostgreSQL). Таблица `card_draws` (`user_id`, `card_id`, `drawn_at`). Клиент для браузера — `@supabase/ssr` createBrowserClient; для Server Components/Route Handlers — createServerClient.
+- **БД / хранилище:** Supabase (PostgreSQL). Таблица `card_draws` хранит `user_id`, `card_id`, `drawn_at`, а для новых вытягиваний также `variant_idx` и `reading_snapshot` с fallback-совместимостью для старой схемы. Клиент для браузера — `@supabase/ssr` createBrowserClient; для Server Components/Route Handlers — createServerClient.
 - **Деплой:** Vercel, прод на `mora-vnkt.vercel.app`
 
 > Если что-то из списка `[нужно уточнить]` — открой код и заполни этот файл. Не работай со слепыми догадками.
@@ -44,14 +44,18 @@ mora/
 │   │   │   ├── page.tsx        # личный кабинет (Server Component, требует auth)
 │   │   │   └── dashboard.css
 │   │   ├── journal/
-│   │   │   ├── page.tsx        # дневник карт (WIP)
+│   │   │   ├── page.tsx        # дневник карт (WIP: список/фильтры есть, reader записей ещё в работе)
 │   │   │   └── journal.css
 │   │   └── api/
 │   │       └── draws/route.ts  # POST /api/draws — сохранение вытянутой карты
 │   ├── components/
 │   │   ├── TaroApp.tsx         # главный клиентский компонент лендинга
 │   │   ├── DrawWidget.tsx      # виджет вытягивания для дашборда
-│   │   ├── RecentCardsWidget.tsx # виджет последних карт
+│   │   ├── RecentCardsWidget.tsx # виджет последних карт на dashboard; открывает записи через DashboardCardReader
+│   │   ├── DashboardCardReader.tsx # shared-element full-result reader для dashboard-карт
+│   │   ├── DashboardTodayCard.tsx # уже вытянутая карта дня на dashboard
+│   │   ├── DashboardShareButton.tsx # Telegram-first/Web Share кнопка для approved shareText
+│   │   ├── JournalClient.tsx   # клиентский список дневника с фильтрами периода
 │   │   └── CardSyncOnMount.tsx # sync: localStorage → Supabase при входе
 │   ├── lib/
 │   │   └── supabase/
@@ -72,10 +76,11 @@ mora/
 | Модуль | Файл / папка | Что делает |
 |---|---|---|
 | Авторизация | `src/app/auth/` | Google OAuth + Email OTP через Supabase. Callback → `/auth/callback/route.ts` |
-| Вытягивание карты | `public/assets/draw.js` + `src/app/api/draws/route.ts` | Клиентская анимация + POST в БД. Защита: одна карта в день через `drawn_at`. Pending draw у незалогиненных — в localStorage |
+| Вытягивание карты | `public/assets/draw.js` + `src/app/api/draws/route.ts` | Клиентская анимация + POST в БД. Защита: одна карта в день через `drawn_at`. Pending draw у незалогиненных — в localStorage. Новые записи сохраняют `variant_idx` и `reading_snapshot`, если схема БД поддерживает snapshot |
 | Данные карт | `public/assets/cards.js` + `src/lib/tarot.ts` | `cards.js` — единый источник текстов/картинок для нативного draw-flow; `tarot.ts` — TypeScript-адаптер для React-экранов |
 | Дашборд | `src/app/dashboard/page.tsx` | Server Component. Загружает карту дня и 3 последних вытягивания из Supabase |
-| Дневник карт | `src/app/journal/page.tsx` | WIP. Полный список вытягиваний пользователя |
+| Full-result reader на dashboard | `src/components/DashboardCardReader.tsx` | Shared-element раскрытие сегодняшней карты и recent cards, чтение сохранённого/fallback reading, share при approved `shareText` |
+| Дневник карт | `src/app/journal/page.tsx` + `src/components/JournalClient.tsx` | WIP. Полный список вытягиваний пользователя с фильтрами; пока без раскрытия записи через full-result reader и без сохранения outcome/note |
 | QA просмотр карт | `src/app/qa/cards/page.tsx` | Служебный noindex-preview всех карт и вариантов текстов. Локально открыт, в production требует `CARD_QA_TOKEN` |
 | Sync pending draw | `src/components/CardSyncOnMount.tsx` | При входе читает `mora:pendingDraw` из localStorage и отправляет в `/api/draws` |
 
