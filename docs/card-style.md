@@ -52,6 +52,9 @@ After generation, compare the output against the canonical composition before op
 
 - Dark, almost black background with deep brown, green-black, charcoal, and smoky shadow.
 - Warm antique gold is the main active color: rim light, symbols, halos, lightning, ornaments, small highlights.
+- The deck should feel unified in palette, but never monochrome. Recent accepted cards use a near-black / dark moss / charcoal base with antique-gold and muted-cream highlights; keep that family consistent across new generations.
+- Create visible value separation between the main figure/object and the environment. The subject needs a brighter face/hands/symbol area, a clear rim light, or a slightly lighter/cooler background plane behind it so it does not dissolve into robes, trees, ruins, smoke, or foliage.
+- Build a clear focal hierarchy. The viewer should know where to look first within one second: primary subject first, required symbols second, atmospheric detail third. Surrounding ornaments, plants, ruins, candles, smoke, and texture must stay quieter in contrast, sharpness, and brightness than the main figure or central object.
 - Painterly engraved texture: dense brushwork, cracked stone, worn metal, rough cloth, smoke, dust, sparks.
 - Cinematic chiaroscuro: most of the frame stays dark, meaning is revealed through one strong light source.
 - High detail, but not colorful noise. Details should support the archetype.
@@ -69,6 +72,7 @@ After generation, compare the output against the canonical composition before op
 - Use a centered or slightly off-center composition with strong silhouette readability.
 - Background should feel like a ritual space: stone, ruins, mountains, night sky, columns, forest, cave, temple, smoke, storm, or celestial void.
 - Add secondary symbols around the main subject, but keep them subordinate.
+- Prefer clean staging over evenly detailed scenes: leave pockets of negative space or simplified dark planes around the main silhouette. Detail is allowed, but it must not compete equally across the whole card.
 - The card should be readable at dashboard/recent-card thumbnail size.
 
 ### Characters
@@ -117,15 +121,18 @@ Light rules:
 
 - One dominant symbolic light source.
 - Gold light should reveal the meaning: halo, candle, lightning, portal, glowing object, reflected rim.
+- Keep 2-3 clear value levels: dark atmospheric background, mid-tone body/architecture, and brighter meaning-bearing highlights on the face, hands, required symbols, weapon/cup/coin/wand, or other central object.
+- If the card has a central character, the face, hands, crown, held object, and the immediate silhouette edge should be more legible than the surrounding environment.
 - Corners should remain dark or vignetted.
 - Do not make the whole card evenly bright.
+- Do not let the whole image collapse into one brown/green/gold tone; a unified deck palette still needs local contrast and readable focal hierarchy.
 
 ## Prompt Template
 
 Use this as the base and replace bracketed parts.
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, antique-gold Roman numeral [NUMERAL] centered in the lower dark footer-marker zone, marker sized consistently with Mora queen-of-pentacles Q and six-of-swords VI, not tiny, marker center around 91-92% of image height with comfortable bottom margin, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, antique-gold Roman numeral [NUMERAL] centered in the lower dark footer-marker zone, marker sized consistently with Mora queen-of-pentacles Q and six-of-swords VI, not tiny, marker center around 91-92% of image height with comfortable bottom margin, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 Example:

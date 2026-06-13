@@ -17,10 +17,10 @@
 - Карта вытягивается раз в день
 - Защита от повторного вытягивания — нельзя вытянуть второй раз в тот же день
 - Карта автоматически сохраняется в дневник
-- В колоде 43 карты: 22 старших аркана и 21 пилотная младшая/придворная карта
+- В колоде 44 карты: 22 старших аркана и 22 пилотные младшие/придворные карты
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
-- Share-ready тексты есть у 17 карт: `fool`, `magician`, `high-priestess`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-swords`, `two-of-pentacles`, `six-of-pentacles`, `two-of-wands`, `four-of-wands`
+- Share-ready тексты есть у 19 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-swords`, `two-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
 
 ### Дневник карт (в личном кабинете)
 - История всех вытянутых карт по дням

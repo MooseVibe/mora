@@ -67,10 +67,10 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, and visual outcome/note actions; full-result reader for journal entries is still WIP
-- deck currently has 43 cards: 22 major arcana and 21 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-swords`, `two-of-pentacles`, `six-of-pentacles`, `two-of-wands`, `four-of-wands`
-- latest card addition: `four-of-swords` / «Четвёрка Мечей»; approved visual preserves the Rider-Waite-Smith resting figure, three swords above, one sword below, chapel/resting slab composition, and translates pause/recovery into Mora's darker ritual style
-- latest old-card text/image update: `high-priestess` / «Жрица» in `preview/full/share`, with a regenerated canonical visual: B/J columns, pomegranate veil, scroll, lunar crown, crescent moon, and only `II` in the footer marker zone
+- deck currently has 44 cards: 22 major arcana and 22 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-swords`, `two-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
+- latest card addition: `seven-of-pentacles` / «Семёрка Пентаклей»; approved visual preserves the Rider-Waite-Smith worker leaning on a tool and looking at exactly seven pentacles on a plant, translating patient assessment and slow growth into Mora's darker ritual style
+- latest old-card text/image update: `empress` / «Императрица» in `preview/full/share`, with a regenerated canonical visual: centered seated Empress, twelve-star crown, scepter, wheat/fruit, water, Venus shield, clearer focal hierarchy, and only `III` in the footer marker zone
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
