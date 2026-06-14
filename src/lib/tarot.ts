@@ -30,6 +30,7 @@ export type TarotCardId =
   | 'page-of-cups'
   | 'three-of-cups'
   | 'four-of-cups'
+  | 'five-of-cups'
   | 'eight-of-cups'
   | 'two-of-swords'
   | 'four-of-swords'

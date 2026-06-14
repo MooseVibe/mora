@@ -19,6 +19,7 @@ type Props = {
   sourceKey: string
   readingDate?: string
   sourceFrame?: CardFrame
+  targetFrame?: CardFrame
   children?: (openReader: () => void) => ReactNode
 }
 
@@ -176,6 +177,7 @@ export default function DashboardCardReader({
   sourceKey,
   readingDate,
   sourceFrame,
+  targetFrame,
   children,
 }: Props) {
   const [mounted, setMounted] = useState(false)
@@ -241,7 +243,7 @@ export default function DashboardCardReader({
       target,
       frame: {
         start: sourceFrame ?? CANONICAL_CARD_FRAME,
-        end: getTargetFrame(sourceRect, sourceFrame, target.cardWidth),
+        end: targetFrame ?? getTargetFrame(sourceRect, sourceFrame, target.cardWidth),
       },
       phase: 'placed',
     })

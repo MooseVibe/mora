@@ -17,16 +17,16 @@
 - Карта вытягивается раз в день
 - Защита от повторного вытягивания — нельзя вытянуть второй раз в тот же день
 - Карта автоматически сохраняется в дневник
-- В колоде 46 карт: 22 старших аркана и 24 пилотные младшие/придворные карты
+- В колоде 47 карт: 22 старших аркана и 25 пилотных младших/придворных карт
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
-- Share-ready тексты есть у 21 карты: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `eight-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
+- Share-ready тексты есть у 22 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
 
 ### Дневник карт (в личном кабинете)
 - История всех вытянутых карт по дням
 - Фильтры периода: всё время / 30 дней / 7 дней
-- Визуальные действия у записи: `Сбылось`, `Не сбылось`, `Мои заметки` — пока без сохранения состояния
-- Сейчас `/journal` показывает summary из текущего словаря карт; следующий инкремент должен читать `variant_idx` и `reading_snapshot`, чтобы раскрывать точный текст конкретного вытягивания
+- `/journal` показывает desktop table layout; строки кликабельны и раскрываются в full-result reader с сохранённым/fallback reading
+- Визуальные действия у записи: `Отклик` — пока без сохранения состояния
 
 ### Блок «Дневник карт» на dashboard
 - Показывает до 3 предыдущих карт, если сегодняшняя карта уже отображается отдельно

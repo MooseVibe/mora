@@ -122,6 +122,93 @@
     font-weight: 300; overflow: hidden;
   }
 
+  .auth-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    padding: 0 80px;
+    background: transparent;
+    z-index: 100;
+  }
+  .auth-header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .auth-header-logo-icon {
+    color: var(--gold);
+    font-size: 14px;
+    opacity: 0.8;
+  }
+  .auth-header-logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: 17px;
+    letter-spacing: 0.22em;
+    color: var(--cream);
+    text-transform: uppercase;
+  }
+  .auth-header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .auth-header-avatar-wrap {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .auth-header-avatar,
+  .auth-header-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(201,169,110,0.3);
+  }
+  .auth-header-avatar {
+    object-fit: cover;
+  }
+  .auth-header-avatar-placeholder {
+    background: rgba(201,169,110,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--gold);
+  }
+  .auth-header-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201, 169, 110, 0.055);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 12px 24px;
+    text-decoration: none;
+    transition: border-color 0.22s, color 0.22s, background-color 0.22s;
+  }
+  .auth-header-logout:hover,
+  .auth-header-logout:focus-visible {
+    border-color: rgba(201, 169, 110, 0.88);
+    color: var(--cream);
+    background-color: rgba(201, 169, 110, 0.08);
+  }
+
+  @media (max-width: 800px) {
+    .auth-header {
+      padding: 0 20px;
+    }
+  }
+
   /* grain */
   body::before {
     content:''; position:fixed; inset:0;

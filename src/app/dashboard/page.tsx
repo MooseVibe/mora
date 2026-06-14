@@ -5,6 +5,7 @@ import CardSyncOnMount from '@/components/CardSyncOnMount'
 import DrawWidget from '@/components/DrawWidget'
 import RecentCardsWidget from '@/components/RecentCardsWidget'
 import DashboardTodayCard from '@/components/DashboardTodayCard'
+import AuthenticatedHeader from '@/components/AuthenticatedHeader'
 import { getDrawReading, type DrawReadingRow } from '@/lib/draw-reading'
 import { getTarotCardDefinition, getTarotCardMeta } from '@/lib/tarot'
 import './dashboard.css'
@@ -124,23 +125,7 @@ export default async function Dashboard({
           : null}
       />
 
-      {/* HEADER */}
-      <header className="db-header">
-        <a href="/" className="db-logo">
-          <span className="db-logo-icon">✦</span>
-          <span className="db-logo-text">MORA</span>
-        </a>
-        <div className="db-header-right">
-          <a href="/auth/logout" className="db-logout-link">Выйти</a>
-          <div className="db-avatar-wrap">
-            {avatarUrl
-              ? <img src={avatarUrl} alt={firstName} className="db-avatar" />
-              : <div className="db-avatar-placeholder">{firstName[0]}</div>
-            }
-            <span className="db-avatar-chevron">▾</span>
-          </div>
-        </div>
-      </header>
+      <AuthenticatedHeader firstName={firstName} avatarUrl={avatarUrl} />
 
       {/* MAIN */}
       <div className="db-main">

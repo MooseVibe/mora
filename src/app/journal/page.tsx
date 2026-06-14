@@ -1,7 +1,8 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import JournalClient from '@/components/JournalClient'
+import AuthenticatedHeader from '@/components/AuthenticatedHeader'
 import { redirect } from 'next/navigation'
+import '../dashboard/dashboard.css'
 import './journal.css'
 
 type JournalPeriod = 'all' | '30' | '7'
@@ -31,7 +32,7 @@ export default async function JournalPage({
 
   const { data: draws } = await supabase
     .from('card_draws')
-    .select('card_id, drawn_at')
+    .select('card_id, drawn_at, variant_idx, reading_snapshot')
     .eq('user_id', user.id)
     .order('drawn_at', { ascending: false })
 
@@ -40,22 +41,7 @@ export default async function JournalPage({
 
   return (
     <div className="jn-wrap">
-      <header className="jn-header">
-        <Link href="/" prefetch className="jn-logo">
-          <span className="jn-logo-icon">✦</span>
-          <span className="jn-logo-text">MORA</span>
-        </Link>
-        <div className="jn-header-right">
-          <a href="/auth/logout" className="jn-logout-link">Выйти</a>
-          <div className="jn-avatar-wrap">
-            {avatarUrl
-              ? <img src={avatarUrl} alt={firstName} className="jn-avatar" />
-              : <div className="jn-avatar-placeholder">{firstName[0]}</div>
-            }
-            <span className="jn-avatar-chevron">▾</span>
-          </div>
-        </div>
-      </header>
+      <AuthenticatedHeader firstName={firstName} avatarUrl={avatarUrl} />
 
       <JournalClient draws={draws ?? []} initialPeriod={selectedPeriod} dashboardHref={dashboardHref} returnPreview={preview} />
     </div>

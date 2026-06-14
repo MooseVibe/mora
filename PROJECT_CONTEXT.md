@@ -67,10 +67,10 @@ Working MVP:
 - automatic save to journal
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
-- journal with drawn card history, period filters, and visual outcome/note actions; full-result reader for journal entries is still WIP
-- deck currently has 46 cards: 22 major arcana and 24 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `eight-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
-- latest card addition: `eight-of-cups` / «Восьмёрка Кубков»; approved visual preserves the Rider-Waite-Smith departing figure, exactly eight cups in a 5+3 stack, moon, water, and mountain path, and uses the new postprocessed footer-marker workflow for a consistent integrated `VIII`
+- journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
+- deck currently has 47 cards: 22 major arcana and 25 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
+- latest card addition: `five-of-cups` / «Пятёрка Кубков»; approved visual preserves the Rider-Waite-Smith grieving figure, exactly three spilled cups, exactly two upright cups, water, bridge, and distant refuge, and uses the postprocessed footer-marker workflow for a consistent integrated `V`
 - latest old-card text/image update: `empress` / «Императрица» in `preview/full/share`, with a regenerated canonical visual: centered seated Empress, twelve-star crown, scepter, wheat/fruit, water, Venus shield, clearer focal hierarchy, and only `III` in the footer marker zone
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
