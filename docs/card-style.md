@@ -67,8 +67,8 @@ After generation, compare the output against the canonical composition before op
 - Main figure/object should occupy roughly 55-75% of the card height.
 - The meaning-bearing figure or object must read instantly as a distinct silhouette, even in a small dashboard thumbnail. Separate it from the scene with value contrast, rim light, negative space, or a darker/lighter background plane; do not let the main figure merge into trees, ruins, smoke, fabric, or other surrounding texture.
 - Treat `ace-of-swords` as the current quality benchmark for main-scene contrast: the core symbol must be brighter, cleaner, and more legible than the surrounding ritual environment while the background stays atmospheric and subordinate.
-- Keep the lower 10-14% visually dark enough for the Roman numeral or symbolic footer.
-- Reserve a consistent footer-marker zone for the card rank: horizontally centered, visually placed in the lower dark band, with the marker center around 91-92% of image height and its bottom leaving roughly 5-6% image height as margin. The marker should be large enough to read as part of the deck system, not a tiny caption: target visual height about 5-6% of the full card height for Roman numerals or rank letters, and about 6-8% including a small court crown. Use `queen-of-pentacles` (`Q` with crown) and `six-of-swords` (`VI`) as the size/placement benchmark; avoid the too-small `eight-of-pentacles` marker.
+- Keep the lower part of the scene gently dark enough for the Roman numeral or symbolic footer, but do not create a visible black footer band. The marker area should feel like the image naturally falls into shadow, not like a separate UI strip.
+- Reserve a consistent footer-marker placement for the card rank: horizontally centered, with the marker center around 91-92% of image height and its bottom leaving roughly 5-6% image height as margin. The artwork only needs a subtle low-contrast darkening behind this placement; avoid abrupt fades, hard horizontal transitions, empty black blocks, plaques, or oversized blank zones that steal space from the scene. The marker should be large enough to read as part of the deck system, not a tiny caption: target visual height about 5-6% of the full card height for Roman numerals or rank letters, and about 6-8% including a small court crown. Use `queen-of-pentacles` (`Q` with crown) and `six-of-swords` (`VI`) as the size/placement benchmark; avoid the too-small `eight-of-pentacles` marker.
 - Footer markers should look like one coherent deck typeface, not generated text fragments. Roman numerals, rank letters, crowns, and suit/rank signs must share the same antique-gold serif/engraved character, stroke weight, line height, and optical spacing. Repeated Roman strokes such as `III` must have readable letter spacing: not fused into a single block, not unevenly scattered, and not drawn as three unrelated marks.
 - Use a centered or slightly off-center composition with strong silhouette readability.
 - Background should feel like a ritual space: stone, ruins, mountains, night sky, columns, forest, cave, temple, smoke, storm, or celestial void.
@@ -130,14 +130,7 @@ Light rules:
 
 ## Footer Marker Postprocess
 
-Do not ask the image generator to draw the final footer rank marker anymore. The generator should leave a clean, dark, empty lower 10-14% footer-marker zone. After the visual is approved, add the marker deterministically with the project helper:
-
-```bash
-python3 scripts/add-card-marker.py \
-  --input public/assets/cards/{card-id}-source.png \
-  --output public/assets/cards/{card-id}.png \
-  --marker III
-```
+Do not ask the image generator to draw the final footer rank marker anymore. The generator should leave the lower scene lightly and naturally darkened around the future marker placement, without a separate black footer band. After the visual is approved, add the marker deterministically with the project helper.
 
 Default marker settings:
 
@@ -149,11 +142,23 @@ Default marker settings:
 
 This is the source of truth for marker size, typeface, spacing, and placement. Prompt text can reserve the zone, but it must not be trusted to create the marker.
 
-Marker approval has three stages:
+Marker geometry should stay boring and consistent: same font, size, tracking, and placement unless the author explicitly asks to revisit the standard. For routine new cards, it is acceptable to skip the separate clean-overlay approval and generate the integrated marker directly.
 
-1. Clean marker overlay: add the marker with `scripts/add-card-marker.py` and inspect size, placement, and spacing.
-2. Bottom comparison sheet: compare the new footer against the last 3-4 accepted cards with `scripts/make-footer-marker-sheet.py`; show this sheet to the author and wait for explicit approval of marker size and placement.
-3. Scene integration: after marker size and placement are approved, rerun `scripts/add-card-marker.py` with `--integrate-scene` to lightly bake the same marker into the card texture without changing its geometry.
+Scene integration means the marker should feel embedded in the card surface, not placed above it. Preserve the standard geometry, then let the scene affect the marker through subtle opacity, texture distress, shadow, and local contrast so it inherits the artwork's mood. Each card's final marker may differ slightly in color impression because the scene texture, palette, and lighting are different; that is expected. The invariant is typography and placement, not identical flat color. Do not solve integration by changing the font, shrinking it, adding outlines, adding plaques, adding decorative lines, or forcing every marker to the same visually flat gold.
+
+After generating the integrated marker, show the card to the author and ask for explicit marker approval before moving on to texts or code integration. Visual approval of the artwork does not automatically approve the marker.
+
+Default routine command:
+
+```bash
+python3 scripts/add-card-marker.py \
+  --input public/assets/cards/{card-id}-source.png \
+  --output public/assets/cards/{card-id}.png \
+  --marker III \
+  --integrate-scene
+```
+
+Use a separate clean marker overlay and bottom comparison sheet only when the marker standard itself is in question or the result looks visually off.
 
 Example comparison sheet:
 
@@ -181,13 +186,13 @@ python3 scripts/add-card-marker.py \
 Use this as the base and replace bracketed parts.
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, clean dark empty lower footer-marker zone in the bottom 10-14% for later typography overlay, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, lower scene softly and naturally falls into shadow around the future centered footer marker placement, no black footer band, no abrupt horizontal fade, no oversized empty bottom zone, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 Example:
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, clean dark empty lower footer-marker zone in the bottom 10-14% for later typography overlay, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, lower scene softly and naturally falls into shadow around the future centered footer marker placement, no black footer band, no abrupt horizontal fade, no oversized empty bottom zone, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 ## Negative Prompt

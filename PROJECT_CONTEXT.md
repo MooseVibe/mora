@@ -68,10 +68,10 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
-- deck currently has 47 cards: 22 major arcana and 25 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
-- latest card addition: `five-of-cups` / «Пятёрка Кубков»; approved visual preserves the Rider-Waite-Smith grieving figure, exactly three spilled cups, exactly two upright cups, water, bridge, and distant refuge, and uses the postprocessed footer-marker workflow for a consistent integrated `V`
-- latest old-card text/image update: `empress` / «Императрица» in `preview/full/share`, with a regenerated canonical visual: centered seated Empress, twelve-star crown, scepter, wheat/fruit, water, Venus shield, clearer focal hierarchy, and only `III` in the footer marker zone
+- deck currently has 48 cards: 22 major arcana and 26 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
+- latest card addition: `ten-of-cups` / «Десятка Кубков»; approved visual preserves the Rider-Waite-Smith family/refuge scene, two adults, two children, distant home, water/valley, exactly ten cups arranged 5+5 in the sky, and uses an integrated `X` marker without a black footer band
+- latest old-card text/image update: `strength` / «Сила» in `preview/full/share`, with a regenerated canonical visual: calm woman and lion in gentle contact, luminous infinity sign, no hand-in-mouth gesture, no black footer band, and an integrated `VIII` marker
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
