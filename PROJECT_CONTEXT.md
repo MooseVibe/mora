@@ -53,7 +53,8 @@ Then try `3002` if needed.
 - `docs/decisions.md` -> decisions log
 - `docs/card-style.md` -> tarot card art/text rules and add-card QA checklist
 - `BACKLOG.md` -> release backlog for MVP-test bugs, UX debts, and pre-release fixes
-- `directives/` -> task workflows for redesigns, features, and bugs
+- `directives/00-start-every-task.md` -> mandatory start for every task: Ponytail mode, smallest safe step, no unnecessary code
+- `directives/` -> task workflows for redesigns, features, bugs, tarot cards, and text updates
 - `docs/competitors.md` -> competitor analysis and market notes
 
 ## Current Product State
@@ -67,9 +68,9 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, and visual outcome/note actions; full-result reader for journal entries is still WIP
-- deck currently has 44 cards: 22 major arcana and 22 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-swords`, `two-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
-- latest card addition: `seven-of-pentacles` / «Семёрка Пентаклей»; approved visual preserves the Rider-Waite-Smith worker leaning on a tool and looking at exactly seven pentacles on a plant, translating patient assessment and slow growth into Mora's darker ritual style
+- deck currently has 46 cards: 22 major arcana and 24 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `eight-of-cups`, `four-of-swords`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
+- latest card addition: `eight-of-cups` / «Восьмёрка Кубков»; approved visual preserves the Rider-Waite-Smith departing figure, exactly eight cups in a 5+3 stack, moon, water, and mountain path, and uses the new postprocessed footer-marker workflow for a consistent integrated `VIII`
 - latest old-card text/image update: `empress` / «Императрица» in `preview/full/share`, with a regenerated canonical visual: centered seated Empress, twelve-star crown, scepter, wheat/fruit, water, Venus shield, clearer focal hierarchy, and only `III` in the footer marker zone
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
@@ -85,9 +86,12 @@ Current work phase:
 Before edits:
 
 1. Read this file.
-2. Read the relevant detailed doc in `docs/`.
-3. Inspect the actual code before changing behavior.
-4. Keep changes scoped to the user's request.
+2. Read `directives/00-start-every-task.md`.
+3. Read the relevant detailed doc in `docs/`.
+4. Inspect the actual code before changing behavior.
+5. Keep changes scoped to the user's request.
+
+Use Ponytail mode by default: question whether the work is needed, prefer existing project patterns and native platform features, avoid new abstractions/dependencies, and take the smallest safe step. Do not use Ponytail as an excuse to skip Mora quality gates: auth, save flow, card canon, design system, accessibility, animations, approvals, and QA still matter.
 
 Do not rewrite working mechanics during UI work. Preserve auth, card draw, save, journal, and pending-draw sync behavior unless the user explicitly asks to change them.
 

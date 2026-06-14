@@ -69,6 +69,7 @@ After generation, compare the output against the canonical composition before op
 - Treat `ace-of-swords` as the current quality benchmark for main-scene contrast: the core symbol must be brighter, cleaner, and more legible than the surrounding ritual environment while the background stays atmospheric and subordinate.
 - Keep the lower 10-14% visually dark enough for the Roman numeral or symbolic footer.
 - Reserve a consistent footer-marker zone for the card rank: horizontally centered, visually placed in the lower dark band, with the marker center around 91-92% of image height and its bottom leaving roughly 5-6% image height as margin. The marker should be large enough to read as part of the deck system, not a tiny caption: target visual height about 5-6% of the full card height for Roman numerals or rank letters, and about 6-8% including a small court crown. Use `queen-of-pentacles` (`Q` with crown) and `six-of-swords` (`VI`) as the size/placement benchmark; avoid the too-small `eight-of-pentacles` marker.
+- Footer markers should look like one coherent deck typeface, not generated text fragments. Roman numerals, rank letters, crowns, and suit/rank signs must share the same antique-gold serif/engraved character, stroke weight, line height, and optical spacing. Repeated Roman strokes such as `III` must have readable letter spacing: not fused into a single block, not unevenly scattered, and not drawn as three unrelated marks.
 - Use a centered or slightly off-center composition with strong silhouette readability.
 - Background should feel like a ritual space: stone, ruins, mountains, night sky, columns, forest, cave, temple, smoke, storm, or celestial void.
 - Add secondary symbols around the main subject, but keep them subordinate.
@@ -87,7 +88,7 @@ After generation, compare the output against the canonical composition before op
 
 - Use archetypal tarot symbols: moon, sun, stars, flame, cup, sword, coin, wand, scale, key, crown, veil, gate, wheel, thread, mirror, hand, mountain, water, path, animal, arch, tower, laurel.
 - Symbols should be integrated into the scene, not pasted as flat icons.
-- Existing card images include a Roman numeral or rank marker at the bottom. New numbered cards should include an antique-gold Roman numeral in the consistent footer-marker zone; court cards can use a compact rank marker such as `Q` with a tiny crown instead of a misleading Roman numeral. The marker is part of deck consistency, so it must not be tiny, oversized, off-center, too close to the edge, or hidden in texture.
+- Existing card images include a Roman numeral or rank marker at the bottom. New numbered cards should include an antique-gold Roman numeral in the consistent footer-marker zone; court cards can use a compact rank marker such as `Q` with a tiny crown instead of a misleading Roman numeral. The marker is part of deck consistency, so it must not be tiny, oversized, off-center, too close to the edge, hidden in texture, or typographically inconsistent with the rest of the deck.
 - Do not put Russian card names on the image. Text belongs in UI, not in the artwork.
 - Do not add a decorative card frame, corner ornaments, rounded border, or separate footer plaque. Existing Mora UI provides the card framing; the artwork should bleed to the edge with only natural dark vignette.
 
@@ -127,24 +128,72 @@ Light rules:
 - Do not make the whole card evenly bright.
 - Do not let the whole image collapse into one brown/green/gold tone; a unified deck palette still needs local contrast and readable focal hierarchy.
 
+## Footer Marker Postprocess
+
+Do not ask the image generator to draw the final footer rank marker anymore. The generator should leave a clean, dark, empty lower 10-14% footer-marker zone. After the visual is approved, add the marker deterministically with the project helper:
+
+```bash
+python3 scripts/add-card-marker.py \
+  --input public/assets/cards/{card-id}-source.png \
+  --output public/assets/cards/{card-id}.png \
+  --marker III
+```
+
+Default marker settings:
+
+- font: `public/assets/fonts/cormorant-garamond-400.ttf`
+- color: `#c9a96e`
+- font size: `104px` on a `1024x1536` card
+- tracking: `10px`
+- marker center Y: `91.5%` of image height
+
+This is the source of truth for marker size, typeface, spacing, and placement. Prompt text can reserve the zone, but it must not be trusted to create the marker.
+
+Marker approval has three stages:
+
+1. Clean marker overlay: add the marker with `scripts/add-card-marker.py` and inspect size, placement, and spacing.
+2. Bottom comparison sheet: compare the new footer against the last 3-4 accepted cards with `scripts/make-footer-marker-sheet.py`; show this sheet to the author and wait for explicit approval of marker size and placement.
+3. Scene integration: after marker size and placement are approved, rerun `scripts/add-card-marker.py` with `--integrate-scene` to lightly bake the same marker into the card texture without changing its geometry.
+
+Example comparison sheet:
+
+```bash
+python3 scripts/make-footer-marker-sheet.py \
+  --item 'public/assets/cards/three-of-pentacles.webp|3 Pentacles' \
+  --item 'public/assets/cards/seven-of-pentacles.webp|7 Pentacles' \
+  --item 'public/assets/cards/four-of-swords.webp|4 Swords' \
+  --item 'public/assets/cards/{card-id}.png|New card marker' \
+  --output /tmp/{card-id}-footer-marker-sheet.jpg
+```
+
+Example integrated marker:
+
+```bash
+python3 scripts/add-card-marker.py \
+  --input public/assets/cards/{card-id}-source.png \
+  --output public/assets/cards/{card-id}.png \
+  --marker III \
+  --integrate-scene
+```
+
 ## Prompt Template
 
 Use this as the base and replace bracketed parts.
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, antique-gold Roman numeral [NUMERAL] centered in the lower dark footer-marker zone, marker sized consistently with Mora queen-of-pentacles Q and six-of-swords VI, not tiny, marker center around 91-92% of image height with comfortable bottom margin, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, clean dark empty lower footer-marker zone in the bottom 10-14% for later typography overlay, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 Example:
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, antique-gold Roman numeral I centered in the lower dark footer-marker zone, marker sized consistently with Mora queen-of-pentacles Q and six-of-swords VI, not tiny, marker center around 91-92% of image height with comfortable bottom margin, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, clean dark empty lower footer-marker zone in the bottom 10-14% for later typography overlay, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 ## Negative Prompt
 
 ```text
-bright colors, pastel, neon, purple blue gradient, cute, cartoon, anime, flat vector, clean minimalism, glossy 3d render, plastic skin, modern fashion photo, corporate illustration, UI icon, sticker, low detail, blurry, washed out, overexposed, symmetrical mandala only, text title, Russian text, English title, watermark, logo, frame mockup, white border, rounded card border, decorative frame, corner ornaments, separate footer plaque, poster border, cropped head, cropped hands, unreadable tiny subject, crowded scene, modern city, sci-fi, cyberpunk
+bright colors, pastel, neon, purple blue gradient, cute, cartoon, anime, flat vector, clean minimalism, glossy 3d render, plastic skin, modern fashion photo, corporate illustration, UI icon, sticker, low detail, blurry, washed out, overexposed, symmetrical mandala only, text title, Russian text, English title, Roman numeral, rank letter, footer symbol, decorative lower mark, watermark, logo, frame mockup, white border, rounded card border, decorative frame, corner ornaments, separate footer plaque, poster border, cropped head, cropped hands, unreadable tiny subject, crowded scene, modern city, sci-fi, cyberpunk
 ```
 
 ## Technical Requirements
