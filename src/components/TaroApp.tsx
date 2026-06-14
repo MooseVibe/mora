@@ -119,19 +119,6 @@ export default function TaroApp() {
   }, [])
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      const els = document.elementsFromPoint(e.clientX, e.clientY)
-      const hit = els.some(el => el.closest?.('button:not([disabled]), a[href]'))
-      document.documentElement.style.cursor = hit ? 'pointer' : ''
-    }
-    document.addEventListener('mousemove', onMove, { passive: true })
-    return () => {
-      document.removeEventListener('mousemove', onMove)
-      document.documentElement.style.cursor = ''
-    }
-  }, [])
-
-  useEffect(() => {
     const supabase = createClient()
     const today = new Date().toISOString().split('T')[0]
     const isDebugDraw = isLocalDebugDrawUrl()

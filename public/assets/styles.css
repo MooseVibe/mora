@@ -1,7 +1,14 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   * { -webkit-tap-highlight-color: transparent; }
   body { cursor: default; }
-  p, h1, h2, h3, h4, h5, h6, span, div { cursor: default; }
+  button:not(:disabled),
+  a[href] {
+    cursor: pointer;
+  }
+  button *,
+  a[href] * {
+    cursor: inherit;
+  }
 
   :root {
     --bg: #090705;
