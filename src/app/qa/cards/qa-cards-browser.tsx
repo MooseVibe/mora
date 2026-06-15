@@ -10,6 +10,7 @@ import {
 
 const FULL_TAROT_DECK_SIZE = 78
 const QA_RECENT_CARD_IDS = [
+  'ace-of-pentacles',
   'ten-of-cups',
   'five-of-cups',
   'eight-of-cups',
@@ -87,8 +88,6 @@ export function QACardsBrowser({ cards }: { cards: TarotCardDefinition[] }) {
       majorCount,
       minorCount: totalCount - majorCount,
       needsTextUpdateCount: totalCount - newFormatCount,
-      newFormatCount,
-      remainingCount: Math.max(FULL_TAROT_DECK_SIZE - totalCount, 0),
       totalCount,
     }
   }, [cards])
@@ -117,12 +116,8 @@ export function QACardsBrowser({ cards }: { cards: TarotCardDefinition[] }) {
       <section className="qa-cards-toolbar" aria-label="Статистика и фильтры колоды">
         <div className="qa-cards-stats">
           <span className="qa-stat">
-            <strong>{stats.totalCount}</strong>
-            <span>карт в колоде</span>
-          </span>
-          <span className="qa-stat">
-            <strong>{stats.remainingCount}</strong>
-            <span>осталось до 78</span>
+            <strong>{stats.totalCount}/{FULL_TAROT_DECK_SIZE}</strong>
+            <span>добавлено</span>
           </span>
           <span className="qa-stat">
             <strong>{stats.majorCount}</strong>
@@ -132,13 +127,9 @@ export function QACardsBrowser({ cards }: { cards: TarotCardDefinition[] }) {
             <strong>{stats.minorCount}</strong>
             <span>младших</span>
           </span>
-          <span className="qa-stat qa-stat--ready">
-            <strong>{stats.newFormatCount}</strong>
-            <span>новый формат</span>
-          </span>
           <span className="qa-stat qa-stat--todo">
-            <strong>{stats.needsTextUpdateCount}</strong>
-            <span>ждут текстов</span>
+            <strong>{stats.needsTextUpdateCount}/{stats.totalCount}</strong>
+            <span>осталось актуализировать</span>
           </span>
         </div>
 

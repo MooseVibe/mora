@@ -52,10 +52,15 @@ function getPeriodHref(period: JournalPeriod, returnPreview: ReturnPreview | nul
   return query ? `/journal?${query}` : '/journal'
 }
 
+function getTodayKey() {
+  return new Date().toISOString().split('T')[0]
+}
+
 export default function JournalClient({ draws, initialPeriod, dashboardHref, returnPreview }: Props) {
   const [selectedPeriod, setSelectedPeriod] = useState<JournalPeriod>(initialPeriod)
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
+  const today = getTodayKey()
 
   const list = useMemo(() => {
     const periodStartDate = getPeriodStartDate(selectedPeriod)
@@ -151,7 +156,7 @@ export default function JournalClient({ draws, initialPeriod, dashboardHref, ret
                     meaningLabel={reading.meaningLabel}
                     paragraphs={reading.paragraphs}
                     fullParagraphs={reading.fullParagraphs}
-                    shareText={reading.shareText}
+                    shareText={draw.drawn_at === today ? reading.shareText : undefined}
                     sourceKey={sourceKey}
                     readingDate={formatDate(reading.drawnAt)}
                     sourceFrame={{ outerRadius: 2, inset: 1, artRadius: 1 }}

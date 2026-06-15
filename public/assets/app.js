@@ -1,5 +1,5 @@
 'use strict';
-import { TAROT_CARDS } from './cards.js?v=cards-20260612-4';
+import { TAROT_CARDS } from './cards.js?v=cards-20260615-1';
 import { STATE, transition, resetState, runSequence } from './state.js';
 import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, preloadCardImage, wait } from './image-cache.js';
 import { smoothStep, lerpArc } from './arc.js';

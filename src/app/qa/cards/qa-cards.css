@@ -94,11 +94,8 @@ body:has(.qa-cards-wrap) {
   background: rgba(9, 7, 5, 0.42);
 }
 
-.qa-stat--ready {
-  border-color: rgba(166, 169, 71, 0.28);
-}
-
 .qa-stat--todo {
+  min-width: 220px;
   border-color: rgba(216, 81, 76, 0.24);
 }
 
