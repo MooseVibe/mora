@@ -69,9 +69,9 @@ Working MVP:
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
 - deck currently has 49 cards: 22 major arcana and 27 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`
 - latest card addition: `ace-of-pentacles` / «Туз Пентаклей»; approved visual preserves the Rider-Waite-Smith offered coin/hand, garden path, gate, and distant mountains, with exactly one pentacle and an integrated `I` marker over a subtle bottom fade
-- latest old-card text/image update: `strength` / «Сила» in `preview/full/share`, with a regenerated canonical visual: calm woman and lion in gentle contact, luminous infinity sign, no hand-in-mouth gesture, no black footer band, and an integrated `VIII` marker
+- latest old-card text/image update: `hermit` / «Отшельник» in `preview/full/share`, with the original canonical scene preserved and the old decorative `IX` replaced by a standard integrated marker using stone texture from the scene
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
