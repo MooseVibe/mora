@@ -68,10 +68,10 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
-- deck currently has 50 cards: 22 major arcana and 28 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`
-- latest card addition: `page-of-wands` / «Паж Жезлов»; approved visual preserves the Rider-Waite-Smith young page, one sprouting wand, open road/desert space, and uses the existing `P` + crown court marker from `page-of-cups` with a stronger subtle bottom fade
-- latest old-card text/image update: `hermit` / «Отшельник» in `preview/full/share`, with the original canonical scene preserved and the old decorative `IX` replaced by a standard integrated marker using stone texture from the scene
+- deck currently has 51 cards: 22 major arcana and 29 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `nine-of-swords`, `five-of-wands`
+- latest card addition: `five-of-wands` / «Пятёрка Жезлов»; approved visual uses five distinct figures and exactly five traceable wands without a dense crossing knot, preserving the card's conflict/competition meaning while avoiding broken wand geometry; marker `V` has an approved brighter textured integration with a soft footer fade
+- latest old-card text update: `nine-of-swords` / «Девятка Мечей» in `preview/full/share`, with three approved daily-reading variants about separating facts from fear, writing down recurring thoughts, and giving anxiety a small bodily point of support
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
