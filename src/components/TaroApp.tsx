@@ -24,7 +24,7 @@ type MoraNativeWindow = Window & {
 
 const APP_TRANSITION_MS = 950
 const APP_TRANSITION_HIDE_MS = 1050
-const NATIVE_APP_VERSION = '20260615-1'
+const NATIVE_APP_VERSION = '20260615-2'
 
 function getPendingDrawCookieMaxAge() {
   const now = new Date()
