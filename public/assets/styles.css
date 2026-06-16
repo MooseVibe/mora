@@ -3542,6 +3542,12 @@
   text-align: center;
 }
 
+.auth-input[type="email"] {
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .auth-error {
   color: #e07070;
   font-size: 13px;

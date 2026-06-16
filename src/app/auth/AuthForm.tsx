@@ -14,6 +14,16 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
 
   const supabase = createClient()
 
+  function getEmailAuthErrorMessage(error: { message?: string; status?: number } | null) {
+    const message = error?.message?.toLowerCase() ?? ''
+
+    if (error?.status === 429 || message.includes('rate limit')) {
+      return 'Код уже запрошен. Подожди минуту и попробуй снова.'
+    }
+
+    return 'Не удалось отправить код. Проверь email.'
+  }
+
   async function handleGoogle() {
     flushSync(() => setGoogleLoading(true))
     await supabase.auth.signInWithOAuth({
@@ -25,25 +35,28 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault()
-    if (!email) return
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) return
     setLoading(true)
     setError('')
+    setEmail(normalizedEmail)
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: normalizedEmail,
       options: { shouldCreateUser: true },
     })
     setLoading(false)
-    if (error) { setError('Не удалось отправить код. Проверь email.'); return }
+    if (error) { setError(getEmailAuthErrorMessage(error)); return }
     setStep('verify')
   }
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault()
     if (!otp) return
+    const normalizedEmail = email.trim().toLowerCase()
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.verifyOtp({
-      email,
+      email: normalizedEmail,
       token: otp,
       type: 'email',
     })

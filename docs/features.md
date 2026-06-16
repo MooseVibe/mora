@@ -20,7 +20,7 @@
 - В колоде 52 карты: 22 старших аркана и 30 пилотных младших/придворных карт
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
-- Share-ready тексты есть у 31 карты: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
+- Share-ready тексты есть у 32 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
 
 ### Дневник карт (в личном кабинете)
 - История всех вытянутых карт по дням

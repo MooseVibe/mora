@@ -83,13 +83,11 @@ export function QACardsBrowser({ cards }: { cards: TarotCardDefinition[] }) {
   const [textFilter, setTextFilter] = useState<TextFilter>('all')
 
   const stats = useMemo(() => {
-    const majorCount = cards.filter(isMajorArcana).length
     const newFormatCount = cards.filter(hasNewTextFormat).length
     const totalCount = cards.length
 
     return {
-      majorCount,
-      minorCount: totalCount - majorCount,
+      remainingCardsCount: FULL_TAROT_DECK_SIZE - totalCount,
       needsTextUpdateCount: totalCount - newFormatCount,
       totalCount,
     }
@@ -119,19 +117,11 @@ export function QACardsBrowser({ cards }: { cards: TarotCardDefinition[] }) {
       <section className="qa-cards-toolbar" aria-label="Статистика и фильтры колоды">
         <div className="qa-cards-stats">
           <span className="qa-stat">
-            <strong>{stats.totalCount}/{FULL_TAROT_DECK_SIZE}</strong>
-            <span>добавлено</span>
-          </span>
-          <span className="qa-stat">
-            <strong>{stats.majorCount}</strong>
-            <span>старших</span>
-          </span>
-          <span className="qa-stat">
-            <strong>{stats.minorCount}</strong>
-            <span>младших</span>
+            <strong>{stats.remainingCardsCount}</strong>
+            <span>осталось добавить</span>
           </span>
           <span className="qa-stat qa-stat--todo">
-            <strong>{stats.needsTextUpdateCount}/{stats.totalCount}</strong>
+            <strong>{stats.needsTextUpdateCount}</strong>
             <span>осталось актуализировать</span>
           </span>
         </div>
