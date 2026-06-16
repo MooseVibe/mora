@@ -282,6 +282,8 @@ For `public/assets/cards.js`:
 - Do not overuse the name Mora in every paragraph. One clear Mora-presence per reading is often enough.
 - The voice is wise, calm, slightly mystical, and personal. It should not sound like stock tarot copy, corporate coaching, or generic AI output.
 - Avoid vague translated-sounding abstractions and spatial metaphors that create unintended meanings. Prefer plain Russian phrasing: write `где можно выдохнуть рядом со своими` instead of `где тебя встретят без лишней защиты`; write `на что уже можно опереться` instead of `место, которое тебя держит`.
+- Write in plain Russian for an ordinary reader first, mystical atmosphere second. Avoid foggy phrases like `может стать видно`, `станет доступно`, `появится пространство`, `выйти в новое состояние`, or `сделать место для желания`. Prefer direct wording: `сегодня ты можешь увидеть`, `ты поймёшь`, `освободи время`, `сделай один понятный шаг`, `скажи прямо`.
+- Before proposing text, check each paragraph with this filter: would an average Russian-speaking person understand it immediately without translating therapy/coaching language into normal speech? If not, rewrite it simpler.
 - No marketing excitement, no emoji, no overpromising.
 
 The result screen layout is:

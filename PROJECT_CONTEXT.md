@@ -52,6 +52,7 @@ Then try `3002` if needed.
 - `docs/features.md` -> current MVP, WIP, planned features
 - `docs/decisions.md` -> decisions log
 - `docs/card-style.md` -> tarot card art/text rules and add-card QA checklist
+- `docs/banned-phrases.md` -> живой словарь плохих фраз, которые нельзя использовать в текстах Mora
 - `BACKLOG.md` -> release backlog for MVP-test bugs, UX debts, and pre-release fixes
 - `directives/00-start-every-task.md` -> mandatory start for every task: Ponytail mode, smallest safe step, no unnecessary code
 - `directives/` -> task workflows for redesigns, features, bugs, tarot cards, and text updates
@@ -68,10 +69,10 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
-- deck currently has 52 cards: 22 major arcana and 30 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
-- latest card addition: `four-of-pentacles` / «Четвёрка Пентаклей»; approved visual preserves the canonical guarded-resource composition with one seated figure and exactly four countable pentacles: one at the chest, one above the head, and two under the feet; marker `IV` uses the existing helper flow and was accepted as-is, while deeper marker-material rules remain a separate future process task
-- latest old-card text update: `four-of-cups` / «Четвёрка Кубков» in `preview/full/share`, with three approved daily-reading variants about emotional fatigue, automatic refusal, and taking a pause without turning it into a wall
+- deck currently has 53 cards: 22 major arcana and 31 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `tower`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `nine-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
+- latest card addition: `nine-of-cups` / «Девятка Кубков»; approved visual preserves the canonical fulfilled-wish composition with one seated figure and exactly nine countable cups arranged evenly on the shelf behind him; marker `IX` was accepted after increasing readability without adding a footer plaque
+- latest old-card text update: `tower` / «Башня» in `preview/full/share`, with three approved daily-reading variants about noticing the first warning sign, rebuilding plans without stubbornness, and saying the main thing before tension explodes
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
