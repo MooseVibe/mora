@@ -38,6 +38,7 @@ export type TarotCardId =
   | 'ace-of-pentacles'
   | 'two-of-pentacles'
   | 'three-of-pentacles'
+  | 'four-of-pentacles'
   | 'six-of-pentacles'
   | 'seven-of-pentacles'
   | 'eight-of-pentacles'
