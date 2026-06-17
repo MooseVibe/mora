@@ -1,28 +1,66 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
+
+const RESEND_WAIT_SECONDS = 60
 
 export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
   const [step, setStep] = useState<'enter' | 'verify'>('enter')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [loadingAction, setLoadingAction] = useState<'email' | 'code' | null>(null)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [resendTried, setResendTried] = useState(false)
+  const [resendAvailableAt, setResendAvailableAt] = useState(0)
+  const [resendSecondsLeft, setResendSecondsLeft] = useState(0)
+  const verifyingOtpRef = useRef('')
 
   const supabase = createClient()
 
-  function getEmailAuthErrorMessage(error: { message?: string; status?: number } | null) {
+  function isRateLimited(error: { message?: string; status?: number } | null) {
     const message = error?.message?.toLowerCase() ?? ''
-
-    if (error?.status === 429 || message.includes('rate limit')) {
-      return 'Код уже запрошен. Подожди минуту и попробуй снова.'
-    }
-
-    return 'Не удалось отправить код. Проверь email.'
+    return error?.status === 429 || message.includes('rate limit')
   }
+
+  function isValidEmailAddress(value: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
+  }
+
+  async function sendEmailCode(normalizedEmail: string) {
+    setLoadingAction('email')
+    const { error } = await supabase.auth.signInWithOtp({
+      email: normalizedEmail,
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    setLoadingAction(null)
+
+    return error
+  }
+
+  function startResendWait() {
+    const availableAt = Date.now() + RESEND_WAIT_SECONDS * 1000
+    setResendAvailableAt(availableAt)
+    setResendSecondsLeft(RESEND_WAIT_SECONDS)
+  }
+
+  useEffect(() => {
+    if (step !== 'verify' || !resendAvailableAt || resendTried) return
+
+    const updateTimer = () => {
+      setResendSecondsLeft(Math.max(0, Math.ceil((resendAvailableAt - Date.now()) / 1000)))
+    }
+    updateTimer()
+
+    const timer = window.setInterval(updateTimer, 1000)
+    return () => window.clearInterval(timer)
+  }, [resendAvailableAt, resendTried, step])
 
   async function handleGoogle() {
     flushSync(() => setGoogleLoading(true))
@@ -36,32 +74,66 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault()
     const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail) return
-    setLoading(true)
+    if (!normalizedEmail) {
+      setError('Чтобы продолжить, нужен email')
+      return
+    }
+    if (!isValidEmailAddress(normalizedEmail)) {
+      setError('Чтобы продолжить, нужен полный email')
+      return
+    }
     setError('')
+    setNotice('')
+    setOtp('')
+    setResendTried(false)
+    setResendAvailableAt(0)
+    setResendSecondsLeft(0)
+    verifyingOtpRef.current = ''
     setEmail(normalizedEmail)
-    const { error } = await supabase.auth.signInWithOtp({
-      email: normalizedEmail,
-      options: { shouldCreateUser: true },
-    })
-    setLoading(false)
-    if (error) { setError(getEmailAuthErrorMessage(error)); return }
+    const error = await sendEmailCode(normalizedEmail)
+
+    if (error && !isRateLimited(error)) {
+      setError('Не удалось отправить письмо. Проверь email.')
+      return
+    }
+
+    startResendWait()
     setStep('verify')
   }
 
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault()
-    if (!otp) return
+  async function handleResendCode() {
     const normalizedEmail = email.trim().toLowerCase()
-    setLoading(true)
+    if (!normalizedEmail || loadingAction || resendSecondsLeft > 0) return
+    if (resendTried) return
+    setError('')
+    setNotice('')
+    const error = await sendEmailCode(normalizedEmail)
+    setResendTried(true)
+    setResendSecondsLeft(0)
+
+    setNotice(
+      error
+        ? 'Если код не пришёл, попробуй позже.'
+        : 'Отправили код повторно. Если он не пришёл, попробуй позже.'
+    )
+  }
+
+  async function verifyEmailCode(code: string) {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (code.length !== 6 || !normalizedEmail || loadingAction || verifyingOtpRef.current === code) return
+    verifyingOtpRef.current = code
+    setLoadingAction('code')
     setError('')
     const { error } = await supabase.auth.verifyOtp({
       email: normalizedEmail,
-      token: otp,
+      token: code,
       type: 'email',
     })
-    setLoading(false)
-    if (error) { setError('Неверный код. Попробуй ещё раз.'); return }
+    setLoadingAction(null)
+    if (error) {
+      setError('Код введён неверно. Проверь цифры и попробуй ещё раз.')
+      return
+    }
     window.location.href = '/dashboard'
   }
 
@@ -100,7 +172,7 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
             </h1>
             <p className="auth-modal-subtitle">
               {step === 'verify'
-                ? `Письмо отправлено на ${email}`
+                ? `Отправили код на ${email}, он придет в течение минуты`
                 : isSaveIntent
                   ? 'Карта дня сохранится в твоём дневнике'
                   : 'Она поможет тебе разобраться…'}
@@ -127,48 +199,105 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
                 <div className="auth-divider-line" />
               </div>
 
-              <form onSubmit={handleEmail} className="auth-form">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="Введите Email"
-                  required
-                  className="auth-input"
-                />
+              <form onSubmit={handleEmail} className="auth-form" noValidate>
+                <div className="auth-input-wrap">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => {
+                      setEmail(e.target.value)
+                      setError('')
+                    }}
+                    placeholder="Введите Email"
+                    required
+                    className="auth-input auth-input--with-clear"
+                  />
+                  {email && (
+                    <button
+                      type="button"
+                      onClick={() => setEmail('')}
+                      className="auth-input-clear"
+                      aria-label="Очистить email"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
                 {error && <p className="auth-error">{error}</p>}
-                <button type="submit" disabled={loading} className="auth-btn">
-                  {loading ? 'Отправляем…' : 'Войти'}
+                <button type="submit" disabled={loadingAction === 'email'} className="auth-btn">
+                  {loadingAction === 'email' ? 'Отправляем…' : 'Войти'}
                 </button>
               </form>
             </>
           ) : (
-            <form onSubmit={handleVerify} className="auth-form">
-              <p className="auth-otp-hint">
-                Введи код из письма — он действует 10 минут. Код может быть 6 или 8 цифр.
-              </p>
-              <input
-                type="text"
-                value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="••••••••"
-                maxLength={8}
-                required
-                autoFocus
-                className="auth-input auth-input--otp"
-              />
+            <div className="auth-form">
+              <div className="auth-input-wrap">
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={e => {
+                    const nextOtp = e.target.value.replace(/\D/g, '').slice(0, 6)
+                    setOtp(nextOtp)
+                    if (nextOtp.length < 6) {
+                      verifyingOtpRef.current = ''
+                    }
+                    if (nextOtp.length === 6) {
+                      void verifyEmailCode(nextOtp)
+                    }
+                  }}
+                  placeholder="••••••"
+                  maxLength={6}
+                  required
+                  autoFocus
+                  className="auth-input auth-input--otp auth-input--with-clear"
+                />
+                {otp && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtp('')
+                      setError('')
+                      verifyingOtpRef.current = ''
+                    }}
+                    className="auth-input-clear"
+                    aria-label="Очистить код"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
               {error && <p className="auth-error">{error}</p>}
-              <button type="submit" disabled={loading} className="auth-btn">
-                {loading ? 'Проверяем…' : 'Подтвердить'}
+              {notice && <p className="auth-otp-hint">{notice}</p>}
+              {loadingAction === 'code' && <p className="auth-otp-hint">Проверяем код…</p>}
+              {loadingAction === 'email' && <p className="auth-otp-hint">Отправляем письмо…</p>}
+              <button
+                type="button"
+                onClick={handleResendCode}
+                disabled={Boolean(loadingAction) || resendTried || resendSecondsLeft > 0}
+                className="auth-btn"
+              >
+                {resendTried
+                  ? 'Код запрошен повторно'
+                  : resendSecondsLeft > 0
+                    ? `Мне не пришёл код · ${resendSecondsLeft} сек`
+                    : 'Мне не пришёл код'}
               </button>
               <button
                 type="button"
-                onClick={() => { setStep('enter'); setOtp(''); setError('') }}
+                onClick={() => {
+                  setStep('enter')
+                  setOtp('')
+                  setError('')
+                  setNotice('')
+                  setResendTried(false)
+                  setResendAvailableAt(0)
+                  setResendSecondsLeft(0)
+                }}
                 className="auth-back-btn"
               >
                 ← Изменить email
               </button>
-            </form>
+            </div>
           )}
         </div>
 

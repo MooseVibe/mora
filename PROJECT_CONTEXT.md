@@ -53,6 +53,7 @@ Then try `3002` if needed.
 - `docs/decisions.md` -> decisions log
 - `docs/card-style.md` -> tarot card art/text rules and add-card QA checklist
 - `docs/banned-phrases.md` -> живой словарь плохих фраз, которые нельзя использовать в текстах Mora
+- `docs/auth-email.md` -> настройка email OTP, Supabase templates, Custom SMTP и rate limits
 - `BACKLOG.md` -> release backlog for MVP-test bugs, UX debts, and pre-release fixes
 - `directives/00-start-every-task.md` -> mandatory start for every task: Ponytail mode, smallest safe step, no unnecessary code
 - `directives/` -> task workflows for redesigns, features, bugs, tarot cards, and text updates
