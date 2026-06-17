@@ -5,6 +5,8 @@ import { flushSync } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 
 const RESEND_WAIT_SECONDS = 60
+const MIN_OTP_LENGTH = 6
+const MAX_OTP_LENGTH = 8
 
 export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
   const [step, setStep] = useState<'enter' | 'verify'>('enter')
@@ -18,6 +20,7 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
   const [resendAvailableAt, setResendAvailableAt] = useState(0)
   const [resendSecondsLeft, setResendSecondsLeft] = useState(0)
   const verifyingOtpRef = useRef('')
+  const verifyOtpTimerRef = useRef<number | null>(null)
 
   const supabase = createClient()
 
@@ -120,7 +123,13 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
 
   async function verifyEmailCode(code: string) {
     const normalizedEmail = email.trim().toLowerCase()
-    if (code.length !== 6 || !normalizedEmail || loadingAction || verifyingOtpRef.current === code) return
+    if (
+      code.length < MIN_OTP_LENGTH ||
+      code.length > MAX_OTP_LENGTH ||
+      !normalizedEmail ||
+      loadingAction ||
+      verifyingOtpRef.current === code
+    ) return
     verifyingOtpRef.current = code
     setLoadingAction('code')
     setError('')
@@ -135,6 +144,18 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
       return
     }
     window.location.href = '/dashboard'
+  }
+
+  function scheduleEmailCodeVerification(code: string) {
+    if (verifyOtpTimerRef.current) {
+      window.clearTimeout(verifyOtpTimerRef.current)
+    }
+
+    if (code.length < MIN_OTP_LENGTH) return
+
+    verifyOtpTimerRef.current = window.setTimeout(() => {
+      void verifyEmailCode(code)
+    }, 0)
   }
 
   return (
@@ -236,17 +257,15 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
                   type="text"
                   value={otp}
                   onChange={e => {
-                    const nextOtp = e.target.value.replace(/\D/g, '').slice(0, 6)
+                    const nextOtp = e.target.value.replace(/\D/g, '').slice(0, MAX_OTP_LENGTH)
                     setOtp(nextOtp)
-                    if (nextOtp.length < 6) {
+                    if (nextOtp.length < MIN_OTP_LENGTH) {
                       verifyingOtpRef.current = ''
                     }
-                    if (nextOtp.length === 6) {
-                      void verifyEmailCode(nextOtp)
-                    }
+                    scheduleEmailCodeVerification(nextOtp)
                   }}
-                  placeholder="••••••"
-                  maxLength={6}
+                  placeholder="••••••••"
+                  maxLength={MAX_OTP_LENGTH}
                   required
                   autoFocus
                   className="auth-input auth-input--otp auth-input--with-clear"
@@ -258,6 +277,9 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
                       setOtp('')
                       setError('')
                       verifyingOtpRef.current = ''
+                      if (verifyOtpTimerRef.current) {
+                        window.clearTimeout(verifyOtpTimerRef.current)
+                      }
                     }}
                     className="auth-input-clear"
                     aria-label="Очистить код"
