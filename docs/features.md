@@ -17,10 +17,10 @@
 - Карта вытягивается раз в день
 - Защита от повторного вытягивания — нельзя вытянуть второй раз в тот же день
 - Карта автоматически сохраняется в дневник
-- В колоде 54 карты: 22 старших аркана и 32 пилотные младшие/придворные карты
+- В колоде 55 карт: 22 старших аркана и 33 пилотные младшие/придворные карты
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
-- Share-ready тексты есть у 35 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `tower`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `nine-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `page-of-swords`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
+- Share-ready тексты есть у 36 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `tower`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `nine-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `page-of-swords`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
 
 ### Дневник карт (в личном кабинете)
 - История всех вытянутых карт по дням
@@ -43,30 +43,28 @@
 | Главный (лендинг) | ✅ Готов, остались мелкие баги |
 | Авторизация | ✅ Готов, остались мелкие баги |
 | Дашборд | 🟡 Сейчас в работе |
-| Дневник карт | 🟡 WIP: список и фильтры есть, нужен full-result reader и сохранение будущих outcome/note |
-| Просмотр одной карты | 🟡 На dashboard есть через `DashboardCardReader`; для `/journal` ещё нужно подключить |
+| Дневник карт | 🟡 WIP: список, фильтры и full-result reader есть; нужна visual polish и будущее сохранение outcome/note |
+| Просмотр одной карты | 🟡 На dashboard и `/journal` есть через `DashboardCardReader`; позже можно переименовать компонент в общий reader |
 | Профиль / настройки | ⬜ Не начат |
 
 ## Следующий шаг
 
-### Journal full-result reader
+### Journal visual polish
 
-Следующая задача: довести `/journal` до того же reader-паттерна, который уже работает на dashboard.
+Следующая задача: отполировать `/journal` после подключения reader-паттерна.
 
 Ожидаемое поведение:
-- пользователь нажимает на любую запись в дневнике;
-- запись раскрывается в full-result reader с большой картой, датой и текстом именно этого вытягивания;
-- для новых записей используется `reading_snapshot`, для старых — fallback через `variant_idx` или дефолтный вариант;
-- кнопка «Назад» возвращает карту обратно в строку/плитку дневника;
-- share доступен только для записей с утверждённым `shareText`.
+- список, фильтры и пустое состояние выглядят цельно на desktop и mobile;
+- строки дневника остаются кликабельными и открывают full-result reader с сохранённым/fallback reading;
+- action-зона `Отклик` выглядит честно как будущая механика, без обещания сохранения состояния;
+- mobile layout не ломает скролл, тач-таргеты и shared-element анимацию.
 
 Технические ориентиры:
-- переиспользовать `DashboardCardReader` или вынести общий reader-компонент, если dashboard-имя начнёт мешать;
-- в `src/app/journal/page.tsx` выбирать `card_id, drawn_at, variant_idx, reading_snapshot`;
-- в `JournalClient` читать записи через `getDrawReading()`, а не только через `getTarotCardJournalSummary()`;
-- не подключать outcome/notes к БД в этом же инкременте, если задача только про reader;
-- не добавлять новые тяжёлые ассеты и не коммитить временные PNG-source;
-- держать производительность как сейчас на production: WebP-first, без лишних фоновых слоёв и без перерендера всего journal во время анимации.
+- не менять выборку `card_id, drawn_at, variant_idx, reading_snapshot`;
+- продолжать читать записи через `getDrawReading()`;
+- не подключать outcome/notes к БД в этом инкременте;
+- не добавлять новые тяжёлые ассеты;
+- проверить 375px и 1440px глазами.
 
 ## Планируется (после редизайна)
 

@@ -75,6 +75,7 @@ After generation, compare the output against the canonical composition before op
 - Add secondary symbols around the main subject, but keep them subordinate.
 - Prefer clean staging over evenly detailed scenes: leave pockets of negative space or simplified dark planes around the main silhouette. Detail is allowed, but it must not compete equally across the whole card.
 - The card should be readable at dashboard/recent-card thumbnail size.
+- Final visual QA must include the card inside Mora UI, not only as a standalone image. If the card dissolves into the dark app background, it fails even when the standalone artwork looks atmospheric.
 
 ### Characters
 
@@ -283,6 +284,7 @@ For `public/assets/cards.js`:
 - The voice is wise, calm, slightly mystical, and personal. It should not sound like stock tarot copy, corporate coaching, or generic AI output.
 - Avoid vague translated-sounding abstractions and spatial metaphors that create unintended meanings. Prefer plain Russian phrasing: write `где можно выдохнуть рядом со своими` instead of `где тебя встретят без лишней защиты`; write `на что уже можно опереться` instead of `место, которое тебя держит`.
 - Write in plain Russian for an ordinary reader first, mystical atmosphere second. Avoid foggy phrases like `может стать видно`, `станет доступно`, `появится пространство`, `выйти в новое состояние`, or `сделать место для желания`. Prefer direct wording: `сегодня ты можешь увидеть`, `ты поймёшь`, `освободи время`, `сделай один понятный шаг`, `скажи прямо`.
+- Before proposing text, check each paragraph with `docs/banned-phrases.md`, including `Редакторский фильтр Mora`. The text must not rely on AI-sounding turns such as `не X, а Y`, decorative `жест`, empty publicistic words, hidden anthropomorphism, rhythmic lists without need, or dramatic punctuation instead of meaning.
 - Before proposing text, check each paragraph with this filter: would an average Russian-speaking person understand it immediately without translating therapy/coaching language into normal speech? If not, rewrite it simpler.
 - No marketing excitement, no emoji, no overpromising.
 

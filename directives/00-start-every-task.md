@@ -30,6 +30,8 @@
    - `03-fix-bug.md`
    - `04-add-tarot-cards.md`
    - `05-update-card-texts.md`
+   - `06-commit-and-deploy.md`
+   - `07-process-feedback.md`
 7. Перед изменениями проверь `git status --short`.
 8. Перед изменениями сформулируй коротко:
    - что именно делаем;

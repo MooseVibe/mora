@@ -44,7 +44,7 @@ mora/
 │   │   │   ├── page.tsx        # личный кабинет (Server Component, требует auth)
 │   │   │   └── dashboard.css
 │   │   ├── journal/
-│   │   │   ├── page.tsx        # дневник карт (WIP: список/фильтры есть, reader записей ещё в работе)
+│   │   │   ├── page.tsx        # дневник карт: список/фильтры + full-result reader записей
 │   │   │   └── journal.css
 │   │   └── api/
 │   │       └── draws/route.ts  # POST /api/draws — сохранение вытянутой карты
@@ -52,10 +52,10 @@ mora/
 │   │   ├── TaroApp.tsx         # главный клиентский компонент лендинга
 │   │   ├── DrawWidget.tsx      # виджет вытягивания для дашборда
 │   │   ├── RecentCardsWidget.tsx # виджет последних карт на dashboard; открывает записи через DashboardCardReader
-│   │   ├── DashboardCardReader.tsx # shared-element full-result reader для dashboard-карт
+│   │   ├── DashboardCardReader.tsx # shared-element full-result reader для dashboard и journal-карт
 │   │   ├── DashboardTodayCard.tsx # уже вытянутая карта дня на dashboard
 │   │   ├── DashboardShareButton.tsx # Telegram-first/Web Share кнопка для approved shareText
-│   │   ├── JournalClient.tsx   # клиентский список дневника с фильтрами периода
+│   │   ├── JournalClient.tsx   # клиентский список дневника с фильтрами периода и reader записей
 │   │   └── CardSyncOnMount.tsx # sync: localStorage → Supabase при входе
 │   ├── lib/
 │   │   └── supabase/
@@ -79,8 +79,8 @@ mora/
 | Вытягивание карты | `public/assets/draw.js` + `src/app/api/draws/route.ts` | Клиентская анимация + POST в БД. Защита: одна карта в день через `drawn_at`. Pending draw у незалогиненных — в localStorage. Новые записи сохраняют `variant_idx` и `reading_snapshot`, если схема БД поддерживает snapshot |
 | Данные карт | `public/assets/cards.js` + `src/lib/tarot.ts` | `cards.js` — единый источник текстов/картинок для нативного draw-flow; `tarot.ts` — TypeScript-адаптер для React-экранов |
 | Дашборд | `src/app/dashboard/page.tsx` | Server Component. Загружает карту дня и 3 последних вытягивания из Supabase |
-| Full-result reader на dashboard | `src/components/DashboardCardReader.tsx` | Shared-element раскрытие сегодняшней карты и recent cards, чтение сохранённого/fallback reading, share при approved `shareText` |
-| Дневник карт | `src/app/journal/page.tsx` + `src/components/JournalClient.tsx` | WIP. Полный список вытягиваний пользователя с фильтрами; пока без раскрытия записи через full-result reader и без сохранения outcome/note |
+| Full-result reader | `src/components/DashboardCardReader.tsx` | Shared-element раскрытие сегодняшней карты, recent cards и записей дневника, чтение сохранённого/fallback reading, share при approved `shareText` |
+| Дневник карт | `src/app/journal/page.tsx` + `src/components/JournalClient.tsx` | Полный список вытягиваний пользователя с фильтрами и full-result reader для записей; outcome/note пока визуальные, без сохранения состояния |
 | QA просмотр карт | `src/app/qa/cards/page.tsx` | Служебный noindex-preview всех карт и вариантов текстов. Локально открыт, в production требует `CARD_QA_TOKEN` |
 | Sync pending draw | `src/components/CardSyncOnMount.tsx` | При входе читает `mora:pendingDraw` из localStorage и отправляет в `/api/draws` |
 

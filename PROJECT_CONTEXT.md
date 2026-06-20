@@ -54,9 +54,12 @@ Then try `3002` if needed.
 - `docs/card-style.md` -> tarot card art/text rules and add-card QA checklist
 - `docs/banned-phrases.md` -> живой словарь плохих фраз, которые нельзя использовать в текстах Mora
 - `docs/auth-email.md` -> настройка email OTP, Supabase templates, Custom SMTP и rate limits
+- `docs/feedback.md` -> inbox and processing log for MVP user feedback from chats/screenshots
 - `BACKLOG.md` -> release backlog for MVP-test bugs, UX debts, and pre-release fixes
 - `directives/00-start-every-task.md` -> mandatory start for every task: Ponytail mode, smallest safe step, no unnecessary code
-- `directives/` -> task workflows for redesigns, features, bugs, tarot cards, and text updates
+- `directives/06-commit-and-deploy.md` -> required checklist before commit, push, preview, or production deploy
+- `directives/07-process-feedback.md` -> workflow for turning raw chat feedback/screenshots into signals, backlog items, text notes, or decisions
+- `directives/` -> task workflows for redesigns, features, bugs, tarot cards, text updates, commits, deploys, and feedback review
 - `docs/competitors.md` -> competitor analysis and market notes
 
 ## Current Product State
@@ -70,10 +73,10 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
-- deck currently has 54 cards: 22 major arcana and 32 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `tower`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `nine-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `page-of-swords`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
-- latest card addition: `page-of-swords` / «Паж Мечей»; approved visual preserves the canonical Page of Swords composition with one youthful page holding exactly one raised sword on a windy hill; the court marker was copied from the existing `page-of-wands` `P` + crown marker and accepted as an MLP-quality marker despite the crown rendering being imperfect because all card art is expected to be regenerated later
-- latest old-card text update: `tower` / «Башня» in `preview/full/share`, with three approved daily-reading variants about noticing the first warning sign, rebuilding plans without stubbornness, and saying the main thing before tension explodes
+- deck currently has 55 cards: 22 major arcana and 33 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `tower`, `two-of-cups`, `six-of-cups`, `page-of-cups`, `ace-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `eight-of-cups`, `nine-of-cups`, `ten-of-cups`, `four-of-swords`, `ace-of-pentacles`, `two-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `six-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `page-of-wands`, `page-of-swords`, `nine-of-swords`, `five-of-wands`, `ten-of-wands`
+- latest card addition: `five-of-pentacles` / «Пятёрка Пентаклей»; approved visual preserves the canonical Rider-Waite-Smith composition with two weary figures outside in the cold and a glowing window containing exactly five pentacles; the author accepted the balanced version after rejecting a people-heavy draft and a pentacles-heavy draft where the figures looked too small
+- latest old-card text update: `nine-of-swords` / «Девятка Мечей» in `preview/full/share`, rewritten through the new editorial filter to remove AI-sounding phrases around "маленькое действие", "жест", "опора", and repeated `не X, а Y` constructions
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
 
@@ -99,6 +102,10 @@ Do not rewrite working mechanics during UI work. Preserve auth, card draw, save,
 
 When the user asks for "QA preview", "страницу с картами и текстами", or wants to inspect added cards, send the `/qa/cards` link for the active environment. Locally this is usually `http://localhost:3000/qa/cards`; if the dev server is on another port, use that port.
 
+When the user says "разбираем фидбек" or sends a batch of MVP feedback/screenshots, read `directives/07-process-feedback.md` and use `docs/feedback.md` as the inbox. Do not turn every comment into a task automatically.
+
 After meaningful product, architecture, or visual decisions, update `docs/decisions.md`.
+
+Before commit, push, preview, or production deploy, read `directives/06-commit-and-deploy.md` and update docs/backlog/decisions so they say what is already done and what remains.
 
 If changes have been deployed, pushed to production, or used for a production preview, they must be committed. Do not leave production behavior only in the local working tree; git history is the source of truth for the next chat.
