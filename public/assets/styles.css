@@ -118,7 +118,7 @@
       #1d1610 52%,
       #181410 100%
     );
-    color: var(--cream); font-family: 'Raleway', sans-serif;
+    color: var(--cream); font-family: var(--font-ui);
     font-weight: 300; overflow: hidden;
   }
 
@@ -144,10 +144,10 @@
     opacity: 0.8;
   }
   .auth-header-logo-text {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-display);
     font-weight: 400;
-    font-size: 17px;
-    letter-spacing: 0.22em;
+    font-size: 15px;
+    letter-spacing: 0.18em;
     color: var(--cream);
     text-transform: uppercase;
   }
@@ -183,7 +183,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Raleway', sans-serif;
+    font-family: var(--font-ui);
     font-weight: 400;
     font-size: 11px;
     letter-spacing: 0.15em;
@@ -312,7 +312,7 @@
   .app-loader-text {
     position:relative;
     display:inline-block;
-    font-family:'Raleway', sans-serif;
+    font-family:var(--font-ui);
     font-size:11px;
     line-height:1;
     letter-spacing:2.6px;
@@ -328,10 +328,10 @@
     text-align:center;
   }
   .app-loader-error-title {
-    font-family:'Cormorant Garamond', serif;
+    font-family:var(--font-display);
     font-size:24px;
     line-height:1;
-    font-weight:300;
+    font-weight:400;
     color:rgba(240,230,211,0.9);
   }
   .app-loader-error-text {
@@ -346,7 +346,7 @@
     border-radius:999px;
     background:rgba(201,169,110,0.05);
     color:rgba(240,230,211,0.82);
-    font-family:'Raleway', sans-serif;
+    font-family:var(--font-ui);
     font-size:11px;
     line-height:1;
     letter-spacing:2px;
@@ -982,7 +982,7 @@
     background:transparent;
     border:1px solid var(--btn-border-color);
     color:var(--btn-color);
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-weight:300;
     font-size:11px;
     line-height:1.5;
@@ -1232,7 +1232,7 @@
     opacity:1;
   }
   .rc-symbol{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:38px;z-index:1;filter:drop-shadow(0 0 10px rgba(201,169,110,0.35))}
-  .rc-name{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:14px;letter-spacing:0.12em;color:var(--gold);text-align:center;z-index:1}
+  .rc-name{font-family:var(--font-display);font-weight:400;font-size:14px;letter-spacing:0.12em;color:var(--gold);text-align:center;z-index:1}
   .rc-num{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);font-size:9px;letter-spacing:0.3em;color:var(--gold-dim);z-index:1}
   .rc-front.has-card-image .rc-front-glow,
   .rc-front.has-card-image .rc-corner,
@@ -1297,7 +1297,7 @@
     border-radius:8px;
     background:rgba(201,169,110,0.04);
     color:var(--cream-dim);
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-size:10px;
     line-height:1;
     letter-spacing:0.14em;
@@ -1323,7 +1323,7 @@
     align-items:center;
     margin-bottom:22px;
     color:rgba(154,138,117,0.78);
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-size:11px;
     line-height:1;
     letter-spacing:0.14em;
@@ -1335,10 +1335,10 @@
     width:100%;
     max-width:470px;
     margin:0 0 28px;
-    font-family:'Cormorant Garamond',serif;
-    font-size:clamp(30px, 3vw, 43px);
-    line-height:1.06;
-    font-weight:300;
+    font-family:var(--font-display);
+    font-size:clamp(28px, 3vw, 38px);
+    line-height:1.12;
+    font-weight:400;
     color:var(--cream);
     letter-spacing:0.01em;
   }
@@ -1389,8 +1389,8 @@
     gap:12px;
     margin:0 0 16px;
     color:var(--gold);
-    font-family:'Cormorant Garamond',serif;
-    font-size:16px;
+    font-family:var(--font-display);
+    font-size:15px;
     line-height:1;
     font-weight:400;
     letter-spacing:0.08em;
@@ -1551,10 +1551,10 @@
     margin:0 0 20px;
     padding-right:42px;
     color:#e8d4a8;
-    font-family:'Cormorant Garamond',serif;
-    font-size:32px;
-    font-weight:300;
-    line-height:1.1;
+    font-family:var(--font-display);
+    font-size:29px;
+    font-weight:400;
+    line-height:1.16;
   }
   .result-reading-modal-text {
     color:rgba(240,230,211,0.8);
@@ -1577,7 +1577,7 @@
     gap:12px;
     margin:22px 0 18px;
     color:rgba(201,169,110,0.72);
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-size:10px;
     font-weight:400;
     letter-spacing:0.18em;
@@ -1614,20 +1614,20 @@
   }
 
   #resultCardName {
-    font-family:'Cormorant Garamond',serif;
+    font-family:var(--font-display);
     min-height:52px;
     display:flex; align-items:center; justify-content:center;
-    font-size:clamp(28px,6vw,40px); line-height:1.15; font-weight:300;
-    color:var(--cream); text-align:center; letter-spacing:0.05em;
+    font-size:clamp(26px,6vw,36px); line-height:1.18; font-weight:400;
+    color:var(--cream); text-align:center; letter-spacing:0.035em;
     transition:color 0.24s ease, letter-spacing 0.24s ease, text-shadow 0.24s ease;
   }
   #resultOverlay[data-mode="street"] #resultCardName {
-    font-family:'Neucha','Cormorant Garamond',serif;
-    font-size:clamp(28px,6vw,40px);
-    line-height:1.15;
+    font-family:var(--font-display);
+    font-size:clamp(26px,6vw,36px);
+    line-height:1.18;
     font-weight:400;
     color:var(--cream);
-    letter-spacing:0.035em;
+    letter-spacing:0.025em;
     text-shadow:none;
   }
   #resultDivider {
@@ -1653,7 +1653,7 @@
   }
   #resultOverlay[data-mode="street"] #resultText {
     color:var(--cream-dim);
-    font-family:'Neucha','Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-style:normal;
     font-weight:400;
     font-size:15px;
@@ -2086,7 +2086,7 @@
   }
   .gallery-card-title {
     margin-top:32px;
-    font-family:'Cormorant Garamond',serif;
+    font-family:var(--font-display);
     font-size:clamp(24px, 3vw, 32px);
     line-height:1;
     color:var(--cream);
@@ -2330,7 +2330,7 @@
   }
 
   .site-logo-text {
-    font-family:'Cormorant Garamond',serif;
+    font-family:var(--font-display);
     font-weight:400;
     font-size:17px;
     letter-spacing:0.22em;
@@ -2348,7 +2348,7 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-weight:400;
     font-size:11px;
     line-height:1;
@@ -2410,9 +2410,9 @@
   }
 
   .landing-hero-title {
-    font-family:'Cormorant Garamond',serif;
-    font-weight:300;
-    font-size:clamp(44px, 5.5vw, 68px);
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:clamp(40px, 5vw, 60px);
     color:#e8d4a8;
     letter-spacing:0.02em;
   }
@@ -2424,7 +2424,7 @@
   }
 
   .landing-hero-sub {
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-weight:300;
     font-size:12px;
     letter-spacing:0.12em;
@@ -2542,7 +2542,7 @@
   }
 
   .landing-panel-badge {
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-size:10px;
     font-weight:300;
     letter-spacing:0.18em;
@@ -2561,15 +2561,15 @@
   }
 
   .landing-panel-title {
-    font-family:'Cormorant Garamond',serif;
-    font-weight:300;
-    font-size:clamp(26px, 3vw, 38px);
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:clamp(24px, 2.6vw, 34px);
     color:#e8d4a8;
     line-height:1.15;
   }
 
   .landing-panel-desc {
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-weight:300;
     font-size:14px;
     letter-spacing:0.04em;
@@ -2947,7 +2947,7 @@
 
   /* Footer tagline */
   .landing-tagline {
-    font-family:'Raleway',sans-serif;
+    font-family:var(--font-ui);
     font-weight:300;
     font-size:13px;
     letter-spacing:0.06em;
@@ -3077,8 +3077,8 @@
       max-width:min(238px, 100%);
     }
     .landing-panel-day .landing-panel-title {
-      font-size:clamp(32px, 8.7vw, 39px);
-      line-height:1.05;
+      font-size:clamp(29px, 8vw, 35px);
+      line-height:1.12;
     }
     .landing-panel-day .landing-panel-desc {
       font-size:clamp(13px, 3.7vw, 15px);
@@ -3192,7 +3192,7 @@
   background: rgba(201,169,110,0.15);
   color: #c9a96e;
   border: 1px solid rgba(201,169,110,0.3);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -3203,7 +3203,7 @@
 }
 
 .drawn-today-footer {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3259,8 +3259,8 @@
 }
 
 .day-panel-content-col--drawn .landing-panel-title {
-  font-size: 38px;
-  line-height: 44px;
+  font-size: 34px;
+  line-height: 40px;
 }
 
 .day-panel-content-col--drawn .landing-panel-badge--drawn {
@@ -3276,7 +3276,7 @@
   border: 1px solid #7a6040;
   border-radius: 8px;
   box-shadow: 0 0 9px rgba(201,169,110,0.08);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.15em;
@@ -3307,7 +3307,7 @@
   justify-content: center;
   padding: 10px 20px;
   border-radius: 8px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -3365,7 +3365,7 @@
   align-items: center;
   justify-content: flex-end;
   padding: 60px clamp(40px, 9.1vw, 131px) 60px 40px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   position: relative;
 }
 
@@ -3396,10 +3396,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   color: rgba(201, 169, 110, 0.8);
-  font-size: 14px;
-  letter-spacing: 0.27em;
+  font-size: 12px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
@@ -3412,16 +3412,16 @@
 }
 
 .auth-modal-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 300;
-  font-size: 38px;
-  line-height: 44px;
+  font-family: var(--font-display);
+  font-weight:400;
+  font-size: 34px;
+  line-height: 40px;
   color: #e8d4a8;
   margin: 0;
 }
 
 .auth-modal-subtitle {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 300;
   font-size: 14px;
   line-height: 24px;
@@ -3447,7 +3447,7 @@
   border: 1px solid #7a6040;
   border-radius: 8px;
   box-shadow: 0 0 9px rgba(201, 169, 110, 0.08);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.15em;
@@ -3495,7 +3495,7 @@
 }
 
 .auth-divider span {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 300;
   font-size: 12px;
   letter-spacing: 0.04em;
@@ -3521,7 +3521,7 @@
   border: 1px solid rgba(201, 169, 110, 0.1);
   border-radius: 8px;
   color: #f0e6d3;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.15em;
@@ -3545,7 +3545,7 @@
   border-radius: 50%;
   background: transparent;
   color: rgba(201, 169, 110, 0.72);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
@@ -3578,7 +3578,7 @@
 
 .auth-input--otp {
   padding-left: 48px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   letter-spacing: 0.6em;
   text-transform: none;
@@ -3594,12 +3594,12 @@
 .auth-error {
   color: #e07070;
   font-size: 13px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   margin: 0;
 }
 
 .auth-otp-hint {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 300;
   color: rgba(154, 138, 117, 0.8);
@@ -3611,7 +3611,7 @@
   background: transparent;
   border: none;
   color: #7a6040;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   cursor: pointer;
   padding: 8px 0;
@@ -3625,7 +3625,7 @@
 }
 
 .auth-disclaimer {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 300;
   font-size: 12px;
   line-height: 24px;
@@ -3647,8 +3647,8 @@
     padding: 48px 28px;
   }
   .auth-modal-title {
-    font-size: clamp(28px, 8vw, 38px);
-    line-height: 1.2;
+    font-size: clamp(28px, 7.4vw, 34px);
+    line-height: 1.18;
   }
 }
 
@@ -3702,16 +3702,16 @@
 }
 
 .save-modal-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 300;
-  font-size: 28px;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-weight:400;
+  font-size: 25px;
+  line-height: 1.24;
   color: #e8d4a8;
   margin: 0;
 }
 
 .save-modal-desc {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 300;
   font-size: 14px;
   line-height: 1.6;
@@ -3727,7 +3727,7 @@
 .save-modal-later {
   background: transparent;
   border: none;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 300;
   letter-spacing: 0.06em;

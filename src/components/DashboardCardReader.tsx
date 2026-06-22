@@ -46,6 +46,7 @@ type ReaderState = {
     start: CardFrame
     end: CardFrame
   }
+  sourceScale: number
   phase: 'placed' | 'opening' | 'open' | 'closing' | 'handoff'
 }
 
@@ -245,6 +246,7 @@ export default function DashboardCardReader({
         start: sourceFrame ?? CANONICAL_CARD_FRAME,
         end: targetFrame ?? getTargetFrame(sourceRect, sourceFrame, target.cardWidth),
       },
+      sourceScale: sourceRect.width / target.cardWidth,
       phase: 'placed',
     })
 
@@ -424,7 +426,11 @@ export default function DashboardCardReader({
           '--db-card-reader-outer-radius': `${reader.frame.end.outerRadius}px`,
           '--db-card-reader-frame-inset': `${reader.frame.end.inset}px`,
           '--db-card-reader-art-radius': `${reader.frame.end.artRadius}px`,
-        } as CSSProperties & Record<'--db-card-reader-tilt' | '--db-card-reader-outer-radius' | '--db-card-reader-frame-inset' | '--db-card-reader-art-radius', string>}
+          '--db-card-reader-source-border-width': `${1 / reader.sourceScale}px`,
+          '--db-card-reader-source-inner-border-width': `${1 / reader.sourceScale}px`,
+          '--db-card-reader-source-shadow-y': `${12 / reader.sourceScale}px`,
+          '--db-card-reader-source-shadow-blur': `${28 / reader.sourceScale}px`,
+        } as CSSProperties & Record<'--db-card-reader-tilt' | '--db-card-reader-outer-radius' | '--db-card-reader-frame-inset' | '--db-card-reader-art-radius' | '--db-card-reader-source-border-width' | '--db-card-reader-source-inner-border-width' | '--db-card-reader-source-shadow-y' | '--db-card-reader-source-shadow-blur', string>}
       >
         <div className="db-card-reader-tilt">
           <img src={imageSrc} alt={title} className="db-card-reader-art" />

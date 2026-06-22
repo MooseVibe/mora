@@ -4,7 +4,7 @@
   overflow: hidden;
   background: transparent;
   color: var(--cream, #f0e6d3);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   display: flex;
   flex-direction: column;
   animation: mora-page-enter 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
@@ -35,7 +35,7 @@
   border-radius: 0;
   color: var(--cream-dim, #9a8a75);
   background: transparent;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   letter-spacing: 0;
   line-height: 13px;
@@ -66,9 +66,9 @@
   padding: 4px 0 12px;
 }
 .jn-page-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 40px;
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight:400;
   color: #e8d4a8;
   letter-spacing: 0.02em;
   line-height: 1.1;
@@ -90,7 +90,7 @@
   border: 1px solid rgba(201,169,110,0.15);
   border-radius: 8px;
   color: var(--cream-dim, #9a8a75);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
@@ -201,11 +201,11 @@
   gap: 6px;
 }
 .jn-row-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 26px;
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight:400;
   color: var(--cream, #f0e6d3);
-  line-height: 1.05;
+  line-height: 1.12;
 }
 .jn-row-desc {
   max-width: 560px;
@@ -262,7 +262,7 @@
   border-radius: 50%;
   background: rgba(255,255,255,0.025);
   color: var(--cream-dim, #9a8a75);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   line-height: 1;
   opacity: 0.55;
@@ -306,7 +306,7 @@ body.is-dashboard-card-reading .jn-wrap {
   background: var(--gold, #c9a96e);
   border: 0;
   color: #090705;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -362,7 +362,7 @@ body.is-dashboard-card-reading .jn-wrap {
   border-radius: 8px;
   color: var(--cream-dim, #9a8a75);
   background: rgba(255,255,255,0.025);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background-color 0.2s;
 }

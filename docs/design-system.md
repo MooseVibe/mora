@@ -42,28 +42,27 @@
 
 ## Типографика
 
-Шрифты загружаются через Google Fonts в `src/app/layout.tsx`.
+Шрифты лежат локально в `public/assets/fonts/` и подключаются через `public/assets/fonts.css`.
 
 | Шрифт | Начертания | Роль |
 |---|---|---|
-| **Cormorant Garamond** (serif) | 300, 400; italic 300, 400 | Заголовки, названия карт, ритуальные элементы |
-| **Raleway** (sans-serif) | 200, 300, 400 | Весь UI: body, кнопки, nav, подписи |
-| **Neucha** (рукописный) | 400 | Зарезервирован, пока почти не используется |
+| **Spectral SC** (display serif) | 300, 400, 500 | Заголовки, названия карт, ритуальные элементы |
+| **Roboto Condensed** (sans-serif) | 300, 400, 500, 600 | Весь UI: body, кнопки, nav, подписи |
 
 ### Размеры (из кода)
 
 | Уровень | Шрифт | Размер | Где |
 |---|---|---|---|
-| Display | Cormorant Garamond 300 | `clamp(44px, 5.5vw, 68px)` | `.landing-hero-title` — хедлайн лендинга |
-| H1 / Panel title | Cormorant Garamond 300 | `clamp(26px, 3vw, 38px)` | `.landing-panel-title` — заголовки панелей |
-| H1 auth | Cormorant Garamond 300 | `38px` | `.auth-modal-title` |
-| H1 dashboard | Cormorant Garamond 300 | `32px` | `.db-welcome-name` |
-| Card title | Cormorant Garamond 300 | `26px` | `.db-card-title` |
-| Body | Raleway 300 | `14px` / `13px` | описания, `.landing-panel-desc` |
-| UI / кнопки | Raleway 300–400 | `11px`, letter-spacing 0.35em, uppercase | `.btn` |
-| Caption / nav | Raleway 400 | `13px` | `.db-nav-link` |
-| Small | Raleway 400 | `12px` / `11px` | даты, метки |
-| Eyebrow / badge | Raleway 300 | `10px`, letter-spacing 0.18em, uppercase | `.landing-panel-badge` |
+| Display | Spectral SC 400 | `clamp(40px, 5vw, 60px)` | `.landing-hero-title` — хедлайн лендинга |
+| H1 / Panel title | Spectral SC 400 | `clamp(24px, 2.6vw, 34px)` | `.landing-panel-title` — заголовки панелей |
+| H1 auth | Spectral SC 400 | `34px` | `.auth-modal-title` |
+| H1 dashboard | Spectral SC 400 | `36px` | `.db-welcome` |
+| Card title | Spectral SC 400 | `31px` | `.db-card-title` |
+| Body | Roboto Condensed 300 | `14px` / `13px` | описания, `.landing-panel-desc` |
+| UI / кнопки | Roboto Condensed 300–600 | `11px`, letter-spacing 0.35em, uppercase | `.btn` |
+| Caption / nav | Roboto Condensed 400 | `13px` | `.db-nav-link` |
+| Small | Roboto Condensed 400 | `12px` / `11px` | даты, метки |
+| Eyebrow / badge | Roboto Condensed 300 | `10px`, letter-spacing 0.18em, uppercase | `.landing-panel-badge` |
 
 **Правило:** serif только для заголовков и магических элементов (название карты, мистические подписи). Тело текста — всегда sans-serif для читаемости.
 

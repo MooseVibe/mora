@@ -23,7 +23,7 @@ def main() -> None:
     parser.add_argument("--crop-start", type=float, default=0.78)
     parser.add_argument("--panel-width", type=int, default=360)
     parser.add_argument("--panel-height", type=int, default=360)
-    parser.add_argument("--font", type=Path, default=Path("public/assets/fonts/raleway-400.ttf"))
+    parser.add_argument("--font", type=Path, default=Path("public/assets/fonts/roboto-condensed-400.ttf"))
     args = parser.parse_args()
 
     sheet = Image.new("RGB", (len(args.item) * args.panel_width, args.panel_height), "#090705")

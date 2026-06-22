@@ -15,7 +15,7 @@
   padding-bottom: 12px;
   display: flex;
   flex-direction: column;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   color: var(--cream, #f0e6d3);
   animation: mora-page-enter 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
@@ -34,9 +34,9 @@
 
 .db-welcome {
   flex-shrink: 0;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 40px;
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight:400;
   color: #e8d4a8;
   letter-spacing: 0.02em;
   line-height: 1.1;
@@ -162,8 +162,8 @@
 }
 
 .db-card-section-title {
-  font-family: 'Raleway', sans-serif;
-  font-weight: 500;
+  font-family: var(--font-ui);
+  font-weight: 300;
   font-size: 24px;
   color: var(--gold, #c9a96e);
   line-height: 1.2;
@@ -258,14 +258,14 @@
 }
 
 .db-card-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 300;
-  font-size: 34px;
-  line-height: 1.15;
+  font-family: var(--font-display);
+  font-weight:400;
+  font-size: 31px;
+  line-height: 1.2;
   margin: 0;
 }
 .db-card-title-name { color: #e8d4a8; }
-.db-card-title-sub  { color: #a09274; font-size: 26px; }
+.db-card-title-sub  { color: #a09274; font-size: 23px; }
 
 .db-card-descs {
   display: flex;
@@ -283,7 +283,7 @@
 .db-card-tarot-brief span,
 .db-card-meaning-label {
   color: var(--gold-dim, #7a6040);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -322,7 +322,7 @@
   padding: 10px 20px;
   border: 1px solid;
   border-radius: 8px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -472,13 +472,13 @@
 .rcw-name {
   display: block;
   max-width: 100%;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 400;
   color: var(--cream, #f0e6d3);
   line-height: 1.2;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -526,9 +526,9 @@
   color: var(--cream-dim, #9a8a75);
 }
 .db-tarot-stub-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18px;
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight:400;
   color: var(--cream, #f0e6d3);
   margin: 0;
   line-height: 1.3;
@@ -550,7 +550,7 @@
   border: 1px solid rgba(201, 169, 110, 0.18);
   border-radius: 8px;
   font-size: 11px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   letter-spacing: 0.06em;
   color: var(--gold, #c9a96e);
   text-decoration: none;
@@ -619,9 +619,9 @@
   transform: translateY(40px);
 }
 .dw-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 34px;
-  font-weight: 300;
+  font-weight:400;
   color: #e8d4a8;
   line-height: 1.15;
   margin: 0;
@@ -656,7 +656,7 @@
   letter-spacing: 0.18em;
   color: var(--gold, #c9a96e);
   text-transform: uppercase;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   white-space: nowrap;
 }
 .dw-timer-time {
@@ -756,6 +756,12 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
     border-radius 460ms cubic-bezier(0.45, 0, 0.2, 1);
 }
 
+.db-card-reader--closing .db-card-reader-tilt,
+.db-card-reader--handoff .db-card-reader-tilt {
+  border-width: var(--db-card-reader-source-border-width, 1px);
+  box-shadow: 0 var(--db-card-reader-source-shadow-y, 12px) var(--db-card-reader-source-shadow-blur, 28px) rgba(0, 0, 0, 0.4);
+}
+
 .db-card-reader--handoff .db-card-reader-card {
   opacity: 0;
   transition: opacity 90ms cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -765,6 +771,11 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
 .db-card-reader--closing .db-card-reader-art {
   transition-duration: 460ms;
   transition-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.db-card-reader--closing .db-card-reader-tilt::before,
+.db-card-reader--handoff .db-card-reader-tilt::before {
+  border-width: var(--db-card-reader-source-inner-border-width, 1px);
 }
 
 .db-card-reader-tilt::before {
@@ -810,17 +821,17 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   width: 100%;
   max-width: 470px;
   margin: 0 0 28px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(30px, 3vw, 43px);
-  line-height: 1.06;
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.12;
+  font-weight:400;
   color: var(--cream, #f0e6d3);
   letter-spacing: 0.01em;
 }
 
 .db-card-reader-date {
   margin: 0 0 22px;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   line-height: 1;
   letter-spacing: 0.14em;
@@ -918,10 +929,10 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   margin: 0 0 20px;
   padding-right: 42px;
   color: #e8d4a8;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 32px;
-  font-weight: 300;
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: 29px;
+  font-weight:400;
+  line-height: 1.16;
 }
 
 .db-card-reader-modal-text {
@@ -949,7 +960,7 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   gap: 12px;
   margin: 22px 0 18px;
   color: rgba(201, 169, 110, 0.72);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 400;
   letter-spacing: 0.18em;
@@ -998,7 +1009,7 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   border-radius: 8px;
   background: rgba(201, 169, 110, 0.06);
   color: rgba(240, 230, 211, 0.78);
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   line-height: 1;
   letter-spacing: 0.16em;

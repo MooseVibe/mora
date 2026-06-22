@@ -1,63 +1,62 @@
 @font-face {
-  font-family: 'Cormorant Garamond';
+  font-family: 'Spectral SC';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('/assets/fonts/cormorant-garamond-300.ttf') format('truetype');
+  src: url('/assets/fonts/spectral-sc-300.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'Cormorant Garamond';
+  font-family: 'Spectral SC';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/cormorant-garamond-400.ttf') format('truetype');
+  src: url('/assets/fonts/spectral-sc-400.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'Cormorant Garamond';
-  font-style: italic;
-  font-weight: 300;
-  font-display: swap;
-  src: url('/assets/fonts/cormorant-garamond-300-italic.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Cormorant Garamond';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/assets/fonts/cormorant-garamond-400-italic.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Raleway';
+  font-family: 'Spectral SC';
   font-style: normal;
-  font-weight: 200;
+  font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/raleway-200.ttf') format('truetype');
+  src: url('/assets/fonts/spectral-sc-500.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'Raleway';
+  font-family: 'Roboto Condensed';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('/assets/fonts/raleway-300.ttf') format('truetype');
+  src: url('/assets/fonts/roboto-condensed-300.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'Raleway';
+  font-family: 'Roboto Condensed';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/raleway-400.ttf') format('truetype');
+  src: url('/assets/fonts/roboto-condensed-400.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'Neucha';
+  font-family: 'Roboto Condensed';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/neucha-400.ttf') format('truetype');
+  src: url('/assets/fonts/roboto-condensed-500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/roboto-condensed-600.ttf') format('truetype');
+}
+
+:root {
+  --font-display: 'Spectral SC', Georgia, serif;
+  --font-ui: 'Roboto Condensed', 'Arial Narrow', Arial, sans-serif;
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-ui);
 }
