@@ -33,7 +33,7 @@ type MoraNativeWindow = Window & {
   }
 }
 
-const NATIVE_APP_VERSION = '20260616-2'
+const NATIVE_APP_VERSION = '20260622-1'
 
 function getTimeUntilMidnight(): string {
   const now = new Date()

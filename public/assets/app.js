@@ -1,5 +1,5 @@
 'use strict';
-import { TAROT_CARDS } from './cards.js?v=cards-20260616-2';
+import { TAROT_CARDS } from './cards.js?v=cards-20260622-1';
 import { STATE, transition, resetState, runSequence } from './state.js';
 import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, preloadCardImage, wait } from './image-cache.js';
 import { smoothStep, lerpArc } from './arc.js';
@@ -90,6 +90,13 @@ function byId(id) {
 }
 
 let cleanupFns = [];
+let initRetryFrame = null;
+
+function clearInitRetry() {
+  if (initRetryFrame == null) return;
+  window.cancelAnimationFrame(initRetryFrame);
+  initRetryFrame = null;
+}
 
 function addManagedListener(target, type, handler, options) {
   if (!target) return;
@@ -1961,6 +1968,7 @@ function bindEvents() {
 }
 
 function cleanupApp() {
+  clearInitRetry();
   cleanupFns.forEach(cleanup => cleanup());
   cleanupFns = [];
   stopMobileTiltListening();
@@ -1996,6 +2004,22 @@ function initApp() {
   settleInitialAppLoader();
   preloadPendingDrawCard();
   return true;
+}
+
+function initAppWhenDomReady(maxAttempts = 60) {
+  clearInitRetry();
+
+  let attempts = 0;
+  function tryInit() {
+    initRetryFrame = null;
+    if (initApp()) return;
+
+    attempts++;
+    if (attempts >= maxAttempts) return;
+    initRetryFrame = window.requestAnimationFrame(tryInit);
+  }
+
+  tryInit();
 }
 
 const drawDeps = {
@@ -2074,9 +2098,9 @@ const galleryDeps = {
 };
 // ── Инициализация: убедиться что всё в правильном состоянии ──
 window.__moraNativeApp = {
-  init: initApp,
+  init: initAppWhenDomReady,
   cleanup: cleanupApp,
 };
-initApp();
+initAppWhenDomReady();
 
 })();
