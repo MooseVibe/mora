@@ -17,10 +17,10 @@
 - Карта вытягивается раз в день
 - Защита от повторного вытягивания — нельзя вытянуть второй раз в тот же день
 - Карта автоматически сохраняется в дневник
-- В колоде 58 карт: 22 старших аркана и 36 пилотных младших/придворных карт
+- В колоде 59 карт: 22 старших аркана и 37 пилотных младших/придворных карт
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
-- Share-ready тексты есть у 40 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
+- Share-ready тексты есть у 41 карты: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
 
 ### Дневник карт (в личном кабинете)
 - История всех вытянутых карт по дням
@@ -49,17 +49,16 @@
 
 ## Следующий шаг
 
-### Cards-first: одна старая карта по текстам
+### MLP отклика на карту
 
-Ближайшая задача: продолжать колоду маленькими проходами. Следующий конкретный проход — выбрать одну уже существующую карту и обновить её `description`, `titleMeta` и 3-4 варианта `dayVariants` в формате `preview/full/share`.
+Ближайшая продуктовая задача перед глубоким UI-макетированием: сделать маленький MLP первого отклика на карту, не проверку “сбылось / не сбылось”.
 
 Ожидаемое поведение:
-- сначала подготовить тексты для ручного чтения автором;
-- не менять `id`, `num`, `symbol`, `visualHint`, ассет и механику вытягивания;
-- интегрировать тексты только после явного аппрува `preview/full` и отдельного аппрува `share`;
-- прогнать каждый абзац через `docs/banned-phrases.md` и редакторский фильтр Mora.
+- варианты: `Принимаю / Не моё / Пока не понимаю` или близкая финальная формулировка;
+- нажатие закрывает ритуал чтения, показывает короткий hardcoded confirmation-текст и сохраняет первый отклик пользователя в дневник;
+- на первом проходе не делать coins, статистику, вечернюю проверку “сбылось”, AI-объяснение или сложную персонализацию.
 
-После текущего cards-first блока нужно отдельно продумать механику отклика на карту: `Принимаю / Не принимаю / Пока не знаю` или близкую формулировку. Гипотеза держится на давлении MVP-тестеров, но её ценность ещё нужно проверить маленьким MLP. После этого ближайшими UI-задачами остаются `journal visual polish`, responsive dashboard/journal и dashboard polish.
+Cards-first продолжается параллельно маленькими проходами: новая карта через visual/marker/text QA или старая карта через `preview/full/share`. Следующий cards-first проход — выбрать одну уже существующую карту и обновить её `description`, `titleMeta` и 3-4 варианта `dayVariants`, но не смешивать это с MLP отклика.
 
 ## Планируется (после редизайна)
 

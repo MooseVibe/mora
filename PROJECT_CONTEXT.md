@@ -73,9 +73,9 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
-- deck currently has 58 cards: 22 major arcana and 36 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
-- latest card addition: `six-of-wands` / «Шестёрка Жезлов»; approved visual preserves Rider-Waite-Smith composition with a mounted rider holding one laurel-crowned wand plus exactly five companion wands, for six wands total; `VI` marker was added through the standard integrated marker helper
+- deck currently has 59 cards: 22 major arcana and 37 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
+- latest card addition: `eight-of-wands` / «Восьмёрка Жезлов»; approved visual keeps Rider-Waite-Smith logic of eight parallel flying wands, with a standard integrated `VIII` marker
 - latest old-card text update: `wheel` / «Колесо Фортуны» in `preview/full/share`, rewritten as three daily scenarios around a changed plan, disrupted rhythm, and a short-lived chance; approved with separate `share` texts
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
@@ -84,8 +84,9 @@ Current work phase:
 
 - UI redesign and polish for existing screens
 - dashboard and journal are the active areas
-- immediate mode: cards-first, one card per pass; next pass is one old-card text update via `directives/05-update-card-texts.md`; do not change card art, IDs, draw/save/journal mechanics, or start `three-of-swords`
-- last product mechanic to think through before Figma/mockup work: card-response hypothesis, likely `Принимаю / Не принимаю / Пока не знаю`; keep it as a small testable MLP, not a permanent commitment
+- immediate mode: finish the card-response MLP before deeper Figma/mockup work; treat it as first response to a card, not as “prediction came true”
+- proposed response options: `Принимаю / Не моё / Пока не понимаю`; after tap, show a short hardcoded confirmation and save the response to the journal; no coins, statistics, evening checks, or AI explanation in the first pass
+- cards-first continues in parallel one card per pass; next card pass is one old-card text update via `directives/05-update-card-texts.md`; do not change card art, IDs, draw/save/journal mechanics, or start `three-of-swords`
 - AI tarot chat is planned later, after the product feels presentable
 
 ## Working Rules
