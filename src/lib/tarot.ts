@@ -45,6 +45,7 @@ export type TarotCardId =
   | 'six-of-pentacles'
   | 'seven-of-pentacles'
   | 'eight-of-pentacles'
+  | 'nine-of-pentacles'
   | 'two-of-wands'
   | 'three-of-wands'
   | 'four-of-wands'
