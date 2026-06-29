@@ -73,9 +73,9 @@ Working MVP:
 - dashboard with daily card and recent cards
 - dashboard recent cards open through the full-result reader with the saved/fallback reading text
 - journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
-- deck currently has 61 cards: 22 major arcana and 39 minor/court cards
-- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `justice`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `nine-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `nine-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
-- latest card addition: `nine-of-pentacles` / «Девятка Пентаклей»; approved visual keeps Rider-Waite-Smith logic of one solitary figure in a cultivated garden, exactly nine visible pentacles, and one falcon on the hand, with a standard integrated `IX` marker
+- deck currently has 62 cards: 22 major arcana and 40 minor/court cards
+- share-ready cards currently: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `justice`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `nine-of-pentacles`, `ten-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `nine-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
+- latest card addition: `ten-of-pentacles` / «Десятка Пентаклей»; approved visual keeps Rider-Waite-Smith logic of several generations near a home/arch, exactly ten visible pentacles, a child and two dogs, with a standard integrated `X` marker
 - latest old-card text update: `justice` / «Справедливость» in `preview/full/share`, rewritten around the card symbols of sword, scales, facts, and one precise example for an honest conversation; approved with separate `share` texts
 - dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
 - recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
@@ -85,7 +85,8 @@ Current work phase:
 - UI redesign and polish for existing screens
 - dashboard and journal are the active areas
 - immediate mode: finish the card-response MLP before deeper Figma/mockup work; treat it as first response to a card, not as “prediction came true”
-- proposed response options: `Принимаю / Не моё / Пока не понимаю`; after tap, show a short hardcoded confirmation and save the response to the journal; no coins, statistics, evening checks, or AI explanation in the first pass
+- current card-response progress: desktop `DashboardCardReader` has a Figma-based draft with `Принимаю / Не принимаю`, local confirmation text, and “Читать дальше” truncation; saving the response to the journal and the third `Пока не понимаю` option are still next steps
+- proposed final response options: `Принимаю / Не моё / Пока не понимаю`; after tap, show a short hardcoded confirmation and save the response to the journal; no coins, statistics, evening checks, or AI explanation in the first pass
 - cards-first continues in parallel one card per pass; next card pass is one old-card text update via `directives/05-update-card-texts.md`; do not change card art, IDs, draw/save/journal mechanics, or start `three-of-swords`
 - AI tarot chat is planned later, after the product feels presentable
 

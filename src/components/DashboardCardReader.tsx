@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { getTarotCardImageSrc } from '@/lib/tarot'
@@ -29,19 +29,23 @@ type CardFrame = {
   artRadius: number
 }
 
+type ReaderResponse = 'accept' | 'reject'
+
 type ReaderState = {
   sourceRect: DOMRect
-  target: {
-    dx: number
-    dy: number
-    scale: number
-    cardLeft: number
-    cardTop: number
-    cardWidth: number
-    panelLeft: number
-    panelTop: number
-    panelWidth: number
-  }
+    target: {
+      dx: number
+      dy: number
+      scale: number
+      cardLeft: number
+      cardTop: number
+      cardWidth: number
+      cardHeight: number
+      panelLeft: number
+      panelTop: number
+      panelWidth: number
+      panelHeight: number
+    }
   frame: {
     start: CardFrame
     end: CardFrame
@@ -57,10 +61,16 @@ const CANONICAL_CARD_FRAME: CardFrame = {
   inset: 6,
   artRadius: 8,
 }
+const DETAIL_CARD_FRAME: CardFrame = {
+  outerRadius: 20,
+  inset: 11,
+  artRadius: 9,
+}
 const OPEN_MS = 680
 const CLOSE_MS = 460
 const HANDOFF_MS = 90
 const DASHBOARD_REVEAL_BEFORE_CLOSE_MS = 210
+const MEANING_PREVIEW_MAX_HEIGHT = 130
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
@@ -87,15 +97,17 @@ function getResultLayout(sourceRect: DOMRect) {
       cardLeft: targetLeft,
       cardTop: targetTop,
       cardWidth: targetWidth,
+      cardHeight: targetHeight,
       panelLeft: 24,
       panelTop,
       panelWidth: viewportWidth - 48,
+      panelHeight: Math.max(0, viewportHeight - panelTop - 24),
     }
   }
 
-  const gap = 120
-  const preferredTextWidth = 520
-  const minTextWidth = 380
+  const gap = 85
+  const preferredTextWidth = 579
+  const minTextWidth = 420
   const minOuterPad = 72
   const availableTextWidth = viewportWidth - minOuterPad * 2 - gap - targetWidth
   const textWidth = clamp(availableTextWidth, minTextWidth, preferredTextWidth)
@@ -111,19 +123,11 @@ function getResultLayout(sourceRect: DOMRect) {
     cardLeft: targetLeft,
     cardTop: targetTop,
     cardWidth: targetWidth,
+    cardHeight: targetHeight,
     panelLeft: layoutLeft,
-    panelTop: viewportHeight / 2,
+    panelTop: targetTop,
     panelWidth: textWidth,
-  }
-}
-
-function getTargetFrame(sourceRect: DOMRect, sourceFrame: CardFrame | undefined, targetWidth: number) {
-  const frame = sourceFrame ?? CANONICAL_CARD_FRAME
-  const ratio = targetWidth / sourceRect.width
-  return {
-    outerRadius: frame.outerRadius * ratio,
-    inset: frame.inset * ratio,
-    artRadius: frame.artRadius * ratio,
+    panelHeight: targetHeight,
   }
 }
 
@@ -185,11 +189,19 @@ export default function DashboardCardReader({
   const [reader, setReader] = useState<ReaderState | null>(null)
   const [tiltStyle, setTiltStyle] = useState('')
   const [isFullMeaningOpen, setIsFullMeaningOpen] = useState(false)
+  const [isMeaningOverflowing, setIsMeaningOverflowing] = useState(false)
+  const [response, setResponse] = useState<ReaderResponse | null>(null)
+  const meaningTextRef = useRef<HTMLDivElement | null>(null)
   const isReaderOpen = reader !== null
   const imageSrc = useMemo(() => getTarotCardImageSrc(cardId), [cardId])
   const fullMeaning = fullParagraphs?.length ? fullParagraphs : paragraphs
   const hasFullMeaning = fullMeaning.join('\n') !== paragraphs.join('\n')
-  const lastPreviewParagraphIndex = paragraphs.length - 1
+  const shouldShowReadMore = hasFullMeaning || isMeaningOverflowing
+  const responseText = response === 'accept'
+    ? 'Отклик сохранён. Эта карта останется в дневнике как принятая.'
+    : response === 'reject'
+      ? 'Отклик сохранён. Иногда карта говорит не сразу.'
+      : ''
 
   useEffect(() => {
     setMounted(true)
@@ -214,6 +226,20 @@ export default function DashboardCardReader({
     document.body.classList.add('is-dashboard-card-source-hidden')
     return () => document.body.classList.remove('is-dashboard-card-source-hidden')
   }, [isReaderOpen])
+
+  useEffect(() => {
+    if (reader?.phase !== 'open') return undefined
+    const text = meaningTextRef.current
+    if (!text) return undefined
+
+    const measure = () => {
+      setIsMeaningOverflowing(text.scrollHeight > MEANING_PREVIEW_MAX_HEIGHT)
+    }
+
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [reader?.phase, paragraphs, title])
 
   useEffect(() => {
     if (!reader || reader.phase === 'handoff') {
@@ -244,7 +270,7 @@ export default function DashboardCardReader({
       target,
       frame: {
         start: sourceFrame ?? CANONICAL_CARD_FRAME,
-        end: targetFrame ?? getTargetFrame(sourceRect, sourceFrame, target.cardWidth),
+        end: targetFrame ?? DETAIL_CARD_FRAME,
       },
       sourceScale: sourceRect.width / target.cardWidth,
       phase: 'placed',
@@ -262,6 +288,8 @@ export default function DashboardCardReader({
 
   function closeReader() {
     setIsFullMeaningOpen(false)
+    setIsMeaningOverflowing(false)
+    setResponse(null)
     setTiltStyle('')
     setReader(current => current ? { ...current, phase: 'closing' } : current)
     window.setTimeout(() => {
@@ -305,67 +333,89 @@ export default function DashboardCardReader({
 
   const overlay = reader ? (
     <div className={`db-card-reader db-card-reader--${reader.phase}`} role="dialog" aria-modal="true" aria-label={title}>
-      <button
-        className="db-card-reader-back"
-        type="button"
-        onClick={closeReader}
-        style={{ '--db-card-reader-panel-left': `${reader.target.panelLeft}px` } as CSSProperties}
-      >
-        Назад
-      </button>
-
       <section
         className="db-card-reader-panel"
         style={{
           left: `${reader.target.panelLeft}px`,
           top: `${reader.target.panelTop}px`,
           width: `${reader.target.panelWidth}px`,
+          height: `${reader.target.panelHeight}px`,
         }}
       >
-        {readingDate && <p className="db-card-reader-date">{readingDate}</p>}
-        <div className="result-reading-tags" aria-label="Теги карты">
-          {tags.map(tag => (
-            <span className="result-reading-tag" key={tag}>{tag}</span>
-          ))}
-        </div>
-        <h2 className="result-reading-title">
-          <span className="result-reading-title-name">{title}</span>
-          {titleMeta && <span className="result-reading-title-meta"> — {titleMeta}</span>}
-        </h2>
-        <div className="result-reading-sections">
-          <section className="result-reading-section">
-            <h3 className="result-reading-section-title">{meaningLabel}</h3>
-            <div className="result-reading-section-text">
-              {paragraphs.map((paragraph, index) => {
-                const showInlineMore = hasFullMeaning && index === lastPreviewParagraphIndex
-                return (
-                  <p className="result-reading-paragraph" key={index}>
-                    {showInlineMore ? `${paragraph} ` : paragraph}
-                    {showInlineMore && (
-                      <button
-                        className="result-reading-inline-more"
-                        type="button"
-                        onClick={() => setIsFullMeaningOpen(true)}
-                      >
-                        Читать дальше
-                      </button>
-                    )}
-                  </p>
-                )
-              })}
-            </div>
-          </section>
-        </div>
-        {shareText && (
-          <div className="result-card-actions db-card-reader-actions">
-            <DashboardShareButton
-              cardId={cardId}
-              cardTitle={title}
-              shareText={shareText}
-              variant="action"
-            />
+        <button className="db-card-reader-back" type="button" onClick={closeReader}>
+          На главную
+        </button>
+
+        <div className="db-card-reader-content">
+          {readingDate && <p className="db-card-reader-date">{readingDate}</p>}
+          <div className="result-reading-tags" aria-label="Теги карты">
+            {tags.map(tag => (
+              <span className="result-reading-tag" key={tag}>{tag}</span>
+            ))}
           </div>
-        )}
+          <h2 className="result-reading-title">
+            <span className="result-reading-title-name">{title}</span>
+            {titleMeta && <span className="result-reading-title-meta"> — {titleMeta}</span>}
+          </h2>
+          <div className="result-reading-sections">
+            <section className="result-reading-section">
+              <h3 className="result-reading-section-title">{meaningLabel}</h3>
+              <div
+                className={`result-reading-section-text${shouldShowReadMore ? ' result-reading-section-text--clamped' : ''}`}
+                ref={meaningTextRef}
+              >
+                {paragraphs.map((paragraph, index) => (
+                  <p className="result-reading-paragraph" key={index}>
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+              {shouldShowReadMore && (
+                <button
+                  className="result-reading-inline-more"
+                  type="button"
+                  onClick={() => setIsFullMeaningOpen(true)}
+                >
+                  Читать дальше
+                </button>
+              )}
+            </section>
+          </div>
+          <div className="db-card-reader-response" aria-live="polite">
+            {responseText ? (
+              <p className="db-card-reader-response-text">{responseText}</p>
+            ) : (
+              <div className="db-card-reader-response-actions">
+                <button
+                  className="db-card-reader-response-btn db-card-reader-response-btn--reject"
+                  type="button"
+                  onClick={() => setResponse('reject')}
+                >
+                  <span className="db-card-reader-response-icon db-card-reader-response-icon--x" aria-hidden="true" />
+                  Не принимаю
+                </button>
+                <button
+                  className="db-card-reader-response-btn db-card-reader-response-btn--accept"
+                  type="button"
+                  onClick={() => setResponse('accept')}
+                >
+                  <span className="db-card-reader-response-icon db-card-reader-response-icon--check" aria-hidden="true" />
+                  Принимаю
+                </button>
+              </div>
+            )}
+          </div>
+          {shareText && (
+            <div className="result-card-actions db-card-reader-actions">
+              <DashboardShareButton
+                cardId={cardId}
+                cardTitle={title}
+                shareText={shareText}
+                variant="action"
+              />
+            </div>
+          )}
+        </div>
       </section>
 
       {isFullMeaningOpen && (

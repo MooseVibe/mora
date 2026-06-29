@@ -35,6 +35,8 @@
 | `--outcome-yes-border` _(dashboard)_ | `rgba(166,169,71,0.45)` | граница кнопки «Сбылось» |
 | `--outcome-no` _(dashboard)_ | `#d8514c` | кнопка «Не сбылось» — приглушённая терракота |
 | `--outcome-no-border` _(dashboard)_ | `rgba(216,81,76,0.45)` | граница кнопки «Не сбылось» |
+| `--reader-response-accept` _(card reader)_ | `#5ebf59` | desktop full-result кнопка «Принимаю» из Figma-макета |
+| `--reader-response-reject` _(card reader)_ | `#ff4a62` | desktop full-result кнопка «Не принимаю» из Figma-макета |
 
 **Правило:** не используй голые hex в JSX / TSX. Только CSS-переменные через `var(--token)` или инлайн-стиль с явным именованием токена.
 
