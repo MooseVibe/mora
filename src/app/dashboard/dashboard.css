@@ -1,9 +1,3 @@
-/* ── Card response color tokens (scoped to dashboard) ── */
-.db-wrap {
-  --reader-response-accept: #5ebf59;
-  --reader-response-reject: #ff4a62;
-}
-
 /* ─────────────────────────────────────────────────
    WRAP — at least full viewport, body gradient shows through
 ───────────────────────────────────────────────── */
@@ -309,62 +303,6 @@
   margin-top: 4px;
 }
 
-.db-outcome-btns {
-  display: flex;
-  gap: 10px;
-}
-.db-outcome-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: 1px solid;
-  border-radius: 8px;
-  font-family: var(--font-ui);
-  font-size: 11px;
-  letter-spacing: 0;
-  cursor: pointer;
-  background: transparent;
-  color: var(--cream, #f0e6d3);
-  border-color: var(--card-inner-border-color, rgba(201, 169, 110, 0.16));
-  transition:
-    background-color var(--duration-quick) var(--ease),
-    border-color var(--duration-quick) var(--ease),
-    transform var(--duration-instant) var(--ease);
-}
-.db-outcome-btn:hover,
-.db-outcome-btn:focus-visible {
-  background: rgba(201, 169, 110, 0.04);
-  border-color: rgba(201, 169, 110, 0.28);
-}
-.db-outcome-btn:focus-visible {
-  outline: 1px solid rgba(201, 169, 110, 0.72);
-  outline-offset: 4px;
-}
-.db-outcome-btn:active {
-  transform: scale(0.96);
-}
-.db-outcome-icon {
-  width: 16px;
-  height: 16px;
-  background: currentColor;
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
-  -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-}
-.db-outcome-icon--check {
-  mask-image: url('/assets/icons/check.svg');
-  -webkit-mask-image: url('/assets/icons/check.svg');
-}
-.db-outcome-icon--x {
-  mask-image: url('/assets/icons/x.svg');
-  -webkit-mask-image: url('/assets/icons/x.svg');
-}
 .db-outcome-text {
   margin: 0;
   min-height: 40px;
@@ -1028,7 +966,7 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   border: 1px solid rgba(201, 169, 110, 0.16);
   border-radius: 8px;
   background: transparent;
-  color: var(--cream-dim, #9a8a75);
+  color: var(--cream, #f0e6d3);
   font-family: var(--font-ui);
   font-size: 16px;
   font-weight: 400;
@@ -1040,14 +978,6 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
     border-color var(--duration-quick) var(--ease),
     box-shadow var(--duration-quick) var(--ease),
     transform var(--duration-instant) var(--ease);
-}
-
-.db-card-reader-response-btn--accept {
-  color: var(--reader-response-accept);
-}
-
-.db-card-reader-response-btn--reject {
-  color: var(--reader-response-reject);
 }
 
 .db-card-reader-response-btn:hover,
@@ -1350,7 +1280,6 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   .db-card-title     { font-size: 28px; }
   .db-card-title-sub { font-size: 22px; }
   .db-outcome-btns { flex-direction: column; gap: 8px; }
-  .db-outcome-btn  { flex: unset; width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

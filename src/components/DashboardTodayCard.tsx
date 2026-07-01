@@ -134,21 +134,21 @@ export default function DashboardTodayCard({
                   {responseText ? (
                     <p className="db-outcome-text">{responseText}</p>
                   ) : (
-                    <div className="db-outcome-btns">
+                    <div className="db-card-reader-response-actions db-outcome-btns">
                       <button
-                        className="db-outcome-btn db-outcome-btn--reject"
+                        className="db-card-reader-response-btn db-card-reader-response-btn--reject"
                         type="button"
                         onClick={() => saveResponse('reject')}
                       >
-                        <span className="db-outcome-icon db-outcome-icon--x" aria-hidden="true" />
+                        <span className="db-card-reader-response-icon db-card-reader-response-icon--x" aria-hidden="true" />
                         Не принимаю
                       </button>
                       <button
-                        className="db-outcome-btn db-outcome-btn--accept"
+                        className="db-card-reader-response-btn db-card-reader-response-btn--accept"
                         type="button"
                         onClick={() => saveResponse('accept')}
                       >
-                        <span className="db-outcome-icon db-outcome-icon--check" aria-hidden="true" />
+                        <span className="db-card-reader-response-icon db-card-reader-response-icon--check" aria-hidden="true" />
                         Принимаю
                       </button>
                     </div>

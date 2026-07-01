@@ -31,9 +31,7 @@
 | _(card subtitle)_ | `#a09274` | subtitle карты в дашборде — между `--cream` и `--cream-dim` |
 | _(input bg)_ | `#1a1614` | фон полей ввода в форме auth |
 | _(body bg gradient)_ | `#070504 → #13100b → #1d1610 → #181410` | градиент фона `body` (180deg) |
-| `--reader-response-accept` _(card reader)_ | `#5ebf59` | кнопка «Принимаю» в раскрытом reader |
-| `--reader-response-reject` _(card reader)_ | `#ff4a62` | кнопка «Не принимаю» в раскрытом reader |
-| `--card-inner-border-color` + `--cream` _(dashboard)_ | `rgba(201,169,110,0.16)` + `#f0e6d3` | нейтральные кнопки `Принимаю / Не принимаю` в блоке «Ваша карта дня» |
+| `--card-inner-border-color` + `--cream` _(card response)_ | `rgba(201,169,110,0.16)` + `#f0e6d3` | единый стиль кнопок `Принимаю / Не принимаю` на dashboard и в раскрытом reader |
 
 **Правило:** не используй голые hex в JSX / TSX. Только CSS-переменные через `var(--token)` или инлайн-стиль с явным именованием токена.
 
