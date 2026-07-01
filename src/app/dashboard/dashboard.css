@@ -1,9 +1,7 @@
-/* ── Outcome color tokens (scoped to dashboard) ── */
+/* ── Card response color tokens (scoped to dashboard) ── */
 .db-wrap {
-  --outcome-yes: #a6a947;
-  --outcome-yes-border: rgba(166, 169, 71, 0.45);
-  --outcome-no: #d8514c;
-  --outcome-no-border: rgba(216, 81, 76, 0.45);
+  --reader-response-accept: #5ebf59;
+  --reader-response-reject: #ff4a62;
 }
 
 /* ─────────────────────────────────────────────────
@@ -307,11 +305,13 @@
   margin: 0;
 }
 
-/* Outcome buttons */
+.db-outcome {
+  margin-top: 4px;
+}
+
 .db-outcome-btns {
   display: flex;
   gap: 10px;
-  margin-top: 4px;
 }
 .db-outcome-btn {
   flex: 1;
@@ -324,22 +324,61 @@
   border-radius: 8px;
   font-family: var(--font-ui);
   font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   cursor: pointer;
   background: transparent;
-  transition: background 0.2s;
+  color: var(--cream, #f0e6d3);
+  border-color: var(--card-inner-border-color, rgba(201, 169, 110, 0.16));
+  transition:
+    background-color var(--duration-quick) var(--ease),
+    border-color var(--duration-quick) var(--ease),
+    transform var(--duration-instant) var(--ease);
 }
-.db-outcome-btn--yes {
-  color: var(--outcome-yes);
-  border-color: var(--outcome-yes-border);
+.db-outcome-btn:hover,
+.db-outcome-btn:focus-visible {
+  background: rgba(201, 169, 110, 0.04);
+  border-color: rgba(201, 169, 110, 0.28);
 }
-.db-outcome-btn--yes:hover { background: rgba(166, 169, 71, 0.08); }
-.db-outcome-btn--no {
-  color: var(--outcome-no);
-  border-color: var(--outcome-no-border);
+.db-outcome-btn:focus-visible {
+  outline: 1px solid rgba(201, 169, 110, 0.72);
+  outline-offset: 4px;
 }
-.db-outcome-btn--no:hover { background: rgba(216, 81, 76, 0.08); }
+.db-outcome-btn:active {
+  transform: scale(0.96);
+}
+.db-outcome-icon {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+.db-outcome-icon--check {
+  mask-image: url('/assets/icons/check.svg');
+  -webkit-mask-image: url('/assets/icons/check.svg');
+}
+.db-outcome-icon--x {
+  mask-image: url('/assets/icons/x.svg');
+  -webkit-mask-image: url('/assets/icons/x.svg');
+}
+.db-outcome-text {
+  margin: 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--card-inner-border-color, rgba(201, 169, 110, 0.16));
+  border-radius: 8px;
+  color: var(--cream-dim, #9a8a75);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.5;
+}
 
 /* ─────────────────────────────────────────────────
    SIDEBAR (right column — stretches to left panel height)

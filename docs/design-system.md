@@ -31,12 +31,9 @@
 | _(card subtitle)_ | `#a09274` | subtitle карты в дашборде — между `--cream` и `--cream-dim` |
 | _(input bg)_ | `#1a1614` | фон полей ввода в форме auth |
 | _(body bg gradient)_ | `#070504 → #13100b → #1d1610 → #181410` | градиент фона `body` (180deg) |
-| `--outcome-yes` _(dashboard)_ | `#a6a947` | кнопка «Сбылось» — оливковый, тёплый |
-| `--outcome-yes-border` _(dashboard)_ | `rgba(166,169,71,0.45)` | граница кнопки «Сбылось» |
-| `--outcome-no` _(dashboard)_ | `#d8514c` | кнопка «Не сбылось» — приглушённая терракота |
-| `--outcome-no-border` _(dashboard)_ | `rgba(216,81,76,0.45)` | граница кнопки «Не сбылось» |
-| `--reader-response-accept` _(card reader)_ | `#5ebf59` | desktop full-result кнопка «Принимаю» из Figma-макета |
-| `--reader-response-reject` _(card reader)_ | `#ff4a62` | desktop full-result кнопка «Не принимаю» из Figma-макета |
+| `--reader-response-accept` _(card reader)_ | `#5ebf59` | кнопка «Принимаю» в раскрытом reader |
+| `--reader-response-reject` _(card reader)_ | `#ff4a62` | кнопка «Не принимаю» в раскрытом reader |
+| `--card-inner-border-color` + `--cream` _(dashboard)_ | `rgba(201,169,110,0.16)` + `#f0e6d3` | нейтральные кнопки `Принимаю / Не принимаю` в блоке «Ваша карта дня» |
 
 **Правило:** не используй голые hex в JSX / TSX. Только CSS-переменные через `var(--token)` или инлайн-стиль с явным именованием токена.
 

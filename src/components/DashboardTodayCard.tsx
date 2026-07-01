@@ -1,8 +1,12 @@
 'use client'
 
+import { useEffect, useMemo, useRef, useState } from 'react'
+
 import DashboardCardReader from '@/components/DashboardCardReader'
 import DashboardShareButton from '@/components/DashboardShareButton'
 import DrawnCardTilt from '@/components/DrawnCardTilt'
+
+type CardResponse = 'accept' | 'reject'
 
 type Props = {
   cardId: string
@@ -31,6 +35,36 @@ export default function DashboardTodayCard({
   readingDate,
   journalArcana,
 }: Props) {
+  const responseKey = useMemo(
+    () => `mora:cardResponse:${readingDate}:${cardId}`,
+    [cardId, readingDate],
+  )
+  const [response, setResponse] = useState<CardResponse | null>(null)
+  const responseRef = useRef<CardResponse | null>(null)
+  const responseText = response === 'accept'
+    ? 'Отклик сохранён. Эта карта останется здесь как принятая.'
+    : response === 'reject'
+      ? 'Отклик сохранён. Иногда карта говорит не сразу.'
+      : ''
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(responseKey)
+    if (stored === 'accept' || stored === 'reject') {
+      responseRef.current = stored
+      setResponse(stored)
+    } else {
+      responseRef.current = null
+      setResponse(null)
+    }
+  }, [responseKey])
+
+  function saveResponse(nextResponse: CardResponse) {
+    if (responseRef.current) return
+    responseRef.current = nextResponse
+    setResponse(nextResponse)
+    window.localStorage.setItem(responseKey, nextResponse)
+  }
+
   return (
     <DashboardCardReader
       cardId={cardId}
@@ -44,6 +78,9 @@ export default function DashboardTodayCard({
       shareText={shareText}
       readingDate={readingDate}
       sourceKey="today"
+      selectedResponse={response}
+      responseText={responseText}
+      onResponseSelect={saveResponse}
     >
       {openReader => (
         <>
@@ -93,19 +130,29 @@ export default function DashboardTodayCard({
                     ))}
                   </div>
                 </div>
-                <div className="db-outcome-btns">
-                  <button className="db-outcome-btn db-outcome-btn--yes" type="button">
-                    <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                      <path d="M229.66 77.66l-128 128a8 8 0 0 1-11.32 0l-56-56a8 8 0 0 1 11.32-11.32L96 188.69 218.34 66.34a8 8 0 0 1 11.32 11.32Z"/>
-                    </svg>
-                    Сбылось
-                  </button>
-                  <button className="db-outcome-btn db-outcome-btn--no" type="button">
-                    <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                      <path d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128 50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/>
-                    </svg>
-                    Не сбылось
-                  </button>
+                <div className="db-outcome" aria-live="polite">
+                  {responseText ? (
+                    <p className="db-outcome-text">{responseText}</p>
+                  ) : (
+                    <div className="db-outcome-btns">
+                      <button
+                        className="db-outcome-btn db-outcome-btn--reject"
+                        type="button"
+                        onClick={() => saveResponse('reject')}
+                      >
+                        <span className="db-outcome-icon db-outcome-icon--x" aria-hidden="true" />
+                        Не принимаю
+                      </button>
+                      <button
+                        className="db-outcome-btn db-outcome-btn--accept"
+                        type="button"
+                        onClick={() => saveResponse('accept')}
+                      >
+                        <span className="db-outcome-icon db-outcome-icon--check" aria-hidden="true" />
+                        Принимаю
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

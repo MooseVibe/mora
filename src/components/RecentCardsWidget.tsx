@@ -1,10 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { getDrawReading, type DrawReadingRow } from '@/lib/draw-reading'
 import { getTarotCardImageSrc, getTarotCardMeta } from '@/lib/tarot'
 import DashboardCardReader from '@/components/DashboardCardReader'
 import RitualTransitionLink from '@/components/RitualTransitionLink'
+
+type CardResponse = 'accept' | 'reject'
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + 'T12:00:00')
@@ -16,7 +18,32 @@ function CardTile({ draw, index }: { draw: DrawReadingRow; index: number }) {
   const reading = getDrawReading(draw)
   const card = getTarotCardMeta(draw.card_id)
   const sourceKey = `recent-${index}-${draw.drawn_at}-${draw.card_id}`
+  const responseKey = useMemo(
+    () => `mora:cardResponse:${draw.drawn_at}:${draw.card_id}`,
+    [draw.card_id, draw.drawn_at],
+  )
+  const [response, setResponse] = useState<CardResponse | null>(null)
+  const responseRef = useRef<CardResponse | null>(null)
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(responseKey)
+    if (stored === 'accept' || stored === 'reject') {
+      responseRef.current = stored
+      setResponse(stored)
+    } else {
+      responseRef.current = null
+      setResponse(null)
+    }
+  }, [responseKey])
+
   if (!reading || !card) return null
+
+  function saveResponse(nextResponse: CardResponse) {
+    if (responseRef.current) return
+    responseRef.current = nextResponse
+    setResponse(nextResponse)
+    window.localStorage.setItem(responseKey, nextResponse)
+  }
 
   function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -44,6 +71,8 @@ function CardTile({ draw, index }: { draw: DrawReadingRow; index: number }) {
       sourceKey={sourceKey}
       readingDate={formatDate(reading.drawnAt)}
       sourceFrame={{ outerRadius: 8, inset: 3.35, artRadius: 4.5 }}
+      selectedResponse={response}
+      onResponseSelect={saveResponse}
     >
       {openReader => (
         <button className="rcw-card rcw-card--button" type="button" onClick={openReader} aria-label={`Открыть карту ${card.name}`}>

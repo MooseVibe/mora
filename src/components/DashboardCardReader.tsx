@@ -20,6 +20,9 @@ type Props = {
   readingDate?: string
   sourceFrame?: CardFrame
   targetFrame?: CardFrame
+  selectedResponse?: ReaderResponse | null
+  responseText?: string
+  onResponseSelect?: (response: ReaderResponse) => void
   children?: (openReader: () => void) => ReactNode
 }
 
@@ -183,6 +186,9 @@ export default function DashboardCardReader({
   readingDate,
   sourceFrame,
   targetFrame,
+  selectedResponse,
+  responseText: selectedResponseText,
+  onResponseSelect,
   children,
 }: Props) {
   const [mounted, setMounted] = useState(false)
@@ -190,18 +196,21 @@ export default function DashboardCardReader({
   const [tiltStyle, setTiltStyle] = useState('')
   const [isFullMeaningOpen, setIsFullMeaningOpen] = useState(false)
   const [isMeaningOverflowing, setIsMeaningOverflowing] = useState(false)
-  const [response, setResponse] = useState<ReaderResponse | null>(null)
+  const [localResponse, setLocalResponse] = useState<ReaderResponse | null>(null)
   const meaningTextRef = useRef<HTMLDivElement | null>(null)
   const isReaderOpen = reader !== null
+  const response = selectedResponse ?? localResponse
   const imageSrc = useMemo(() => getTarotCardImageSrc(cardId), [cardId])
   const fullMeaning = fullParagraphs?.length ? fullParagraphs : paragraphs
   const hasFullMeaning = fullMeaning.join('\n') !== paragraphs.join('\n')
   const shouldShowReadMore = hasFullMeaning || isMeaningOverflowing
-  const responseText = response === 'accept'
-    ? 'Отклик сохранён. Эта карта останется в дневнике как принятая.'
-    : response === 'reject'
-      ? 'Отклик сохранён. Иногда карта говорит не сразу.'
-      : ''
+  const responseText = selectedResponseText || (
+    response === 'accept'
+      ? 'Отклик сохранён. Эта карта останется в дневнике как принятая.'
+      : response === 'reject'
+        ? 'Отклик сохранён. Иногда карта говорит не сразу.'
+        : ''
+  )
 
   useEffect(() => {
     setMounted(true)
@@ -289,7 +298,7 @@ export default function DashboardCardReader({
   function closeReader() {
     setIsFullMeaningOpen(false)
     setIsMeaningOverflowing(false)
-    setResponse(null)
+    setLocalResponse(null)
     setTiltStyle('')
     setReader(current => current ? { ...current, phase: 'closing' } : current)
     window.setTimeout(() => {
@@ -329,6 +338,15 @@ export default function DashboardCardReader({
     if (event.key !== 'Enter' && event.key !== ' ') return
     event.preventDefault()
     closeReader()
+  }
+
+  function saveResponse(nextResponse: ReaderResponse) {
+    if (response) return
+    if (onResponseSelect) {
+      onResponseSelect(nextResponse)
+    } else {
+      setLocalResponse(nextResponse)
+    }
   }
 
   const overlay = reader ? (
@@ -389,7 +407,7 @@ export default function DashboardCardReader({
                 <button
                   className="db-card-reader-response-btn db-card-reader-response-btn--reject"
                   type="button"
-                  onClick={() => setResponse('reject')}
+                  onClick={() => saveResponse('reject')}
                 >
                   <span className="db-card-reader-response-icon db-card-reader-response-icon--x" aria-hidden="true" />
                   Не принимаю
@@ -397,7 +415,7 @@ export default function DashboardCardReader({
                 <button
                   className="db-card-reader-response-btn db-card-reader-response-btn--accept"
                   type="button"
-                  onClick={() => setResponse('accept')}
+                  onClick={() => saveResponse('accept')}
                 >
                   <span className="db-card-reader-response-icon db-card-reader-response-icon--check" aria-hidden="true" />
                   Принимаю

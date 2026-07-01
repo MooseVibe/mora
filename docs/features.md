@@ -20,6 +20,7 @@
 - В колоде 62 карты: 22 старших аркана и 40 пилотных младших/придворных карт
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
+- На dashboard у сегодняшней карты есть первый локальный отклик `Принимаю / Не принимаю`: после выбора кнопки заменяются confirmation-текстом, повторно нажать отклик для этой вытянутой карты нельзя; сохранение в дневник ещё не подключено
 - Share-ready тексты есть у 45 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `justice`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `nine-of-pentacles`, `ten-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `nine-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
 
 ### Дневник карт (в личном кабинете)
@@ -33,6 +34,7 @@
 - Показывает до 3 предыдущих карт, если сегодняшняя карта уже отображается отдельно
 - Каждая recent-карта кликабельна и открывается через `DashboardCardReader`
 - В раскрытом reader показываются дата, теги, название, сохранённый или fallback-текст конкретного вытягивания
+- В раскрытом reader recent-карты есть локальный one-shot отклик `Принимаю / Не принимаю`: после выбора кнопки заменяются confirmation-текстом, при повторном открытии этой записи статус сохраняется; на самой плитке статус пока не показывается
 - Карта возвращается обратно в свою плитку shared-element анимацией
 - Share в reader доступен только при наличии утверждённого `shareText`
 
@@ -58,7 +60,7 @@
 - нажатие закрывает ритуал чтения, показывает короткий hardcoded confirmation-текст и сохраняет первый отклик пользователя в дневник;
 - на первом проходе не делать coins, статистику, вечернюю проверку “сбылось”, AI-объяснение или сложную персонализацию.
 
-Статус на 2026-06-30: в `DashboardCardReader` собран desktop-черновик Figma-экрана с кнопками `Принимаю / Не принимаю`, локальным confirmation-текстом и обрезкой reading-текста через «Читать дальше». Сохранение отклика в дневник и третий вариант `Пока не понимаю` ещё не подключены.
+Статус на 2026-07-01: в `DashboardCardReader` собран desktop-черновик Figma-экрана с кнопками `Принимаю / Не принимаю`, локальным confirmation-текстом и обрезкой reading-текста через «Читать дальше». На dashboard у сегодняшней карты и раскрытых recent-карт есть локальный one-shot отклик `Принимаю / Не принимаю`. Сохранение отклика в Supabase/journal, показ статуса на recent-плитках и третий вариант `Пока не понимаю` ещё не подключены.
 
 Cards-first продолжается параллельно маленькими проходами: новая карта через visual/marker/text QA или старая карта через `preview/full/share`. Следующий cards-first проход — выбрать одну уже существующую карту и обновить её `description`, `titleMeta` и 3-4 варианта `dayVariants`, но не смешивать это с MLP отклика.
 
