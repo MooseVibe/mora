@@ -36,8 +36,9 @@
 
 - Dashboard recent cards уже кликабельные: `RecentCardsWidget` открывает каждую предыдущую карту через `DashboardCardReader`, использует `getDrawReading(draw)` и показывает сохранённый/ fallback-текст.
 - Dashboard recent-card reader уже показывает локальный one-shot отклик `Принимаю / Не принимаю`, хранит его в `localStorage` по `drawn_at + card_id` и не выводит статус на самой плитке.
+- Dashboard fresh result после `Вытянуть карту` использует native draw-flow только для ritual-анимации и сохранения, а после завершения открывает тот же `DashboardCardReader`, что и expand уже вытянутой карты.
 - Уже вытянутая карта дня на dashboard открывается кликом по карте или Expand-кнопкой через тот же reader-паттерн.
-- Share работает в трёх местах для share-ready reading: свежий result-screen, свернутая сегодняшняя карта на dashboard, раскрытый `DashboardCardReader`.
+- Share остаётся на fresh native/unauth result-screen и иконкой у свернутой сегодняшней карты на dashboard; в раскрытом dashboard reader отдельной share-кнопки нет.
 - `/api/draws` сохраняет `variant_idx` и `reading_snapshot` для новых вытягиваний, с fallback на старую схему при отсутствии колонки `reading_snapshot`.
 - `/journal` выбирает `card_id, drawn_at, variant_idx, reading_snapshot`, читает записи через `getDrawReading()`, раскрывает строки через `DashboardCardReader` и показывает сохранённый/fallback reading. Outcome/note пока не сохраняются.
 

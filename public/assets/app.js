@@ -4,7 +4,7 @@ import { STATE, transition, resetState, runSequence } from './state.js';
 import { IMAGE_LOAD_STATUS, getCachedImage, loadCardImage, preloadCardImage, wait } from './image-cache.js';
 import { smoothStep, lerpArc } from './arc.js';
 import { initLoader, scheduleAppLoaderStateTimers, startAppLoaderShuffle, settleInitialAppLoader, reloadFromAppLoader } from './loader.js';
-import { initDraw, arcCard, shuffleDeck, startDrawing, resetScene } from './draw.js';
+import { initDraw, arcCard, shuffleDeck, startDrawing, resetScene } from './draw.js?v=draw-20260702-17';
 import {
   initGallery, hydrateCardBackEmblems,
   openDeckGallery, closeDeckGallery,

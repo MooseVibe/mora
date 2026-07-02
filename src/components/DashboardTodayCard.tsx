@@ -20,6 +20,17 @@ type Props = {
   shareText?: string
   readingDate: string
   journalArcana: string
+  autoOpenKey?: string | number | null
+  autoOpenMode?: 'animated' | 'instant' | 'handoff'
+  autoOpenTargetRect?: TargetRect | null
+  autoOpenNativeMetrics?: unknown
+}
+
+type TargetRect = {
+  left: number
+  top: number
+  width: number
+  height: number
 }
 
 export default function DashboardTodayCard({
@@ -34,6 +45,10 @@ export default function DashboardTodayCard({
   shareText,
   readingDate,
   journalArcana,
+  autoOpenKey,
+  autoOpenMode,
+  autoOpenTargetRect,
+  autoOpenNativeMetrics,
 }: Props) {
   const responseKey = useMemo(
     () => `mora:cardResponse:${readingDate}:${cardId}`,
@@ -81,6 +96,10 @@ export default function DashboardTodayCard({
       selectedResponse={response}
       responseText={responseText}
       onResponseSelect={saveResponse}
+      autoOpenKey={autoOpenKey}
+      autoOpenMode={autoOpenMode}
+      autoOpenTargetRect={autoOpenTargetRect}
+      autoOpenNativeMetrics={autoOpenNativeMetrics}
     >
       {openReader => (
         <>

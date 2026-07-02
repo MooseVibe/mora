@@ -15,6 +15,7 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <link rel="preload" as="image" href="/assets/cards/moose.webp" />
+        <link rel="preload" as="font" href="/assets/fonts/spectral-sc-400.ttf" type="font/ttf" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/assets/fonts.css" />
         <link rel="stylesheet" href="/assets/styles.css" />
       </head>

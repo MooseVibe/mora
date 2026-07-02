@@ -1,10 +1,9 @@
 'use client'
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { getTarotCardImageSrc } from '@/lib/tarot'
-import DashboardShareButton from '@/components/DashboardShareButton'
 
 type Props = {
   cardId: string
@@ -23,6 +22,10 @@ type Props = {
   selectedResponse?: ReaderResponse | null
   responseText?: string
   onResponseSelect?: (response: ReaderResponse) => void
+  autoOpenKey?: string | number | null
+  autoOpenMode?: 'animated' | 'instant' | 'handoff'
+  autoOpenTargetRect?: TargetRect | null
+  autoOpenNativeMetrics?: unknown
   children?: (openReader: () => void) => ReactNode
 }
 
@@ -30,6 +33,13 @@ type CardFrame = {
   outerRadius: number
   inset: number
   artRadius: number
+}
+
+type TargetRect = {
+  left: number
+  top: number
+  width: number
+  height: number
 }
 
 type ReaderResponse = 'accept' | 'reject'
@@ -54,7 +64,8 @@ type ReaderState = {
     end: CardFrame
   }
   sourceScale: number
-  phase: 'placed' | 'opening' | 'open' | 'closing' | 'handoff'
+  cardHidden?: boolean
+  phase: 'placed' | 'reveal' | 'opening' | 'open' | 'closing' | 'handoff'
 }
 
 const CARD_ASPECT_HEIGHT = 477
@@ -173,6 +184,104 @@ function fadeSourceClone(source: HTMLElement) {
   }, HANDOFF_MS + 40)
 }
 
+function isHandoffDebugEnabled() {
+  try {
+    return new URLSearchParams(window.location.search).get('handoffDebug') === '1'
+      || window.localStorage.getItem('mora:handoffDebug') === '1'
+  } catch {
+    return false
+  }
+}
+
+function roundMetric(value: number) {
+  return Math.round(value * 1000) / 1000
+}
+
+function readPx(value: string) {
+  const parsed = Number.parseFloat(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function rectMetrics(rect: DOMRect) {
+  return {
+    left: roundMetric(rect.left),
+    top: roundMetric(rect.top),
+    width: roundMetric(rect.width),
+    height: roundMetric(rect.height),
+  }
+}
+
+function getVisualScale(element: HTMLElement, rect: DOMRect) {
+  return element.offsetWidth ? rect.width / element.offsetWidth : 1
+}
+
+function collectReaderCardMetrics() {
+  const card = document.querySelector('.db-card-reader-card')
+  const tilt = document.querySelector('.db-card-reader-tilt')
+  const art = document.querySelector('.db-card-reader-art')
+  if (!(card instanceof HTMLElement) || !(tilt instanceof HTMLElement) || !(art instanceof HTMLElement)) return null
+
+  const cardRect = card.getBoundingClientRect()
+  const artRect = art.getBoundingClientRect()
+  const cardStyle = getComputedStyle(card)
+  const tiltStyle = getComputedStyle(tilt)
+  const artStyle = getComputedStyle(art)
+  const beforeStyle = getComputedStyle(tilt, '::before')
+  const scale = getVisualScale(card, cardRect)
+
+  return {
+    source: 'react',
+    card: rectMetrics(cardRect),
+    art: rectMetrics(artRect),
+    visualScale: roundMetric(scale),
+    visualOuterRadius: roundMetric(readPx(cardStyle.borderTopLeftRadius) * scale),
+    visualArtRadius: roundMetric(readPx(artStyle.borderTopLeftRadius) * scale),
+    visualArtInsetLeft: roundMetric(artRect.left - cardRect.left),
+    visualArtInsetTop: roundMetric(artRect.top - cardRect.top),
+    css: {
+      cardRadius: cardStyle.borderTopLeftRadius,
+      artPadding: artStyle.left,
+      artRadius: artStyle.borderTopLeftRadius,
+      innerInset: beforeStyle.inset,
+      innerRadius: beforeStyle.borderTopLeftRadius,
+      borderWidth: tiltStyle.borderTopWidth,
+      innerBorderWidth: beforeStyle.borderTopWidth,
+      shadow: tiltStyle.boxShadow,
+      transform: cardStyle.transform,
+    },
+  }
+}
+
+function readMetricObject(value: unknown) {
+  return value && typeof value === 'object' ? value as Record<string, unknown> : {}
+}
+
+function readMetricNumber(source: Record<string, unknown>, key: string) {
+  const value = source[key]
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0
+}
+
+function diffMetrics(nativeMetrics: unknown, reactMetrics: ReturnType<typeof collectReaderCardMetrics>) {
+  if (!nativeMetrics || typeof nativeMetrics !== 'object' || !reactMetrics) return null
+  const native = nativeMetrics as Record<string, unknown>
+  const nativeCard = readMetricObject(native.card)
+  const nativeArt = readMetricObject(native.art)
+  return {
+    cardLeft: roundMetric(reactMetrics.card.left - readMetricNumber(nativeCard, 'left')),
+    cardTop: roundMetric(reactMetrics.card.top - readMetricNumber(nativeCard, 'top')),
+    cardWidth: roundMetric(reactMetrics.card.width - readMetricNumber(nativeCard, 'width')),
+    cardHeight: roundMetric(reactMetrics.card.height - readMetricNumber(nativeCard, 'height')),
+    artLeft: roundMetric(reactMetrics.art.left - readMetricNumber(nativeArt, 'left')),
+    artTop: roundMetric(reactMetrics.art.top - readMetricNumber(nativeArt, 'top')),
+    artWidth: roundMetric(reactMetrics.art.width - readMetricNumber(nativeArt, 'width')),
+    artHeight: roundMetric(reactMetrics.art.height - readMetricNumber(nativeArt, 'height')),
+    outerRadius: roundMetric(reactMetrics.visualOuterRadius - readMetricNumber(native, 'visualOuterRadius')),
+    artRadius: roundMetric(reactMetrics.visualArtRadius - readMetricNumber(native, 'visualArtRadius')),
+    artInsetLeft: roundMetric(reactMetrics.visualArtInsetLeft - readMetricNumber(native, 'visualArtInsetLeft')),
+    artInsetTop: roundMetric(reactMetrics.visualArtInsetTop - readMetricNumber(native, 'visualArtInsetTop')),
+  }
+}
+
 export default function DashboardCardReader({
   cardId,
   title,
@@ -181,7 +290,6 @@ export default function DashboardCardReader({
   meaningLabel,
   paragraphs,
   fullParagraphs,
-  shareText,
   sourceKey,
   readingDate,
   sourceFrame,
@@ -189,6 +297,10 @@ export default function DashboardCardReader({
   selectedResponse,
   responseText: selectedResponseText,
   onResponseSelect,
+  autoOpenKey,
+  autoOpenMode = 'animated',
+  autoOpenTargetRect,
+  autoOpenNativeMetrics,
   children,
 }: Props) {
   const [mounted, setMounted] = useState(false)
@@ -198,6 +310,8 @@ export default function DashboardCardReader({
   const [isMeaningOverflowing, setIsMeaningOverflowing] = useState(false)
   const [localResponse, setLocalResponse] = useState<ReaderResponse | null>(null)
   const meaningTextRef = useRef<HTMLDivElement | null>(null)
+  const lastAutoOpenKeyRef = useRef<string | number | null>(null)
+  const lastDiagnosticKeyRef = useRef<string | number | null>(null)
   const isReaderOpen = reader !== null
   const response = selectedResponse ?? localResponse
   const imageSrc = useMemo(() => getTarotCardImageSrc(cardId), [cardId])
@@ -266,14 +380,27 @@ export default function DashboardCardReader({
     return undefined
   }, [reader])
 
-  function openReader() {
+  const openReader = useCallback(function openReader(mode: 'animated' | 'instant' | 'handoff' = 'animated') {
     const source = document.querySelector(`[data-card-reader-source="${sourceKey}"]`)
-    if (!(source instanceof HTMLElement)) return
+    if (!(source instanceof HTMLElement)) return false
 
     resetSourceTransform(source)
     source.dataset.cardReaderActive = 'true'
     const sourceRect = source.getBoundingClientRect()
     const target = getResultLayout(sourceRect)
+    if (mode === 'handoff' && autoOpenTargetRect) {
+      target.cardLeft = autoOpenTargetRect.left
+      target.cardTop = autoOpenTargetRect.top
+      target.cardWidth = autoOpenTargetRect.width
+      target.cardHeight = autoOpenTargetRect.height
+      if (window.innerWidth < 700) {
+        target.panelTop = autoOpenTargetRect.top + autoOpenTargetRect.height + 20
+        target.panelHeight = Math.max(0, window.innerHeight - target.panelTop - 24)
+      } else {
+        target.panelTop = autoOpenTargetRect.top
+        target.panelHeight = autoOpenTargetRect.height
+      }
+    }
     setReader({
       sourceRect,
       target,
@@ -282,8 +409,24 @@ export default function DashboardCardReader({
         end: targetFrame ?? DETAIL_CARD_FRAME,
       },
       sourceScale: sourceRect.width / target.cardWidth,
-      phase: 'placed',
+      cardHidden: mode === 'handoff',
+      phase: mode === 'instant' ? 'open' : mode === 'handoff' ? 'reveal' : 'placed',
     })
+
+    if (mode === 'instant') return true
+
+    if (mode === 'handoff') {
+      requestAnimationFrame(() => {
+        setReader(current => current ? { ...current, phase: 'opening' } : current)
+        window.setTimeout(() => {
+          setReader(current => current ? { ...current, phase: 'open' } : current)
+        }, OPEN_MS)
+        window.setTimeout(() => {
+          setReader(current => current ? { ...current, cardHidden: false } : current)
+        }, 420)
+      })
+      return true
+    }
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -293,7 +436,52 @@ export default function DashboardCardReader({
         }, OPEN_MS)
       })
     })
-  }
+    return true
+  }, [autoOpenTargetRect, sourceFrame, sourceKey, targetFrame])
+
+  useLayoutEffect(() => {
+    if (!autoOpenKey || reader || lastAutoOpenKeyRef.current === autoOpenKey) return
+
+    let frame = 0
+    let attempts = 0
+
+    const tryOpen = () => {
+      attempts += 1
+      if (openReader(autoOpenMode)) {
+        lastAutoOpenKeyRef.current = autoOpenKey
+        return
+      }
+      if (attempts < 60) frame = window.requestAnimationFrame(tryOpen)
+    }
+
+    frame = window.requestAnimationFrame(tryOpen)
+    return () => window.cancelAnimationFrame(frame)
+  }, [autoOpenKey, autoOpenMode, reader, openReader])
+
+  useEffect(() => {
+    if (!isHandoffDebugEnabled() || autoOpenMode !== 'handoff' || !autoOpenNativeMetrics || !reader) return
+    if (autoOpenKey && lastDiagnosticKeyRef.current === autoOpenKey) return
+    if (autoOpenKey) lastDiagnosticKeyRef.current = autoOpenKey
+
+    const frame = window.requestAnimationFrame(() => {
+      const reactMetrics = collectReaderCardMetrics()
+      const diff = diffMetrics(autoOpenNativeMetrics, reactMetrics)
+      const diagnostics = {
+        key: autoOpenKey,
+        native: autoOpenNativeMetrics,
+        react: reactMetrics,
+        diff,
+      }
+      ;(window as Window & { __moraHandoffDiagnostics?: unknown }).__moraHandoffDiagnostics = diagnostics
+      console.groupCollapsed('[Mora handoff diagnostics]')
+      console.log('native', autoOpenNativeMetrics)
+      console.log('react', reactMetrics)
+      if (diff) console.table(diff)
+      console.groupEnd()
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [autoOpenKey, autoOpenMode, autoOpenNativeMetrics, reader])
 
   function closeReader() {
     setIsFullMeaningOpen(false)
@@ -423,16 +611,6 @@ export default function DashboardCardReader({
               </div>
             )}
           </div>
-          {shareText && (
-            <div className="result-card-actions db-card-reader-actions">
-              <DashboardShareButton
-                cardId={cardId}
-                cardTitle={title}
-                shareText={shareText}
-                variant="action"
-              />
-            </div>
-          )}
         </div>
       </section>
 
@@ -471,7 +649,7 @@ export default function DashboardCardReader({
       )}
 
       <div
-        className={`db-card-reader-card${reader.phase === 'open' ? ' db-card-reader-card--interactive' : ''}`}
+        className={`db-card-reader-card${reader.phase === 'open' ? ' db-card-reader-card--interactive' : ''}${reader.cardHidden ? ' db-card-reader-card--handoff-hidden' : ''}`}
         role={reader.phase === 'open' ? 'button' : undefined}
         tabIndex={reader.phase === 'open' ? 0 : undefined}
         aria-label={reader.phase === 'open' ? 'Вернуть карту назад' : undefined}
@@ -509,8 +687,8 @@ export default function DashboardCardReader({
 
   return (
     <>
-      {children ? children(openReader) : (
-        <button className="db-panel-icon-btn db-panel-icon-btn--active" type="button" onClick={openReader} aria-label="Развернуть карту дня">
+      {children ? children(() => { openReader() }) : (
+        <button className="db-panel-icon-btn db-panel-icon-btn--active" type="button" onClick={() => openReader()} aria-label="Развернуть карту дня">
           <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
             <path d="M216 48v56a8 8 0 0 1-16 0V75.31l-58.34 58.35a8 8 0 0 1-11.32-11.32L188.69 64H160a8 8 0 0 1 0-16h56a8 8 0 0 1 8 8ZM98.34 130.34 40 188.69V160a8 8 0 0 0-16 0v56a8 8 0 0 0 8 8h56a8 8 0 0 0 0-16H59.31l58.35-58.34a8 8 0 0 0-11.32-11.32Z"/>
           </svg>

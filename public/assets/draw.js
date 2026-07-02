@@ -5,17 +5,50 @@ import { smoothStep, lerpArc } from './arc.js';
 let d = null;
 let activeDeck3DFlight = null;
 let activeDeck3DFlightHome = null;
+let activeResultRect = null;
 const USE_DECK3D_DRAW_EXPERIMENT = true;
 const DEBUG_DECK3D_FLIGHT_MATCH = false;
 const DECK3D_FLIGHT_SCALE = 1.7;
 const DECK3D_FLIGHT_TARGET_WIDTH = 320;
-const DECK3D_RESULT_SCALE = 2;
 const DECK3D_RESULT_TARGET_WIDTH = 376;
 const DECK3D_RESULT_FLIGHT_START = 720;
 const DECK3D_RESULT_FLIGHT_DURATION = 680;
+const REACT_RESULT_HANDOFF_BEFORE_END = 360;
+const REVEAL_RESULT_FRAME = {
+  radius: 20,
+  artPadding: 11,
+  artRadius: 9,
+  shadowY: 28,
+  shadowBlur: 80,
+};
 
 export function initDraw(deps) {
   d = deps;
+}
+
+function getReaderTargetWidth() {
+  const viewportWidth = window.innerWidth;
+  return viewportWidth < 700
+    ? Math.min(viewportWidth - 56, 280)
+    : Math.min(DECK3D_RESULT_TARGET_WIDTH, viewportWidth * 0.34);
+}
+
+function scaleFrameValue(value, baseWidth, targetWidth) {
+  return `${(value * baseWidth / targetWidth).toFixed(3)}px`;
+}
+
+function applyRevealResultFrame(baseWidth, targetWidth = getReaderTargetWidth()) {
+  d.dom.revealCard.classList.add('is-result-frame');
+  d.dom.revealCard.style.setProperty('--card-radius', scaleFrameValue(REVEAL_RESULT_FRAME.radius, baseWidth, targetWidth));
+  d.dom.revealCard.style.setProperty('--card-art-padding', scaleFrameValue(REVEAL_RESULT_FRAME.artPadding, baseWidth, targetWidth));
+  d.dom.revealCard.style.setProperty('--card-art-radius', scaleFrameValue(REVEAL_RESULT_FRAME.artRadius, baseWidth, targetWidth));
+  d.dom.revealCard.style.setProperty('--card-inner-border-inset', scaleFrameValue(REVEAL_RESULT_FRAME.artPadding, baseWidth, targetWidth));
+  d.dom.revealCard.style.setProperty('--card-inner-border-radius', scaleFrameValue(REVEAL_RESULT_FRAME.artRadius, baseWidth, targetWidth));
+  d.dom.revealCard.style.setProperty('--reveal-card-border-width', scaleFrameValue(1, baseWidth, targetWidth));
+  d.dom.revealCard.style.setProperty(
+    '--card-shadow',
+    `0 ${scaleFrameValue(REVEAL_RESULT_FRAME.shadowY, baseWidth, targetWidth)} ${scaleFrameValue(REVEAL_RESULT_FRAME.shadowBlur, baseWidth, targetWidth)} rgba(0, 0, 0, 0.42)`,
+  );
 }
 
 function getPendingDrawCookieMaxAge() {
@@ -37,16 +70,16 @@ function persistPendingDraw(draw) {
 
 function savePendingDraw() {
   try {
-    if (window.__moraDrawPreview) return;
-    if (d.isDebugDrawEnabled?.() && !window.__moraDrawShareQa) return;
     const card = d.getCurrent();
     const reading = d.getCurrentReading();
-    if (!card) return;
+    if (!card) return null;
     const draw = {
       cardId: card.id,
       variantIdx: reading?.variantIdx ?? 0,
       drawnAt: new Date().toISOString().split('T')[0],
     };
+    if (window.__moraDrawPreview) return draw;
+    if (d.isDebugDrawEnabled?.() && !window.__moraDrawShareQa) return draw;
     persistPendingDraw(draw);
     // если контекст дашборда — сохраняем в БД сразу
     if (window.__moraDrawAuthed) {
@@ -56,7 +89,87 @@ function savePendingDraw() {
         body: JSON.stringify(draw),
       }).catch(() => {});
     }
+    return draw;
   } catch(_) {}
+  return null;
+}
+
+function notifyDrawComplete(draw) {
+  if (!draw) return;
+  window.dispatchEvent(new CustomEvent('mora:draw-complete', {
+    detail: {
+      ...draw,
+      targetRect: activeResultRect,
+      nativeMetrics: isHandoffDebugEnabled() ? collectRevealCardMetrics() : null,
+    },
+  }));
+}
+
+function isHandoffDebugEnabled() {
+  try {
+    return new URLSearchParams(window.location.search).get('handoffDebug') === '1'
+      || window.localStorage.getItem('mora:handoffDebug') === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+function rectMetrics(rect) {
+  return {
+    left: roundMetric(rect.left),
+    top: roundMetric(rect.top),
+    width: roundMetric(rect.width),
+    height: roundMetric(rect.height),
+  };
+}
+
+function roundMetric(value) {
+  return Math.round(value * 1000) / 1000;
+}
+
+function readPx(value) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getVisualScale(element, rect) {
+  return element.offsetWidth ? rect.width / element.offsetWidth : 1;
+}
+
+function collectRevealCardMetrics() {
+  const card = d.dom.revealCard;
+  const front = d.dom.rcFront;
+  const art = d.dom.rcArt;
+  const cardRect = card.getBoundingClientRect();
+  const artRect = art?.getBoundingClientRect();
+  const cardStyle = getComputedStyle(card);
+  const frontStyle = front ? getComputedStyle(front) : null;
+  const artStyle = art ? getComputedStyle(art) : null;
+  const beforeStyle = front ? getComputedStyle(front, '::before') : null;
+  const scale = getVisualScale(card, cardRect);
+
+  return {
+    source: 'native',
+    state: String(STATE),
+    card: rectMetrics(cardRect),
+    art: artRect ? rectMetrics(artRect) : null,
+    visualScale: roundMetric(scale),
+    visualOuterRadius: roundMetric(readPx(cardStyle.borderTopLeftRadius) * scale),
+    visualArtRadius: artStyle ? roundMetric(readPx(artStyle.borderTopLeftRadius) * scale) : null,
+    visualArtInsetLeft: artRect ? roundMetric(artRect.left - cardRect.left) : null,
+    visualArtInsetTop: artRect ? roundMetric(artRect.top - cardRect.top) : null,
+    css: {
+      cardRadius: cardStyle.getPropertyValue('--card-radius').trim(),
+      artPadding: cardStyle.getPropertyValue('--card-art-padding').trim(),
+      artRadius: cardStyle.getPropertyValue('--card-art-radius').trim(),
+      innerInset: cardStyle.getPropertyValue('--card-inner-border-inset').trim(),
+      innerRadius: cardStyle.getPropertyValue('--card-inner-border-radius').trim(),
+      borderWidth: frontStyle?.borderTopWidth ?? '',
+      innerBorderWidth: beforeStyle?.borderTopWidth ?? '',
+      shadow: cardStyle.boxShadow,
+      transform: cardStyle.transform,
+    },
+  };
 }
 
 function cleanupDeck3DFlight() {
@@ -128,6 +241,7 @@ function flyDeck3DFlightToCenter() {
 
 function runDeck3DDrawExperiment() {
   createDeck3DFlightShell();
+  activeResultRect = null;
 
   if (DEBUG_DECK3D_FLIGHT_MATCH) {
     d.dom.drawBtn.disabled = true;
@@ -183,6 +297,7 @@ function handoffDeck3DFlightToRevealCard() {
   d.dom.rcInner.style.transform = 'rotateY(0deg)';
   d.dom.revealCard.style.transition = 'none';
   d.dom.revealCard.classList.add('is-deck3d-handoff-card');
+  applyRevealResultFrame(baseWidth);
   d.dom.revealCard.style.left = `${left}px`;
   d.dom.revealCard.style.top = `${top}px`;
   d.dom.revealCard.style.width = `${baseWidth}px`;
@@ -219,20 +334,32 @@ function handoffDeck3DFlightToRevealCard() {
 
   window.setTimeout(() => {
     if (STATE !== 'drawing') return;
+    if (window.__moraUseReactResult) return;
     d.dom.resultReadingPanel.classList.add('visible');
   }, DECK3D_RESULT_FLIGHT_START);
+
+  window.setTimeout(() => {
+    if (STATE !== 'drawing' || !window.__moraUseReactResult) return;
+    transition('result');
+    d.syncResultShareAvailability();
+    const draw = savePendingDraw();
+    notifyDrawComplete(draw);
+  }, DECK3D_RESULT_FLIGHT_START + DECK3D_RESULT_FLIGHT_DURATION - REACT_RESULT_HANDOFF_BEFORE_END);
 
   window.setTimeout(() => {
     if (STATE !== 'drawing') return;
     transition('result');
     d.syncResultShareAvailability();
-    savePendingDraw();
-    const backdrop = document.getElementById('drawBackdrop');
-    if (backdrop) backdrop.style.display = 'block';
-    d.dom.resultOverlay.style.pointerEvents = 'auto';
-    d.updateCardZoomAvailability();
-    if (d.canUseMobileTilt()) {
-      d.startMobileTiltListening();
+    const draw = savePendingDraw();
+    notifyDrawComplete(draw);
+    if (!window.__moraUseReactResult) {
+      const backdrop = document.getElementById('drawBackdrop');
+      if (backdrop) backdrop.style.display = 'block';
+      d.dom.resultOverlay.style.pointerEvents = 'auto';
+      d.updateCardZoomAvailability();
+      if (d.canUseMobileTilt()) {
+        d.startMobileTiltListening();
+      }
     }
   }, DECK3D_RESULT_FLIGHT_START + DECK3D_RESULT_FLIGHT_DURATION + 80);
 }
@@ -242,43 +369,24 @@ function flyRevealCardToResultSide() {
   const startScale = getRevealCardTransformScale();
   const baseWidth = parseFloat(d.dom.revealCard.style.width) || rect.width / startScale;
   const baseHeight = rect.height / startScale;
-  const isMobile = window.innerWidth < 600;
-  const headerBottom = document.querySelector('.site-header')?.getBoundingClientRect().bottom || d.getViewportTop();
-  const viewportBottom = d.getViewportTop() + d.getViewportHeight();
-
-  // On mobile: card fits in upper 44% zone, hard cap at 1.2
-  let endScale;
-  if (isMobile) {
-    const cardZoneHeight = (viewportBottom - headerBottom) * 0.44;
-    const maxByWidth = (window.innerWidth - 56) / baseWidth;
-    const maxByHeight = cardZoneHeight / baseHeight;
-    endScale = Math.min(1.2, maxByWidth, maxByHeight);
-  } else {
-    endScale = Math.min(DECK3D_RESULT_SCALE, DECK3D_RESULT_TARGET_WIDTH / baseWidth);
-  }
-
-  const visualWidth = baseWidth * endScale;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const isMobile = viewportWidth < 700;
+  const targetWidth = getReaderTargetWidth();
+  applyRevealResultFrame(baseWidth, targetWidth);
+  const endScale = targetWidth / baseWidth;
+  const visualWidth = targetWidth;
   const visualHeight = baseHeight * endScale;
   const { layoutLeft, gap, textWidth } = getResultLayoutMetrics(visualWidth);
   d.dom.resultOverlay.style.setProperty('--result-layout-left', `${layoutLeft}px`);
   d.dom.resultOverlay.style.setProperty('--result-text-width', `${textWidth}px`);
 
-  const maxVisualLeft = window.innerWidth - layoutLeft - visualWidth;
-  const targetVisualLeft = window.innerWidth < 860
-    ? Math.max(24, Math.min(maxVisualLeft, window.innerWidth / 2 - visualWidth / 2))
-    : Math.max(layoutLeft, Math.min(maxVisualLeft, layoutLeft + textWidth + gap));
-
-  // Calculate targetVisualTop — on mobile center card+panel as a unit
-  let targetVisualTop;
-  if (isMobile) {
-    const panel = d.dom.resultReadingPanel;
-    const panelH = panel ? panel.scrollHeight + 28 : 220;
-    const unitH = visualHeight + 12 + panelH;
-    const available = viewportBottom - headerBottom;
-    targetVisualTop = headerBottom + Math.max(8, (available - unitH) / 2);
-  } else {
-    targetVisualTop = headerBottom + (viewportBottom - headerBottom - visualHeight) / 2;
-  }
+  const targetVisualLeft = isMobile
+    ? (viewportWidth - visualWidth) / 2
+    : layoutLeft + textWidth + gap;
+  const targetVisualTop = isMobile
+    ? Math.max(24, viewportHeight * 0.08)
+    : (viewportHeight - visualHeight) / 2;
 
   // Switch transform-origin from center-bottom → center-center WITHOUT visual jump,
   // then animate to final position.
@@ -297,6 +405,12 @@ function flyRevealCardToResultSide() {
   const targetLeft = targetVisualLeft + baseWidth * (endScale - 1) / 2;
   const targetTop  = targetVisualTop  + baseHeight * (endScale - 1) / 2;
   const targetVisualCenterY = targetVisualTop + visualHeight / 2;
+  activeResultRect = {
+    left: targetVisualLeft,
+    top: targetVisualTop,
+    width: visualWidth,
+    height: visualHeight,
+  };
 
   d.dom.revealCard.style.transition = [
     `left ${DECK3D_RESULT_FLIGHT_DURATION}ms cubic-bezier(0.18,0.82,0.22,1)`,
@@ -320,15 +434,23 @@ function flyRevealCardToResultSide() {
       const overlayRect = d.dom.resultOverlay.getBoundingClientRect();
       panel.style.top = `${cardBottom - overlayRect.top + 12}px`;
       panel.style.bottom = 'auto';
-      panel.style.maxHeight = `${viewportBottom - cardBottom - 28}px`;
+      panel.style.maxHeight = `${viewportHeight - cardBottom - 28}px`;
     }
   }
 }
 
 function getResultLayoutMetrics(cardVisualWidth) {
-  const gap = 120;
-  const preferredTextWidth = 520;
-  const minTextWidth = 380;
+  if (window.innerWidth < 700) {
+    return {
+      layoutLeft: 24,
+      gap: 0,
+      textWidth: window.innerWidth - 48,
+    };
+  }
+
+  const gap = 85;
+  const preferredTextWidth = 579;
+  const minTextWidth = 420;
   const minOuterPad = 72;
   const availableTextWidth = window.innerWidth - minOuterPad * 2 - gap - cardVisualWidth;
   const textWidth = clamp(availableTextWidth, minTextWidth, preferredTextWidth);
@@ -443,6 +565,7 @@ export async function shuffleDeck() {
 
 export async function startDrawing() {
   if (STATE !== 'idle') return;
+  activeResultRect = null;
 
   await d.prepareMobileTilt();
   if (STATE !== 'idle') return;
@@ -546,6 +669,7 @@ export async function startDrawing() {
     ...d.RESULT_REVEAL_STEPS.map(({ id, step }) => [
       d.DRAW_TIMING.showResult + step * d.DRAW_TIMING.resultStagger,
       () => {
+        if (window.__moraUseReactResult) return;
         const el = d.byId(id);
         el.style.transition = 'opacity 0.55s cubic-bezier(0.22,0.61,0.36,1), transform 0.55s cubic-bezier(0.22,0.61,0.36,1)';
         el.classList.add('visible');
@@ -555,11 +679,14 @@ export async function startDrawing() {
       cleanupDeck3DFlight();
       transition('result');
       d.syncResultShareAvailability();
-      savePendingDraw();
-      d.dom.resultOverlay.style.pointerEvents = 'auto';
-      d.updateCardZoomAvailability();
-      if (d.canUseMobileTilt()) {
-        d.startMobileTiltListening();
+      const draw = savePendingDraw();
+      notifyDrawComplete(draw);
+      if (!window.__moraUseReactResult) {
+        d.dom.resultOverlay.style.pointerEvents = 'auto';
+        d.updateCardZoomAvailability();
+        if (d.canUseMobileTilt()) {
+          d.startMobileTiltListening();
+        }
       }
     }],
   ], () => STATE === 'drawing');

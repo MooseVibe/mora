@@ -592,8 +592,8 @@
   gap: 16px;
   padding: 0 0 0 52px;
   max-width: none;
-  margin-top: 60px;
-  transform: translateY(40px);
+  align-self: flex-start;
+  margin-top: 170px;
 }
 .dw-title {
   font-family: var(--font-display);
@@ -695,8 +695,13 @@ body.is-dashboard-card-source-hidden [data-card-reader-active="true"] {
   transform-origin: top left;
   transition:
     transform 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
-    border-radius 680ms cubic-bezier(0.18, 0.82, 0.22, 1);
+    border-radius 680ms cubic-bezier(0.18, 0.82, 0.22, 1),
+    opacity 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
+}
+
+.db-card-reader-card--handoff-hidden {
+  opacity: 0;
 }
 
 .db-card-reader-card--interactive {
