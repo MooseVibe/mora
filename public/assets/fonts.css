@@ -2,7 +2,7 @@
   font-family: 'Spectral SC';
   font-style: normal;
   font-weight: 300;
-  font-display: swap;
+  font-display: block;
   src: url('/assets/fonts/spectral-sc-300.ttf') format('truetype');
 }
 
@@ -18,7 +18,7 @@
   font-family: 'Spectral SC';
   font-style: normal;
   font-weight: 500;
-  font-display: swap;
+  font-display: block;
   src: url('/assets/fonts/spectral-sc-500.ttf') format('truetype');
 }
 
@@ -26,7 +26,7 @@
   font-family: 'Roboto Condensed';
   font-style: normal;
   font-weight: 300;
-  font-display: swap;
+  font-display: block;
   src: url('/assets/fonts/roboto-condensed-300.ttf') format('truetype');
 }
 
@@ -34,7 +34,7 @@
   font-family: 'Roboto Condensed';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: block;
   src: url('/assets/fonts/roboto-condensed-400.ttf') format('truetype');
 }
 
@@ -42,7 +42,7 @@
   font-family: 'Roboto Condensed';
   font-style: normal;
   font-weight: 500;
-  font-display: swap;
+  font-display: block;
   src: url('/assets/fonts/roboto-condensed-500.ttf') format('truetype');
 }
 
@@ -50,7 +50,7 @@
   font-family: 'Roboto Condensed';
   font-style: normal;
   font-weight: 600;
-  font-display: swap;
+  font-display: block;
   src: url('/assets/fonts/roboto-condensed-600.ttf') format('truetype');
 }
 

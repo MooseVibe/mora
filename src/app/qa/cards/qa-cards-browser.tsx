@@ -10,6 +10,7 @@ import {
 
 const FULL_TAROT_DECK_SIZE = 78
 const QA_RECENT_CARD_IDS = [
+  'queen-of-cups',
   'ten-of-pentacles',
   'nine-of-pentacles',
   'nine-of-wands',
