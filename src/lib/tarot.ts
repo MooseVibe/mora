@@ -57,6 +57,7 @@ export type TarotCardId =
   | 'eight-of-wands'
   | 'nine-of-wands'
   | 'ace-of-wands'
+  | 'queen-of-wands'
   | 'page-of-wands'
   | 'page-of-swords'
   | 'six-of-swords'

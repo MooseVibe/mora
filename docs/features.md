@@ -17,11 +17,11 @@
 - Карта вытягивается раз в день
 - Защита от повторного вытягивания — нельзя вытянуть второй раз в тот же день
 - Карта автоматически сохраняется в дневник
-- В колоде 63 карты: 22 старших аркана и 41 пилотная младшая/придворная карта
+- В колоде 64 карты: 22 старших аркана и 42 пилотные младшие/придворные карты
 - Уже вытянутую карту дня можно развернуть в full-result экран и вернуть назад shared-element анимацией
 - Шеринг свежевытянутой карты работает как Telegram-first flow: share-кнопка на result-screen, share-иконка сегодняшней карты на dashboard и share-кнопка в раскрытом full-result reader активны только при наличии утверждённого `dayVariants[n].share`, старые/неактуализированные варианты показывают disabled-иконку или не получают кнопку
 - На dashboard у сегодняшней карты есть первый локальный отклик `Принимаю / Не принимаю`: после выбора кнопки заменяются confirmation-текстом, повторно нажать отклик для этой вытянутой карты нельзя; сохранение в дневник ещё не подключено
-- Share-ready тексты есть у 47 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `justice`, `hanged-man`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `queen-of-cups`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `nine-of-pentacles`, `ten-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `nine-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
+- Share-ready тексты есть у 48 карт: `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `justice`, `hanged-man`, `tower`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `queen-of-cups`, `queen-of-wands`, `four-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `nine-of-pentacles`, `ten-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `nine-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`
 
 ### Дневник карт (в личном кабинете)
 - История всех вытянутых карт по дням
@@ -62,7 +62,7 @@
 
 Статус на 2026-07-02: в `DashboardCardReader` собран desktop-черновик Figma-экрана с кнопками `Принимаю / Не принимаю`, локальным confirmation-текстом и обрезкой reading-текста через «Читать дальше». На dashboard у сегодняшней карты, fresh result после `Вытянуть карту` и раскрытых recent-карт есть локальный one-shot отклик `Принимаю / Не принимаю`. Dashboard fresh draw после native-анимации открывает тот же `DashboardCardReader`, что и expand уже вытянутой карты; native result-screen остаётся fallback/unauth flow. Сохранение отклика в Supabase/journal, показ статуса на recent-плитках и третий вариант `Пока не понимаю` ещё не подключены.
 
-Cards-first продолжается параллельно маленькими проходами: новая карта через visual/marker/text QA или старая карта через `preview/full/share`. Последний cards-first проход — `hanged-man` / «Повешенный» обновлён по текстам; следующий проход можно снова брать как одну существующую карту без смешивания с MLP отклика.
+Cards-first продолжается параллельно маленькими проходами: новая карта через visual/marker/text QA или старая карта через `preview/full/share`. Последний cards-first проход — `queen-of-wands` / «Королева Жезлов» добавлена как новая карта; следующий проход можно снова брать одной отдельной картой без смешивания с MLP отклика.
 
 ## Планируется (после редизайна)
 
