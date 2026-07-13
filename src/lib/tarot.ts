@@ -38,6 +38,7 @@ export type TarotCardId =
   | 'ten-of-cups'
   | 'two-of-swords'
   | 'four-of-swords'
+  | 'five-of-swords'
   | 'ace-of-pentacles'
   | 'two-of-pentacles'
   | 'three-of-pentacles'
