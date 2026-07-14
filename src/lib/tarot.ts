@@ -40,6 +40,7 @@ export type TarotCardId =
   | 'four-of-swords'
   | 'five-of-swords'
   | 'seven-of-swords'
+  | 'queen-of-swords'
   | 'ace-of-pentacles'
   | 'two-of-pentacles'
   | 'three-of-pentacles'
