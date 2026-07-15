@@ -102,6 +102,8 @@ Before edits:
 
 Use Ponytail mode by default: question whether the work is needed, prefer existing project patterns and native platform features, avoid new abstractions/dependencies, and take the smallest safe step. Do not use Ponytail as an excuse to skip Mora quality gates: auth, save flow, card canon, design system, accessibility, animations, approvals, and QA still matter.
 
+If a task is estimated to take more than 10 minutes, warn the author before starting and propose splitting it into steps. Never leave the author without a status update for more than 2 minutes; if a command or process stalls or exceeds its expected duration, stop it yourself and immediately report what happened.
+
 Do not rewrite working mechanics during UI work. Preserve auth, card draw, save, journal, and pending-draw sync behavior unless the user explicitly asks to change them.
 
 When the user asks for "QA preview", "страницу с картами и текстами", or wants to inspect added cards, send the `/qa/cards` link for the active environment. Locally this is usually `http://localhost:3000/qa/cards`; if the dev server is on another port, use that port.
