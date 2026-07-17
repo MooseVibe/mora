@@ -53,6 +53,7 @@ export type TarotCardId =
   | 'nine-of-pentacles'
   | 'ten-of-pentacles'
   | 'page-of-pentacles'
+  | 'king-of-pentacles'
   | 'two-of-wands'
   | 'three-of-wands'
   | 'four-of-wands'
@@ -164,7 +165,9 @@ export function getTarotCardDefinition(cardId: string) {
 }
 
 export function getTarotCardImageSrc(cardId: string) {
-  return `/assets/cards/${cardId}.webp`
+  const image = getTarotCardDefinition(cardId)?.image
+  if (!image) return `/assets/cards/${cardId}.webp`
+  return image.startsWith('/') ? image : `/${image}`
 }
 
 export function getTarotCardDailyMeaning(cardId: string, variantIdx = 0): TarotDailyMeaning | null {
