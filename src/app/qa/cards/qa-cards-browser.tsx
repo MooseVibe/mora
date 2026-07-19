@@ -10,6 +10,7 @@ import {
 
 const FULL_TAROT_DECK_SIZE = 78
 const QA_RECENT_CARD_IDS = [
+  'eight-of-swords',
   'star',
   'king-of-pentacles',
   'page-of-pentacles',
