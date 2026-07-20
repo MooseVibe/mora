@@ -54,6 +54,7 @@ export type TarotCardId =
   | 'ten-of-pentacles'
   | 'page-of-pentacles'
   | 'king-of-pentacles'
+  | 'knight-of-pentacles'
   | 'two-of-wands'
   | 'three-of-wands'
   | 'four-of-wands'
