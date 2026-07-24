@@ -76,6 +76,7 @@ export type TarotCardId =
   | 'seven-of-cups'
   | 'ten-of-wands'
   | 'nine-of-swords'
+  | 'ten-of-swords'
   | 'eight-of-swords'
 
 type TarotCardMeta = {

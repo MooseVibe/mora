@@ -280,6 +280,7 @@ For `public/assets/cards.js`:
 - Use Rider-Waite-Smith as an internal writing reference, but do not expose niche deck names in user-facing readings. Prefer plain phrases like `в классическом таро`, `в канонах таро`, or `традиционно эта карта`.
 - Prefer a tarot-session bridge in `full`: briefly name what is visible on the classic card, explain what that symbol means, then translate it into the user's day. The reader should feel that Mora is looking at the card with them, not just using the card as a prompt for generic advice.
 - If the visual symbol is central to the day's advice, the bridge may start in `preview` so the user can read the result while looking at the card image and immediately understand what matters in the artwork.
+- For rewritten cards, prefer starting each variant from a different visible canonical detail, explaining what that detail means in traditional tarot, and only then suggesting how it may resonate today if this card appeared. Do not invent a specific event in the user's life or state it as a prediction; leave enough room for the reader to recognize their own situation.
 - Do not make the bridge formulaic. It can sound like `на карте изображено… это говорит о… для тебя сегодня это значит…`, but it should remain a living reading, not an encyclopedia entry.
 - Do not force every text into three paragraphs. Use paragraph breaks only when they help reading and each paragraph adds a new thought.
 - Tone: clear human advice for the day, not vague esoteric noise.
