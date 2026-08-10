@@ -108,7 +108,9 @@ export type TarotCardDefinition = {
   id: TarotCardId
   name: string
   archetype: string
+  character: string
   description: string
+  visualHint: string
   image?: string
   imageFallback?: string
   num: string

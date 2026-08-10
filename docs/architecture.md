@@ -47,7 +47,9 @@ mora/
 │   │   │   ├── page.tsx        # дневник карт: список/фильтры + full-result reader записей
 │   │   │   └── journal.css
 │   │   └── api/
-│   │       └── draws/route.ts  # POST /api/draws — сохранение вытянутой карты
+│   │       ├── draws/route.ts  # POST /api/draws — сохранение вытянутой карты
+│   │       ├── prototypes/tester-session/route.ts # HttpOnly tester-session и admin OTP Mora Next
+│   │       └── prototypes/spread-reading/route.ts # защищённый Gemini-only текст расклада
 │   ├── components/
 │   │   ├── TaroApp.tsx         # главный клиентский компонент лендинга
 │   │   ├── DrawWidget.tsx      # виджет вытягивания для дашборда
@@ -83,6 +85,17 @@ mora/
 | Дневник карт | `src/app/journal/page.tsx` + `src/components/JournalClient.tsx` | Полный список вытягиваний пользователя с фильтрами и full-result reader для записей; outcome/note пока визуальные, без сохранения состояния |
 | QA просмотр карт | `src/app/qa/cards/page.tsx` | Служебный noindex-preview всех карт и вариантов текстов. Локально открыт, в production требует `CARD_QA_TOKEN` |
 | Sync pending draw | `src/components/CardSyncOnMount.tsx` | При входе читает `mora:pendingDraw` из localStorage и отправляет в `/api/draws` |
+| AI-расклад Mora Next | `src/app/api/prototypes/spread-reading/route.ts` | Проверяет tester cookie или подтверждённую admin-сессию, резервирует попытку до Gemini и завершает её только после валидного чтения |
+| Tester-session | `src/app/api/prototypes/tester-session/route.ts` + `src/lib/prototype-testers.ts` + `supabase/functions/prototype-tester-session/index.ts` | 30-дневная HttpOnly-сессия обычного тестера, admin OTP и серверный RPC-контракт `reserve / complete / release` |
+| Mora Next | `public/prototypes/spread/` | Изолированный UI/WebGL-прототип карты дня и расклада; production-маршруты не заменяет. `daily-3d.js` обслуживает утверждённую карту дня, `spread-deck-3d.js` — пока неутверждённый 3D-flow выбора трёх карт |
+| 3D-ассеты карт | `public/prototypes/3d-daily/assets/` | `mora-card.glb` используется для стопок и вееров; `mora-card-result.glb` — только для крупных выбранных/result-карт. Имена mesh/material, особенно `_front`, считаются контрактом кода |
+
+### Mora Next и 3D-лаборатория
+
+- `public/prototypes/spread/index.html`, `styles.css`, `app.js` — экран и продуктовые состояния Mora Next, включая невидимые DOM hit targets для веера расклада.
+- `public/prototypes/spread/daily-3d.js` — утверждённый полный 3D-flow карты дня: стопка, clean cut, веер, выбор, сохранение и result.
+- `public/prototypes/spread/spread-deck-3d.js` — экспериментальный WebGL-слой расклада; click-flow трёх карт ещё требует ручного QA, drag остаётся 2D.
+- `public/prototypes/3d-daily/app.js` и соседние ассеты — исходная отдельная лаборатория. Не удалять её до полного аппрува Mora Next 3D-flow.
 
 ## Договорённости по коду
 
@@ -110,9 +123,10 @@ npm run lint     # ESLint
 ```env
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+GEMINI_API_KEY=...
 ```
 
-Оба значения публичные (`NEXT_PUBLIC_`), используются и на клиенте, и на сервере.
+Значения `NEXT_PUBLIC_` публичные и используются на клиенте и сервере. `GEMINI_API_KEY` остаётся только в deployment environment и никогда не передаётся браузеру.
 
 ## Ключевые архитектурные особенности
 

@@ -32,10 +32,50 @@
 | _(input bg)_ | `#1a1614` | фон полей ввода в форме auth |
 | _(body bg gradient)_ | `#070504 → #13100b → #1d1610 → #181410` | градиент фона `body` (180deg) |
 | `--card-inner-border-color` + `--cream` _(card response)_ | `rgba(201,169,110,0.16)` + `#f0e6d3` | единый стиль кнопок `Принимаю / Не принимаю` на dashboard и в раскрытом reader |
+| `--tab-shell-bg` _(Mora Next prototype)_ | `rgba(255,255,255,0.02)` | внешний фон переключателя «Карта дня / Расклад» |
+| `--tab-active-bg` _(Mora Next prototype)_ | `rgba(255,255,255,0.06)` | фон активного таба |
+| `--prototype-surface` _(Mora Next prototype)_ | `#141312` | единая поверхность карты дня, выбора темы, сохранённого расклада и результата |
+| `--prototype-text-secondary` _(Mora Next prototype)_ | `#a8a8a8` | вторичный текст result-экрана карты дня |
+| `--result-card-frame-start/end` _(Mora Next prototype)_ | `rgba(255,255,255,0.12) → rgba(255,255,255,0.04)` | диагональная стеклянная плоскость раскрытой карты |
+| `--result-card-frame-border` _(Mora Next prototype)_ | `rgba(255,255,255,0.12)` | внешняя и внутренняя рамка раскрытой карты |
+| `--daily-result-card-inner-gap` _(Mora Next prototype)_ | `12px` | симметричный отступ изображения и внутренней рамки от внешнего края карты дня |
+| `--daily-result-section-gap` _(Mora Next prototype)_ | `20px` | расстояние между блоком тега/названия карты и секцией «Что это значит сегодня» |
+| `--tag-bg` _(Mora Next prototype)_ | `rgba(255,255,255,0.08)` | фон suit-chip |
+| `--tag-border-start/end` _(Mora Next prototype)_ | `rgba(255,255,255,0.5) → rgba(255,255,255,0.1)` | диагональная рамка suit-chip |
+| `--card-back-surface` _(Mora Next prototype)_ | `#43403e` | внешняя плоскость рубашки карты |
+| `--card-back-highlight` _(Mora Next prototype)_ | `#585858` | центральный свет внутреннего градиента рубашки |
+| `--card-back-outer-border` _(Mora Next prototype)_ | `rgba(255,255,255,0.16)` | внешняя рамка рубашки |
+| `--card-back-inner-border` _(Mora Next prototype)_ | `rgba(255,255,255,0.24)` | внутренняя рамка рубашки |
+| `--prototype-header-height` _(Mora Next prototype)_ | `74px` | высота fixed-header и верхняя граница доступной рабочей области |
+| `--gold`, `--gold-dim`, `--cream`, `--cream-dim` _(локальный override Mora Next)_ | `#fff` | единая белая основа заголовков, CTA, логотипа, навигации, рамок и состояний прототипа; production MVP сохраняет исходную бежево-золотую палитру |
 
 **Правило:** не используй голые hex в JSX / TSX. Только CSS-переменные через `var(--token)` или инлайн-стиль с явным именованием токена.
 
 **Правило:** агент не использует hex-значения прямо в JSX. Только токены через CSS-переменные или Tailwind-конфиг.
+
+### Topic chips Mora Next
+
+Один компонент используется для выбора темы и показа уже выбранной темы:
+
+| Размер | Высота | Padding | Текст |
+|---|---:|---:|---|
+| `SM` | `36px` | `6px 16px 6px 12px` | Inter Display 400, `14/22` |
+| `MD` | `40px` | `8px 24px 8px 20px` | Inter Display 400, `16/24` |
+
+Общие параметры: ширина `hug content` без фиксированных значений, иконка `24×24`, gap `8px`, radius `999px`. Default — прозрачный фон и stroke `white/30%`; hover — fill `white/8%` и stroke `white/30%`; focus — fill `white/8%` и stroke `white/70%`. На главном экране готового расклада используется некликабельный `MD Default`.
+
+### Card suit / arcana chips Mora Next
+
+На результате карты дня chip использует одну систему размеров, но разные маркеры:
+
+- младший аркан — иконка масти `24×24` и название масти;
+- старший аркан — номер карты `0`, `I–XXI` в экспортированном из Figma фрейме `24×24` и подпись «Старший аркан».
+
+SVG-маркеры старших арканов не содержат самостоятельного UI-цвета: геометрия использует `currentColor`, а интерфейс окрашивает её через CSS mask.
+
+### Primary action Mora Next
+
+Один `.primary-action` используется для основных текстовых действий «Войти», «Поделиться» на карте дня, «Ещё расклад» и «Поделиться» в итоге расклада. Высота `44px`, padding `10px 24px`, radius `8px`, Inter Display `16/24` 400. Default — `white/10%` с мягкой внутренней подсветкой; hover/focus — усиленный glow и внутренняя рамка; pressed — `scale(0.96)`. Ширина остаётся контекстной и не входит в общий компонент.
 
 ## Типографика
 
@@ -44,7 +84,7 @@
 | Шрифт | Начертания | Роль |
 |---|---|---|
 | **Spectral SC** (display serif) | 300, 400, 500 | Заголовки, названия карт, ритуальные элементы |
-| **Roboto Condensed** (sans-serif) | 300, 400, 500, 600 | Весь UI: body, кнопки, nav, подписи |
+| **Inter Display** (sans-serif) | 300, 400, 500, 600 | Весь UI: body, кнопки, nav, подписи |
 
 **Правило против скачка шрифтов:** локальные Mora-шрифты, которые видны в первом кадре, dashboard/journal reader или result-screen, не должны использовать `font-display: swap`. При добавлении нового семейства или веса сначала проверь, где он появляется: критичные веса preload-ятся в `src/app/layout.tsx`, а `@font-face` в `public/assets/fonts.css` должен исключать позднюю подмену метрик. Иначе пользователь видит “не тот шрифт”, затем текст и layout скачут после загрузки файла.
 
@@ -57,11 +97,13 @@
 | H1 auth | Spectral SC 400 | `34px` | `.auth-modal-title` |
 | H1 dashboard | Spectral SC 400 | `36px` | `.db-welcome` |
 | Card title | Spectral SC 400 | `31px` | `.db-card-title` |
-| Body | Roboto Condensed 300 | `14px` / `13px` | описания, `.landing-panel-desc` |
-| UI / кнопки | Roboto Condensed 300–600 | `11px`, letter-spacing 0.35em, uppercase | `.btn` |
-| Caption / nav | Roboto Condensed 400 | `13px` | `.db-nav-link` |
-| Small | Roboto Condensed 400 | `12px` / `11px` | даты, метки |
-| Eyebrow / badge | Roboto Condensed 300 | `10px`, letter-spacing 0.18em, uppercase | `.landing-panel-badge` |
+| Daily result card name | Spectral SC 400 | `48px / 56px` | основное название карты до длинного тире в Mora Next |
+| Daily result title meta | Spectral SC 300 | `32px / 44px` | описание карты после длинного тире в Mora Next |
+| Body | Inter Display 300 | `14px` / `13px` | описания, `.landing-panel-desc` |
+| UI / кнопки | Inter Display 300–600 | `11px`, letter-spacing 0.35em, uppercase | `.btn` |
+| Caption / nav | Inter Display 400 | `13px` | `.db-nav-link` |
+| Small | Inter Display 400 | `12px` / `11px` | даты, метки |
+| Eyebrow / badge | Inter Display 300 | `10px`, letter-spacing 0.18em, uppercase | `.landing-panel-badge` |
 
 **Правило:** serif только для заголовков и магических элементов (название карты, мистические подписи). Тело текста — всегда sans-serif для читаемости.
 

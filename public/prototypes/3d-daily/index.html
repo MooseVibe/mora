@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mora — тест 3D-карты дня</title>
+    <link rel="stylesheet" href="/assets/fonts.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+
+    <header class="header">
+      <a class="brand" href="/prototypes/spread/index.html" aria-label="Mora — вернуться в основной прототип">
+        <img src="/prototypes/spread/icons/logo.svg" alt="Mora" />
+      </a>
+      <span class="prototype-label">3D TEST</span>
+    </header>
+
+    <main class="daily-stage" id="daily-stage">
+      <canvas id="card-canvas" aria-hidden="true"></canvas>
+
+      <section class="ritual-copy" id="ritual-copy" aria-live="polite">
+        <span class="ritual-eyebrow">Карта дня</span>
+        <h1 id="ritual-title">Карта дня</h1>
+        <p id="ritual-subtitle">Нажми на колоду и узнай, что приготовил тебе день</p>
+      </section>
+
+      <button class="deck-action" id="deck-action" type="button" aria-label="Перемешать колоду">
+        <span class="sr-only" id="deck-action-copy">Перемешать колоду</span>
+      </button>
+
+      <section class="result-copy" id="result-copy" aria-label="Результат карты дня">
+        <span class="result-kicker">Ваша карта дня</span>
+        <div class="result-heading">
+          <span class="result-tag" id="result-tag">Старший аркан</span>
+          <h2>
+            <span id="result-title">Мир — </span>
+            <span class="result-title-meta" id="result-title-meta"></span>
+          </h2>
+        </div>
+        <div class="result-meaning">
+          <h3 id="result-meaning-label">Что это значит сегодня</h3>
+          <div id="result-text"></div>
+        </div>
+        <button class="repeat-action" id="repeat-action" type="button">Повторить тест</button>
+      </section>
+
+      <div class="loading-note" id="loading-note" role="status" aria-live="polite">
+        Готовим колоду
+      </div>
+
+      <section class="error-state" id="error-state" hidden>
+        <h2>3D-сцена не загрузилась</h2>
+        <p>Обнови страницу. Если ошибка повторится, проверим поддержку WebGL и загрузку модели.</p>
+      </section>
+    </main>
+
+    <noscript>Для этого 3D-теста нужен JavaScript.</noscript>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

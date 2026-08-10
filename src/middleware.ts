@@ -49,8 +49,18 @@ export async function middleware(request: NextRequest) {
 
     if (isPublicEntry && user) {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      url.search = ''
+      const requestedNext = request.nextUrl.searchParams.get('next')
+      const safeNext = requestedNext?.startsWith('/') && !requestedNext.startsWith('//')
+        ? requestedNext
+        : null
+      if (request.nextUrl.pathname === '/auth' && safeNext) {
+        const destination = new URL(safeNext, request.url)
+        url.pathname = destination.pathname
+        url.search = destination.search
+      } else {
+        url.pathname = '/dashboard'
+        url.search = ''
+      }
       return NextResponse.redirect(url)
     }
   } catch {

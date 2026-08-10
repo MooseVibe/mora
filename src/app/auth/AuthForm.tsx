@@ -8,7 +8,13 @@ const RESEND_WAIT_SECONDS = 60
 const MIN_OTP_LENGTH = 6
 const MAX_OTP_LENGTH = 8
 
-export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
+export default function AuthForm({
+  isSaveIntent,
+  nextPath,
+}: {
+  isSaveIntent: boolean
+  nextPath: string
+}) {
   const [step, setStep] = useState<'enter' | 'verify'>('enter')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
@@ -143,7 +149,7 @@ export default function AuthForm({ isSaveIntent }: { isSaveIntent: boolean }) {
       setError('Код введён неверно. Проверь цифры и попробуй ещё раз.')
       return
     }
-    window.location.href = '/dashboard'
+    window.location.href = nextPath
   }
 
   function scheduleEmailCodeVerification(code: string) {

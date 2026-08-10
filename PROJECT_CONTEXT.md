@@ -47,6 +47,7 @@ Then try `3002` if needed.
 
 - `CLAUDE.md` -> agent rules and working conventions
 - `docs/project.md` -> product idea, audience, phase, north star
+- `docs/current-work.md` -> живой handoff: почему идёт параллельный редизайн, что сделано в последнем цикле и что делать следующим
 - `docs/architecture.md` -> stack, structure, commands, environment
 - `docs/design-system.md` -> visual language, colors, animation principles
 - `docs/features.md` -> current MVP, WIP, planned features
@@ -88,11 +89,11 @@ Working MVP:
 
 Current work phase:
 
-- UI redesign and polish for existing screens
-- dashboard and journal are the active areas
-- immediate mode: finish the card-response MLP before deeper Figma/mockup work; treat it as first response to a card, not as “prediction came true”
-- current card-response progress: desktop `DashboardCardReader` has a Figma-based draft with `Принимаю / Не принимаю`, local confirmation text, and “Читать дальше” truncation; saving the response to the journal and the third `Пока не понимаю` option are still next steps
-- proposed final response options: `Принимаю / Не моё / Пока не понимаю`; after tap, show a short hardcoded confirmation and save the response to the journal; no coins, statistics, evening checks, or AI explanation in the first pass
+- active design laboratory: Mora Next in `public/prototypes/spread/`; production MVP remains untouched
+- the daily-card scenario is an approved end-to-end 3D flow; the three-card spread has an experimental GLB fan and three-card click flow that still needs motion/loading QA, while drag remains 2D
+- author has prepared new first-entry mockups for unauthenticated users outside the current code; the next product pass must inspect those mockups before implementing one screen at a time
+- do not mix onboarding implementation with 3D spread stabilization in one pass; both use manual desktop approval in steps of at most 10 minutes
+- the older dashboard card-response MLP remains unfinished but is not the immediate active line unless the author explicitly returns to it
 - cards-first continues in parallel one card per pass; the latest pass updated `world`, while the previous passes updated `judgement` and added `ten-of-swords`; only `three-of-swords` remains missing and must be handled last in a separate pass after an explicit instruction, without changing IDs or draw/save/journal mechanics; 8 old cards remain to be updated by text
 - AI tarot chat is planned later, after the product feels presentable
 
@@ -101,10 +102,11 @@ Current work phase:
 Before edits:
 
 1. Read this file.
-2. Read `directives/00-start-every-task.md`.
-3. Read the relevant detailed doc in `docs/`.
-4. Inspect the actual code before changing behavior.
-5. Keep changes scoped to the user's request.
+2. Read `docs/current-work.md` to understand the active workstream and latest handoff.
+3. Read `directives/00-start-every-task.md`.
+4. Read the relevant detailed doc in `docs/`.
+5. Inspect the actual code before changing behavior.
+6. Keep changes scoped to the user's request.
 
 Use Ponytail mode by default: question whether the work is needed, prefer existing project patterns and native platform features, avoid new abstractions/dependencies, and take the smallest safe step. Do not use Ponytail as an excuse to skip Mora quality gates: auth, save flow, card canon, design system, accessibility, animations, approvals, and QA still matter.
 
@@ -119,5 +121,7 @@ When the user says "разбираем фидбек" or sends a batch of MVP fee
 After meaningful product, architecture, or visual decisions, update `docs/decisions.md`.
 
 Before commit, push, preview, or production deploy, read `directives/06-commit-and-deploy.md` and update docs/backlog/decisions so they say what is already done and what remains.
+
+Before writing a handoff prompt for a new chat, first update `docs/current-work.md` so its latest cycle and next steps match the actual code and decisions.
 
 If changes have been deployed, pushed to production, or used for a production preview, they must be committed. Do not leave production behavior only in the local working tree; git history is the source of truth for the next chat.

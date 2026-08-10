@@ -23,40 +23,40 @@
 }
 
 @font-face {
-  font-family: 'Roboto Condensed';
+  font-family: 'Inter Display';
   font-style: normal;
   font-weight: 300;
   font-display: block;
-  src: url('/assets/fonts/roboto-condensed-300.ttf') format('truetype');
+  src: url('/assets/fonts/inter-display-300.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Roboto Condensed';
+  font-family: 'Inter Display';
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url('/assets/fonts/roboto-condensed-400.ttf') format('truetype');
+  src: url('/assets/fonts/inter-display-400.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Roboto Condensed';
+  font-family: 'Inter Display';
   font-style: normal;
   font-weight: 500;
   font-display: block;
-  src: url('/assets/fonts/roboto-condensed-500.ttf') format('truetype');
+  src: url('/assets/fonts/inter-display-500.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Roboto Condensed';
+  font-family: 'Inter Display';
   font-style: normal;
   font-weight: 600;
   font-display: block;
-  src: url('/assets/fonts/roboto-condensed-600.ttf') format('truetype');
+  src: url('/assets/fonts/inter-display-600.woff2') format('woff2');
 }
 
 :root {
   --font-display: 'Spectral SC', Georgia, serif;
-  --font-ui: 'Roboto Condensed', 'Arial Narrow', Arial, sans-serif;
+  --font-ui: 'Inter Display', Inter, Arial, sans-serif;
   --font-serif: var(--font-display);
   --font-sans: var(--font-ui);
 }

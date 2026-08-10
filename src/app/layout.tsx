@@ -17,9 +17,9 @@ export default function RootLayout({
         <link rel="preload" as="image" href="/assets/cards/moose.webp" />
         <link rel="preload" as="font" href="/assets/fonts/spectral-sc-300.ttf" type="font/ttf" crossOrigin="anonymous" />
         <link rel="preload" as="font" href="/assets/fonts/spectral-sc-400.ttf" type="font/ttf" crossOrigin="anonymous" />
-        <link rel="preload" as="font" href="/assets/fonts/roboto-condensed-300.ttf" type="font/ttf" crossOrigin="anonymous" />
-        <link rel="preload" as="font" href="/assets/fonts/roboto-condensed-400.ttf" type="font/ttf" crossOrigin="anonymous" />
-        <link rel="preload" as="font" href="/assets/fonts/roboto-condensed-600.ttf" type="font/ttf" crossOrigin="anonymous" />
+        <link rel="preload" as="font" href="/assets/fonts/inter-display-300.woff2" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" as="font" href="/assets/fonts/inter-display-400.woff2" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" as="font" href="/assets/fonts/inter-display-600.woff2" type="font/woff2" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/assets/fonts.css" />
         <link rel="stylesheet" href="/assets/styles.css" />
       </head>

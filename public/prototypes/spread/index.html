@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mora — прототип расклада</title>
+    <script>
+      (() => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (["1", "always"].includes(params.get("resetDaily"))) return;
+          const snapshot = JSON.parse(window.localStorage.getItem("mora:prototype:dailyCard") || "null");
+          const now = new Date();
+          const dayKey = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, "0"),
+            String(now.getDate()).padStart(2, "0"),
+          ].join("-");
+          if (snapshot?.dayKey === dayKey) document.documentElement.classList.add("daily-saved-pending");
+        } catch {
+          // Invalid storage falls back to the regular daily deck.
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="/assets/fonts.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260810-cooldown2" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body class="daily-mode">
+    <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
+
+    <header class="header">
+      <a class="brand" href="./index.html" aria-label="Mora — на главную">
+        <img src="./icons/logo.svg" alt="Mora" />
+      </a>
+      <button class="login primary-action" type="button">Войти</button>
+      <div class="profile-control">
+        <button class="profile-trigger" type="button" aria-label="Профиль" aria-expanded="false" aria-controls="profile-menu">
+          <img src="./icons/profile.svg" alt="" />
+        </button>
+        <div class="profile-menu" id="profile-menu" aria-hidden="true">
+          <button class="profile-logout" type="button">
+            <img src="./icons/sign-out.svg" alt="" />
+            <span>Выйти</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="mode-nav" aria-label="Режим">
+      <button class="mode-button active" id="daily-mode-button" type="button" aria-label="Карта дня">
+        <img src="./icons/tab-one.svg" alt="" />
+      </button>
+      <button class="mode-button" id="spread-mode-button" type="button" aria-label="Расклад из трёх карт">
+        <img class="mode-button-icon" src="./icons/tab-two.svg" alt="" />
+        <img class="mode-button-lock" src="./icons/lock.svg" alt="" />
+      </button>
+    </nav>
+
+    <main>
+      <section class="daily-card-screen" id="daily-card-screen" aria-label="Карта дня">
+        <div class="daily-card-heading">
+          <h1>Карта дня</h1>
+          <p>Нажми на колоду и узнай, что приготовил тебе день</p>
+        </div>
+
+        <button class="daily-deck" id="daily-deck" type="button" aria-label="Вытянуть карту дня">
+          <canvas class="daily-deck-canvas" id="daily-deck-canvas" aria-hidden="true"></canvas>
+          <span class="daily-deck-card daily-deck-card-back" hidden></span>
+          <span class="daily-deck-card daily-deck-card-middle" hidden></span>
+          <span class="daily-deck-card daily-deck-card-top" hidden></span>
+        </button>
+      </section>
+
+      <section class="daily-result" id="daily-result" aria-label="Результат карты дня">
+        <div class="daily-result-copy">
+          <span class="daily-result-kicker">Ваша карта дня</span>
+          <div class="daily-result-content">
+            <div class="daily-result-heading">
+              <div class="daily-result-suit" id="daily-result-suit">
+                <span class="daily-result-suit-icon" id="daily-result-suit-icon" aria-hidden="true"></span>
+                <span id="daily-result-suit-label"></span>
+              </div>
+              <h2 id="daily-result-title">
+                <span id="daily-result-title-main"></span>
+                <span id="daily-result-title-meta"></span>
+              </h2>
+            </div>
+            <div class="daily-result-section">
+              <h3 id="daily-result-meaning-label">Что это значит сегодня</h3>
+              <div id="daily-result-text"></div>
+            </div>
+          </div>
+          <button class="daily-result-share primary-action" type="button">Поделиться</button>
+        </div>
+        <div class="daily-result-card">
+          <div class="daily-result-card-tilt">
+            <img id="daily-result-image" alt="" />
+          </div>
+        </div>
+      </section>
+
+      <section class="ritual-screen" id="start" data-step="topic">
+        <div class="spread-deck-3d" id="spread-deck-3d" aria-hidden="true">
+          <canvas class="spread-deck-3d-canvas" id="spread-deck-3d-canvas"></canvas>
+        </div>
+        <div class="ritual-heading">
+          <h1>Расклад из трёх карт</h1>
+          <p id="ritual-subtitle">На что хочешь посмотреть?</p>
+          <div class="topics" aria-label="Тема расклада">
+            <button class="topic" data-topic="Внутреннее состояние" type="button">
+              <img src="./icons/star-four.svg" alt="" />
+              <span>Внутреннее состояние</span>
+            </button>
+            <button class="topic" data-topic="Работа" type="button">
+              <img src="./icons/bag.svg" alt="" />
+              <span>Работа</span>
+            </button>
+            <button class="topic" data-topic="Отношения" type="button">
+              <img src="./icons/heart.svg" alt="" />
+              <span>Отношения</span>
+            </button>
+            <button class="topic" data-topic="Выбор" type="button">
+              <img src="./icons/diamonds-four.svg" alt="" />
+              <span>Выбор</span>
+            </button>
+          </div>
+          <button class="selected-topic" id="selected-topic" type="button" aria-label="Изменить тему"></button>
+        </div>
+
+        <div class="slots" aria-label="Выбранные карты">
+          <button class="slot" type="button" data-slot="0" aria-label="Первая карта"></button>
+          <button class="slot" type="button" data-slot="1" aria-label="Вторая карта"></button>
+          <button class="slot" type="button" data-slot="2" aria-label="Третья карта"></button>
+        </div>
+
+        <p class="deck-hint is-hidden" id="deck-hint">
+          <span class="deck-hint-copy">Выбери карты из колоды</span>
+          <svg class="deck-hint-arrow" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 2.5v9M4.5 8.5 8 12l3.5-3.5" />
+          </svg>
+        </p>
+        <div class="deck" id="deck" aria-label="Колода карт"></div>
+
+        <div class="reading-status" role="status" aria-live="polite">
+          <img class="status-icon" src="./icons/stack-loading.svg" alt="" />
+          <span class="status-copy">
+            Раскладываем<span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
+          </span>
+        </div>
+      </section>
+
+      <section class="saved-spread" id="saved-spread" aria-label="Последний расклад">
+        <div class="saved-spread-content">
+          <div class="saved-spread-heading">
+            <h1>Ваш расклад из трёх карт</h1>
+            <div class="saved-topic" id="saved-topic"></div>
+          </div>
+          <div class="saved-cards" id="saved-cards"></div>
+          <div class="saved-actions">
+            <button class="saved-action primary-action" id="new-spread" type="button">
+              Ещё расклад
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="reading" id="reading" aria-label="Результат расклада">
+        <nav class="reading-nav" aria-label="Разделы расклада">
+          <button type="button" data-chapter="0" data-label="Общий рисунок" aria-label="Общий рисунок"></button>
+          <button type="button" data-chapter="1" data-label="Сейчас" aria-label="Сейчас"></button>
+          <button type="button" data-chapter="2" data-label="Что мешает" aria-label="Что мешает"></button>
+          <button type="button" data-chapter="3" data-label="Что делать" aria-label="Что делать"></button>
+          <button type="button" data-chapter="4" data-label="Итог" aria-label="Итог"></button>
+        </nav>
+        <button class="reading-boundary-hint" type="button" aria-label="Вернуться на главную расклада">
+          <span>На главную</span>
+          <span class="reading-boundary-arrow" aria-hidden="true">↓</span>
+        </button>
+
+        <div class="reading-copy">
+          <article class="chapter intro" data-active="all">
+            <span class="eyebrow" id="reading-topic">1 из 5 · Общий рисунок</span>
+            <h2>Смотрим на три карты вместе</h2>
+            <p>Здесь будет первое наблюдение таролога: что повторяется в раскладе и как меняется его смысл слева направо.</p>
+          </article>
+
+          <article class="chapter" data-active="0">
+            <span class="eyebrow">2 из 5 · Сейчас · Что происходит</span>
+            <h3>Туз Жезлов</h3>
+            <p>Здесь будет простое описание того, что видно на карте.</p>
+            <p>Здесь карта ответит, что происходит сейчас в выбранной теме.</p>
+          </article>
+
+          <article class="chapter" data-active="1">
+            <span class="eyebrow">3 из 5 · Что мешает · Главное препятствие</span>
+            <h3>Солнце</h3>
+            <p>Здесь будет простое описание того, что видно на карте.</p>
+            <p>Здесь карта объяснит, что мешает и как это связано с первой картой.</p>
+          </article>
+
+          <article class="chapter" data-active="2">
+            <span class="eyebrow">4 из 5 · Что делать · Следующий шаг</span>
+            <h3>Девятка Пентаклей</h3>
+            <p>Здесь будет простое описание того, что видно на карте.</p>
+            <p>Здесь карта предложит конкретное действие в ответ на первые две карты.</p>
+          </article>
+
+          <article class="chapter synthesis" data-active="all">
+            <span class="eyebrow">5 из 5 · Итог</span>
+            <h3>Что три карты означают вместе</h3>
+            <p>Здесь будет короткий человеческий ответ по выбранной теме.</p>
+            <div class="result-actions">
+              <button class="share primary-action" type="button">Поделиться</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="card-stage" aria-label="Карты расклада">
+          <div class="stage-card" data-card="0">
+            <div class="tarot-card-shell stage-card-shell">
+              <img src="/assets/cards/ace-of-wands.webp" alt="Туз Жезлов" />
+            </div>
+          </div>
+          <div class="stage-card" data-card="1">
+            <div class="tarot-card-shell stage-card-shell">
+              <img src="/assets/cards/sun.webp" alt="Солнце" />
+            </div>
+          </div>
+          <div class="stage-card" data-card="2">
+            <div class="tarot-card-shell stage-card-shell">
+              <img src="/assets/cards/nine-of-pentacles.webp" alt="Девятка Пентаклей" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="login-screen" id="login-screen" aria-labelledby="login-screen-title" aria-hidden="true">
+      <div class="login-screen-content">
+        <a class="login-screen-brand" href="./index.html" aria-label="Вернуться в Mora">
+          <img src="./icons/logo.svg" alt="Mora" />
+        </a>
+        <h1 id="login-screen-title">Добро пожаловать<br />к Море</h1>
+        <p>Войдите или создайте аккаунт</p>
+        <form class="login-screen-form" id="login-screen-form">
+          <label class="visually-hidden" for="login-screen-email">Электронная почта</label>
+          <input
+            class="auth-gate-input"
+            id="login-screen-email"
+            name="email"
+            type="email"
+            placeholder="Электронная почта"
+            autocomplete="email"
+            required
+          />
+          <button class="primary-action" type="submit">Продолжить</button>
+        </form>
+      </div>
+    </section>
+
+    <div class="auth-gate" id="auth-gate" aria-hidden="true">
+      <div class="auth-gate-backdrop" aria-hidden="true"></div>
+      <section class="auth-gate-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
+        <h2 id="auth-gate-title">Чтобы делать расклады<br />войдите или зарегистрируйтесь</h2>
+        <form class="auth-gate-form" id="auth-gate-form">
+          <label class="visually-hidden" for="auth-gate-email">Электронная почта</label>
+          <input
+            class="auth-gate-input"
+            id="auth-gate-email"
+            name="email"
+            type="email"
+            placeholder="Электронная почта"
+            autocomplete="email"
+            required
+          />
+          <button class="auth-gate-submit primary-action" type="submit">Продолжить</button>
+          <button class="auth-gate-close primary-action" type="button">Закрыть</button>
+        </form>
+      </section>
+    </div>
+
+    <script type="module" src="./app.js?v=20260810-cooldown2"></script>
+  </body>
+</html>
