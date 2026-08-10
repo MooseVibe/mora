@@ -2735,3 +2735,7 @@ HTML теперь сразу загружается в `daily-mode` с акти�
 ## 2026-08-10 — Завершение reservation идемпотентно
 
 `complete_prototype_spread` сохраняет ID последней успешно завершённой reservation и при повторе того же ID возвращает прежний успешный `nextSpreadAt`, не сдвигая cooldown. Next.js API повторяет completion один раз при сетевой или Edge-ошибке. Это закрывает неоднозначность «БД записала результат, HTTP-ответ потерялся» без отдельной таблицы запросов; миграция проверена двойным complete в rollback-транзакции и применена к Supabase.
+
+## 2026-08-10 — Gemini проверяется из Vercel Preview до production deploy
+
+Существующий `GEMINI_API_KEY` хранится в Vercel Production и в Preview только для ветки `codex/mora-next-closed-test`; значение не попадает в git или клиентский bundle. Пересборка GitHub Preview подтвердила доступ Vercel к Google API реальным защищённым раскладом с `source: gemini` и успешным завершением серверной reservation. Локальная региональная ошибка Google поэтому не является блокером для тестеров; production deploy остаётся отдельным ручным решением автора.
