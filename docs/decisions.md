@@ -2747,3 +2747,5 @@ Production deployment `dpl_7fGPRuKj4gLyHteJGGgnJai5eJeV` собран из чи�
 ## 2026-08-10 — Первый production bugfix-пакет не меняет утверждённый 3D-flow
 
 QA-параметр `resetDaily` ограничен localhost, чтобы тестовая ссылка не удаляла сохранённую карту на production. До асинхронного ответа tester-session скрываются только auth-зависимые контролы, поэтому гостевой state не мигает, а публичная карта дня остаётся доступной. Неактивный spread-tab после авторизации возвращён к opacity `0.5`. Фоновый PNG сохранён как исходник, но интерфейс грузит визуально проверенный WebP (406 KB вместо 3.9 MB). Лаг 3D-колоды не маскируется случайным снижением качества: первичный аудит вынесен в отдельную измеряемую задачу.
+
+Пакет задеплоен из чистого commit `2f71bef` как production deployment `dpl_8TsDHZtiZ5HNNpzpdgygGd5FaNue`. Smoke через alias подтвердил Mora Next `200`, tester-session `200` и WebP `200` с `image/webp` и размером `415350` байт.
