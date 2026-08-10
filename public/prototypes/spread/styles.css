@@ -41,7 +41,7 @@ body {
   color: var(--cream);
   min-width: 320px;
   background-color: var(--prototype-surface);
-  background-image: url("./assets/mora-background-v1.png");
+  background-image: url("./assets/mora-background-v1.webp");
   background-position: center;
   background-size: cover;
   background-attachment: fixed;
@@ -136,6 +136,13 @@ body.prototype-tester .login {
 
 body.prototype-tester .profile-control {
   display: block;
+}
+
+html.tester-session-pending .login,
+html.tester-session-pending .profile-control,
+html.tester-session-pending #spread-mode-button {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .profile-trigger {
@@ -359,6 +366,10 @@ body.prototype-tester #spread-mode-button .mode-button-icon {
   opacity: 1;
 }
 
+body.prototype-tester #spread-mode-button:not(.active) {
+  opacity: 0.5;
+}
+
 body.prototype-tester #spread-mode-button .mode-button-lock {
   opacity: 0;
 }
@@ -477,7 +488,7 @@ body.prototype-tester #spread-mode-button .mode-button-lock {
   place-items: center;
   padding: 48px 24px;
   background-color: var(--prototype-surface);
-  background-image: url("./assets/mora-background-v1.png");
+  background-image: url("./assets/mora-background-v1.webp");
   background-position: center;
   background-size: cover;
   opacity: 0;

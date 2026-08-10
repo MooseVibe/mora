@@ -36,6 +36,63 @@
 
 ## Inbox
 
+### 2026-08-10 · Первые production-сигналы Mora Next после закрытого запуска
+
+#### 1. Карта дня пропадает после закрытия вкладки
+
+- Source: автор, production-тест.
+- Screen: Mora Next, карта дня после вытягивания и повторного входа.
+- Type: Bug.
+- Raw feedback: «карта дня не сохраняется если ее вытащить — закрыть вкладку — зайти снова».
+- Screenshot:
+- Interpretation: восстановление дневной карты из сохранённого состояния не срабатывает либо сохранение происходит в неправильный момент/ключ.
+- Status: Done.
+- Next step: production больше не выполняет QA-параметр `resetDaily`; сохранение и восстановление карты подтверждены локальным повторным входом.
+
+#### 2. При повторном входе виден неавторизованный экран
+
+- Source: автор, production-тест авторизованного аккаунта.
+- Screen: Mora Next, первоначальная загрузка страницы.
+- Type: Bug / UX.
+- Raw feedback: «сначала я попадаю на неавторизованный стейт, а потом уже меня перебрасывает на авторизованный».
+- Screenshot:
+- Interpretation: HTML рисует гостевой state до завершения асинхронной проверки HttpOnly-сессии, создавая заметный flash неверного интерфейса.
+- Status: Done.
+- Next step: auth-контролы используют нейтральный pending-state до завершения session GET; основной экран карты дня не блокируется.
+
+#### 3. Выбор карт лагает на desktop и laptop
+
+- Source: коллеги автора, разные устройства.
+- Screen: Mora Next, выбор трёх карт в 3D-колоде расклада.
+- Type: Bug / UX.
+- Raw feedback: «выбор карт у коллег с разных устройств очень лагает (десктоп/лептоп)».
+- Screenshot:
+- Interpretation: повторяющийся cross-device performance-сигнал; причина пока не установлена и может быть в render loop, raycasting, DPR, GLB/texture upload или одновременных эффектах.
+- Status: Backlog.
+- Next step: снять production performance trace на throttled desktop и проверить frame time без изменения утверждённых click/drag-flow.
+
+#### 4. Фоновое изображение долго загружается
+
+- Source: коллеги автора, production-тест.
+- Screen: Mora Next, первоначальная загрузка.
+- Type: Bug / Visual.
+- Raw feedback: «картинка бг видимо очень тяжелая и ее надо оптимизировать — у коллег долго прогружалась».
+- Screenshot:
+- Interpretation: текущий PNG-фон весит несколько мегабайт и блокирует визуальную готовность на медленной сети.
+- Status: Done.
+- Next step: визуально проверенный WebP заменил runtime PNG-фон и уменьшил transfer с 3.9 MB до 406 KB; исходник сохранён.
+
+#### 5. Иконка раскладов получает полную opacity в неактивном состоянии
+
+- Source: автор, production-тест после авторизации.
+- Screen: Mora Next, переключатель «Карта дня / Расклады».
+- Type: Bug / Visual.
+- Raw feedback: «когда таб раскладов открывается после авторизации иконка раскладов становится opacity 100, хотя если она неактивна то должна быть opacity 50».
+- Screenshot:
+- Interpretation: authenticated/locked CSS-state переопределяет неактивную opacity иконки или всей кнопки.
+- Status: Done.
+- Next step: inactive authenticated state подтверждён с opacity `0.5`, active — `1`.
+
 ### YYYY-MM-DD · Короткий заголовок
 
 - Source:

@@ -112,6 +112,7 @@ const dailyDeck3D = mountDailyDeck3D({
 
 const savedSpreadKey = "mora:prototype:lastSpread";
 const savedDailyCardKey = "mora:prototype:dailyCard";
+const isLocalPrototype = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const spreadCooldownMs = 24 * 60 * 60 * 1000;
 const suitTags = {
   "Пентакли": "./icons/suit-pentacles.svg",
@@ -181,7 +182,7 @@ restorePrototypeTesterSession();
 restoreSavedSpread();
 const urlParams = new URLSearchParams(window.location.search);
 const resetDailyMode = urlParams.get("resetDaily");
-if (resetDailyMode === "1" || resetDailyMode === "always") {
+if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always")) {
   window.localStorage.removeItem(savedDailyCardKey);
   if (resetDailyMode === "1") {
     urlParams.delete("resetDaily");
@@ -221,10 +222,10 @@ dailyDeck.addEventListener("click", handleDailyDeckClick);
 
 async function restorePrototypeTesterSession() {
   const params = new URLSearchParams(window.location.search);
-  const localPreview = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
-    && params.get("testerPreview") === "1";
+  const localPreview = isLocalPrototype && params.get("testerPreview") === "1";
   if (localPreview) {
     setPrototypeTesterAuthenticated(true, true);
+    document.documentElement.classList.remove("tester-session-pending");
     return;
   }
 
@@ -239,6 +240,8 @@ async function restorePrototypeTesterSession() {
     );
   } catch {
     // The public daily-card flow remains available when session lookup fails.
+  } finally {
+    document.documentElement.classList.remove("tester-session-pending");
   }
 }
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class="tester-session-pending">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,7 +8,8 @@
       (() => {
         try {
           const params = new URLSearchParams(window.location.search);
-          if (["1", "always"].includes(params.get("resetDaily"))) return;
+          const isLocal = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+          if (isLocal && ["1", "always"].includes(params.get("resetDaily"))) return;
           const snapshot = JSON.parse(window.localStorage.getItem("mora:prototype:dailyCard") || "null");
           const now = new Date();
           const dayKey = [
@@ -23,7 +24,7 @@
       })();
     </script>
     <link rel="stylesheet" href="/assets/fonts.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260810-cooldown2" />
+    <link rel="stylesheet" href="./styles.css?v=20260810-production-fixes1" />
     <script type="importmap">
       {
         "imports": {
