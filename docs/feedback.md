@@ -69,7 +69,7 @@
 - Screenshot:
 - Interpretation: повторяющийся cross-device performance-сигнал; причина пока не установлена и может быть в render loop, raycasting, DPR, GLB/texture upload или одновременных эффектах.
 - Status: Backlog.
-- Next step: снять production performance trace на throttled desktop и проверить frame time без изменения утверждённых click/drag-flow.
+- Next step: задеплоить проверенный performance-пакет и попросить тех же коллег повторить выбор карт на тех же устройствах; до удалённого подтверждения не закрывать сигнал.
 
 #### 4. Фоновое изображение долго загружается
 

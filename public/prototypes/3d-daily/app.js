@@ -213,7 +213,7 @@ function setupScene() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.4 : 1.8));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.2 : 1.5));
 
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.55));
 
@@ -783,7 +783,7 @@ async function init() {
     const [gltf, faceTexture, backTexture] = await Promise.all([
       new GLTFLoader().loadAsync("./assets/mora-card.glb"),
       loadTexture(`/${worldCard.image.replace(/^\/+/, "")}`),
-      loadTexture("./assets/mora-card-back-v3.png"),
+      loadTexture("./assets/mora-card-back-v3.webp"),
     ]);
     const materials = createMaterials(faceTexture, prepareBackTexture(backTexture));
     cardBackMaterial = materials.back;

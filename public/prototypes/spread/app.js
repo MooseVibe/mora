@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260810-performance1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260810-performance1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS
@@ -392,6 +392,7 @@ async function switchMode(mode) {
 }
 
 function showDailyMode() {
+  dailyDeck3D.then((controller) => controller?.setActive(true));
   resetSavedCardTilt();
   savedReturnChapter = null;
   document.body.classList.remove(
@@ -437,6 +438,7 @@ function showDailyMode() {
 }
 
 function showSpreadMode() {
+  dailyDeck3D.then((controller) => controller?.setActive(false));
   resetDailyResultTilt();
   document.body.classList.remove(
     "daily-mode",
@@ -822,9 +824,10 @@ function initStarfield() {
   gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let lastStarfieldFrame = -Infinity;
 
   function resize() {
-    const scale = Math.min(window.devicePixelRatio || 1, 2);
+    const scale = Math.min(window.devicePixelRatio || 1, 1.25);
     starfield.width = Math.round(window.innerWidth * scale);
     starfield.height = Math.round(window.innerHeight * scale);
     gl.viewport(0, 0, starfield.width, starfield.height);
@@ -832,8 +835,11 @@ function initStarfield() {
   }
 
   function render(now = 0) {
-    gl.uniform1f(time, now * 0.001);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    if (now - lastStarfieldFrame >= 1000 / 30) {
+      lastStarfieldFrame = now;
+      gl.uniform1f(time, now * 0.001);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
     if (!reducedMotion) window.requestAnimationFrame(render);
   }
 
@@ -870,7 +876,7 @@ mountSpreadDeck3D({
 })
   .then((controller) => {
     spreadDeck3DController = controller;
-    spreadDeck3DController.refresh();
+    renderDeck();
     ritual.classList.add("spread-deck-3d-ready");
   })
   .catch((error) => {
@@ -879,13 +885,16 @@ mountSpreadDeck3D({
   });
 
 function renderDeck() {
+  const visibleCardIndices = [];
+  const visibleLimit = window.innerWidth / 2 + 320;
   deckCards.forEach((card, index) => {
     const offset = index - (deckCardCount - 1) / 2 + deckScroll / 98;
     card.style.top = `${offset ** 2 * 2}px`;
     card.style.transform = `translateX(calc(-50% + ${offset * 98}px)) rotate(${offset * 1.88}deg)`;
     card.style.zIndex = String(index);
+    if (Math.abs(offset * 98) <= visibleLimit) visibleCardIndices.push(index);
   });
-  spreadDeck3DController?.setScroll(deckScroll);
+  spreadDeck3DController?.setVisibleIndices(visibleCardIndices);
 }
 
 function stopDeckDiscoveryMotion() {
@@ -919,6 +928,7 @@ function playDeckDiscoveryMotion() {
 }
 
 renderDeck();
+window.addEventListener("resize", renderDeck);
 
 ritual.addEventListener(
   "wheel",

@@ -23,7 +23,7 @@ function tween(duration, update) {
 
 function loadBackTexture(renderer) {
   const texture = new THREE.TextureLoader().load(
-    new URL("../3d-daily/assets/mora-card-back-v3.png", import.meta.url).href,
+    new URL("../3d-daily/assets/mora-card-back-v3.webp", import.meta.url).href,
   );
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.flipY = false;
@@ -111,7 +111,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.4 : 1.8));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.2 : 1.5));
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.7));
   const key = new THREE.DirectionalLight(0xffe7d2, 2.8);
   key.position.set(-4, 8, 8);
@@ -125,8 +125,8 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   applyMaterials(template, renderer);
   const size = new THREE.Box3().setFromObject(template).getSize(new THREE.Vector3());
   const cardCount = cardElements.length;
-  const cards = [];
-  const shadows = [];
+  const cards = Array(cardCount).fill(null);
+  const shadows = Array(cardCount).fill(null);
   const selectedIndices = new Set();
   const faceCamera = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0));
   const verticalAxis = new THREE.Vector3(0, 1, 0);
@@ -141,12 +141,14 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     transparent: true,
     depthWrite: false,
   });
-  for (let index = 0; index < cardCount; index += 1) {
+  function ensureCard(index) {
+    if (cards[index]) return cards[index];
     const card = template.clone(true);
     const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
     scene.add(card, shadow);
-    cards.push(card);
-    shadows.push(shadow);
+    cards[index] = card;
+    shadows[index] = shadow;
+    return card;
   }
 
   let hoveredIndex = null;
@@ -158,18 +160,26 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   let draggedIndex = null;
   let dragStartScale = null;
   let dragScaleAmount = 0;
+  let visibleIndices = new Set(cards.keys());
+  let viewportWidth = 0;
+  let viewportHeight = 0;
+  const cardTurnAxis = new THREE.Vector3(0, 0, 1);
 
   function configureViewport() {
     const rect = host.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
-    renderer.setSize(rect.width, rect.height, false);
-    camera.left = -rect.width / 2;
-    camera.right = rect.width / 2;
-    camera.top = rect.height / 2;
-    camera.bottom = -rect.height / 2;
-    camera.near = 0.1;
-    camera.far = 2000;
-    camera.updateProjectionMatrix();
+    if (rect.width !== viewportWidth || rect.height !== viewportHeight) {
+      viewportWidth = rect.width;
+      viewportHeight = rect.height;
+      renderer.setSize(rect.width, rect.height, false);
+      camera.left = -rect.width / 2;
+      camera.right = rect.width / 2;
+      camera.top = rect.height / 2;
+      camera.bottom = -rect.height / 2;
+      camera.near = 0.1;
+      camera.far = 2000;
+      camera.updateProjectionMatrix();
+    }
     return rect;
   }
 
@@ -179,8 +189,14 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     const middleIndex = (cardCount - 1) / 2;
 
     cards.forEach((card, index) => {
+      if (!card) return;
       if (selectedIndices.has(index)) return;
       if (index === draggedIndex) return;
+      if (!visibleIndices.has(index)) {
+        card.visible = false;
+        shadows[index].visible = false;
+        return;
+      }
       if (!fanVisible) {
         card.visible = false;
         shadows[index].visible = false;
@@ -202,15 +218,14 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       const x = rect.left + rect.width / 2 - viewport.width / 2 + hoverX;
       const y = viewport.height / 2 - rect.top - rect.height / 2 + hoverY;
       const z = (index - middleIndex) * layerStep;
-      const turn = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotation);
       card.position.set(x, y, z);
-      card.quaternion.copy(turn).multiply(faceCamera);
+      card.quaternion.setFromAxisAngle(cardTurnAxis, rotation).multiply(faceCamera);
       card.scale.set(xScale, xScale, zScale);
       card.visible = true;
 
       const shadow = shadows[index];
       shadow.position.set(x, y - 6, z - layerStep * 0.55);
-      shadow.quaternion.copy(turn);
+      shadow.quaternion.setFromAxisAngle(cardTurnAxis, rotation);
       shadow.scale.set(rect.width * 1.12, rect.height * 1.08, 1);
       shadow.visible = true;
     });
@@ -259,7 +274,9 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
 
   return {
     refresh: renderDeck,
-    setScroll() {
+    setVisibleIndices(nextIndices) {
+      visibleIndices = new Set(nextIndices);
+      nextIndices.forEach(ensureCard);
       renderDeck();
     },
     setHovered(nextIndex) {
@@ -277,6 +294,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     },
     startDrag(index) {
       if (selectedIndices.has(index)) return false;
+      ensureCard(index);
       draggedIndex = index;
       dragStartScale = cards[index].scale.clone();
       dragScaleAmount = 0;
@@ -385,6 +403,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     },
     async drawToSlot({ index, slotIndex, imageUrl, targetElement, onCover, onTextReveal }) {
       if (selectedIndices.has(index)) return false;
+      ensureCard(index);
       const viewport = configureViewport();
       if (!viewport) return false;
       renderDeck();

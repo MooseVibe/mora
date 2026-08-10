@@ -47,7 +47,7 @@ function moveObjects(items, targets, duration) {
 
 async function loadBackTexture(renderer) {
   const texture = await new THREE.TextureLoader().loadAsync(
-    new URL("../3d-daily/assets/mora-card-back-v3.png", import.meta.url).href,
+    new URL("../3d-daily/assets/mora-card-back-v3.webp", import.meta.url).href,
   );
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.flipY = false;
@@ -181,7 +181,7 @@ export async function mountDailyDeck3D({ canvas, host, onSelect, onResult }) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.4 : 1.8));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.2 : 1.5));
 
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.55));
 
@@ -264,6 +264,7 @@ export async function mountDailyDeck3D({ canvas, host, onSelect, onResult }) {
   let hoverAmount = 0;
   let ritualState = "idle";
   let frameId;
+  let renderingActive = true;
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const resultPressPoint = new THREE.Vector2();
@@ -286,6 +287,10 @@ export async function mountDailyDeck3D({ canvas, host, onSelect, onResult }) {
   }
 
   function render() {
+    if (!renderingActive) {
+      frameId = null;
+      return;
+    }
     if (ritualState === "idle") {
       hoverAmount += ((hovered ? 1 : 0) - hoverAmount) * 0.14;
       deckGroup.position.y = hoverAmount * 0.05;
@@ -768,6 +773,10 @@ export async function mountDailyDeck3D({ canvas, host, onSelect, onResult }) {
   return {
     activate,
     restoreResult,
+    setActive(active) {
+      renderingActive = active;
+      if (active && !frameId) render();
+    },
     isDeckHovered: () => {
       if (ritualState === "result") return resultHovered;
       return ritualState === "fan" ? Boolean(hoveredCard) : hovered;
