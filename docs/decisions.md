@@ -2739,3 +2739,7 @@ HTML теперь сразу загружается в `daily-mode` с акти�
 ## 2026-08-10 — Gemini проверяется из Vercel Preview до production deploy
 
 Существующий `GEMINI_API_KEY` хранится в Vercel Production и в Preview только для ветки `codex/mora-next-closed-test`; значение не попадает в git или клиентский bundle. Пересборка GitHub Preview подтвердила доступ Vercel к Google API реальным защищённым раскладом с `source: gemini` и успешным завершением серверной reservation. Локальная региональная ошибка Google поэтому не является блокером для тестеров; production deploy остаётся отдельным ручным решением автора.
+
+## 2026-08-10 — Mora Next с Gemini задеплоена в production после отдельного аппрува
+
+Production deployment `dpl_7fGPRuKj4gLyHteJGGgnJai5eJeV` собран из чистого git commit `9627ec7`, поэтому локальные untracked-черновики не вошли в upload. Alias `mora-vnkt.vercel.app` обновлён только после успешной Vercel-сборки. Smoke через production alias подтвердил публичную загрузку Mora Next, обязательную tester-сессию и настоящий ответ Gemini с завершённой reservation; временная QA-сессия отозвана.

@@ -240,7 +240,7 @@ North Star остаётся прежней: AI-таролог, который д
 
 Для первого закрытого теста автор выбрал упрощённую email tester-session и один завершённый расклад на 24 часа; подтверждённый админ остаётся без лимита. Для первой волны используется только Gemini, а GigaChat не считается production fallback до отдельной проверки TLS, credentials и deploy-сети.
 
-`GEMINI_API_KEY` добавлен в Vercel для Production и только для Preview-ветки `codex/mora-next-closed-test`. Preview, пересобранный из commit `c364696`, успешно выполнил защищённый Gemini-запрос: HTTP 200, `source: gemini`, три ожидаемых `cardId`, валидные overview/conclusion и серверный `nextSpreadAt`. QA tester-сессия после smoke отозвана. Production deployment ещё не запускался и требует отдельного подтверждения автора.
+`GEMINI_API_KEY` добавлен в Vercel для Production и только для Preview-ветки `codex/mora-next-closed-test`. После отдельного подтверждения автора commit `9627ec7` задеплоен в Production как deployment `dpl_7fGPRuKj4gLyHteJGGgnJai5eJeV` и привязан к `mora-vnkt.vercel.app`. Production smoke успешно проверил страницу Mora Next (200), отказ AI-маршрута без сессии (401), создание tester cookie (200) и реальный расклад Gemini (200, `source: gemini`, три ожидаемых `cardId`, валидные overview/conclusion и серверный `nextSpreadAt`). QA tester-сессия после smoke отозвана.
 
 Не строить большую админку и не записывать чувствительные вопросы или полные тексты без явного согласия. Аналитика показывает, что человек сделал, но причину ухода нужно узнавать через вопрос или интервью.
 
