@@ -52,6 +52,22 @@ body {
   overscroll-behavior-x: none;
 }
 
+.starfield,
+.header,
+.mode-nav,
+main {
+  opacity: 1;
+  transition: opacity 560ms var(--ease);
+}
+
+html.site-loading .starfield,
+html.site-loading .header,
+html.site-loading .mode-nav,
+html.site-loading main {
+  opacity: 0;
+  pointer-events: none;
+}
+
 button,
 a {
   color: inherit;
@@ -69,9 +85,15 @@ main {
   transition: opacity 180ms ease-in-out;
 }
 
+html:not(.site-loading) main {
+  transition-duration: 560ms;
+  transition-timing-function: var(--ease);
+}
+
 body.mode-switching main {
   opacity: 0;
   pointer-events: none;
+  transition-duration: 180ms;
 }
 
 body.auth-gate-open {

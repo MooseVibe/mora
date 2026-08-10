@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260810-performance1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260810-performance1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260810-entrance1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260810-entrance1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS
@@ -92,6 +92,7 @@ let savedCardTiltFrame;
 let activeSavedCardTilt;
 let savedCardTilt = { x: 0, y: 0 };
 let spreadDeck3DController;
+let spreadDeck3DPromise;
 let prototypeTesterAuthenticated = false;
 let prototypeTesterIsAdmin = false;
 let prototypeNextSpreadAt = 0;
@@ -178,7 +179,7 @@ function restoreSpreadDeckOrder(cards) {
 }
 
 initStarfield();
-restorePrototypeTesterSession();
+const testerSessionReady = restorePrototypeTesterSession();
 restoreSavedSpread();
 const urlParams = new URLSearchParams(window.location.search);
 const resetDailyMode = urlParams.get("resetDaily");
@@ -192,6 +193,7 @@ if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always"))
 const startInSpreadMode = urlParams.get("mode") === "spread";
 startInSpreadMode ? showSpreadMode() : showDailyMode();
 if (startInSpreadMode) window.history.replaceState(null, "", window.location.pathname);
+revealSiteWhenReady();
 
 dailyModeButton.addEventListener("click", () => switchMode("daily"));
 spreadModeButton.addEventListener("click", () => {
@@ -243,6 +245,19 @@ async function restorePrototypeTesterSession() {
   } finally {
     document.documentElement.classList.remove("tester-session-pending");
   }
+}
+
+function waitForBackground() {
+  const image = new Image();
+  image.src = "./assets/mora-background-v1.webp";
+  return image.decode?.().catch(() => {}) || Promise.resolve();
+}
+
+async function revealSiteWhenReady() {
+  await Promise.allSettled([testerSessionReady, dailyDeck3D, waitForBackground()]);
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => document.documentElement.classList.remove("site-loading"));
+  });
 }
 
 async function handleTesterLogin(event, destination) {
@@ -438,6 +453,7 @@ function showDailyMode() {
 }
 
 function showSpreadMode() {
+  ensureSpreadDeck3D();
   dailyDeck3D.then((controller) => controller?.setActive(false));
   resetDailyResultTilt();
   document.body.classList.remove(
@@ -869,20 +885,26 @@ for (let index = 0; index < deckCardCount; index += 1) {
   deckCards.push(card);
 }
 
-mountSpreadDeck3D({
-  canvas: spreadDeck3DCanvas,
-  host: spreadDeck3DHost,
-  cardElements: deckCards,
-})
-  .then((controller) => {
-    spreadDeck3DController = controller;
-    renderDeck();
-    ritual.classList.add("spread-deck-3d-ready");
+function ensureSpreadDeck3D() {
+  if (spreadDeck3DPromise) return spreadDeck3DPromise;
+  spreadDeck3DPromise = mountSpreadDeck3D({
+    canvas: spreadDeck3DCanvas,
+    host: spreadDeck3DHost,
+    cardElements: deckCards,
   })
-  .catch((error) => {
-    spreadDeck3DHost?.classList.add("is-failed");
-    console.error("Mora spread 3D deck failed to load", error);
-  });
+    .then((controller) => {
+      spreadDeck3DController = controller;
+      renderDeck();
+      ritual.classList.add("spread-deck-3d-ready");
+      return controller;
+    })
+    .catch((error) => {
+      spreadDeck3DHost?.classList.add("is-failed");
+      console.error("Mora spread 3D deck failed to load", error);
+      return null;
+    });
+  return spreadDeck3DPromise;
+}
 
 function renderDeck() {
   const visibleCardIndices = [];
