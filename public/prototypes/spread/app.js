@@ -1,12 +1,12 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260810-entrance1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260810-entrance1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260811-stability1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260811-stability1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS
   .filter((card) => card.image)
   .map((card) => ({ ...card, image: `/${card.image.replace(/^\/+/, "")}` }));
-const spreadDeck = restoreSpreadDeckOrder(availableSpreadCards);
+let spreadDeck = restoreSpreadDeckOrder(availableSpreadCards);
 const selectedCards = [];
 const spreadSize = 3;
 
@@ -98,11 +98,14 @@ let prototypeTesterIsAdmin = false;
 let prototypeNextSpreadAt = 0;
 let spreadCooldownTimer;
 let volatileFailedSpread = null;
+let pendingDailySelection = null;
+let visibleSpreadCardIndices = [];
 
 dailyDeck.classList.add("is-3d-loading");
 const dailyDeck3D = mountDailyDeck3D({
   canvas: dailyDeckCanvas,
   host: dailyDeck,
+  onPrepare: prepareDailyCardCandidate,
   onSelect: prepareDailyCardSelection,
   onResult: showDaily3DResult,
 }).catch((error) => {
@@ -179,7 +182,7 @@ function restoreSpreadDeckOrder(cards) {
 }
 
 initStarfield();
-const testerSessionReady = restorePrototypeTesterSession();
+restorePrototypeTesterSession();
 restoreSavedSpread();
 const urlParams = new URLSearchParams(window.location.search);
 const resetDailyMode = urlParams.get("resetDaily");
@@ -193,7 +196,6 @@ if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always"))
 const startInSpreadMode = urlParams.get("mode") === "spread";
 startInSpreadMode ? showSpreadMode() : showDailyMode();
 if (startInSpreadMode) window.history.replaceState(null, "", window.location.pathname);
-revealSiteWhenReady();
 
 dailyModeButton.addEventListener("click", () => switchMode("daily"));
 spreadModeButton.addEventListener("click", () => {
@@ -245,19 +247,6 @@ async function restorePrototypeTesterSession() {
   } finally {
     document.documentElement.classList.remove("tester-session-pending");
   }
-}
-
-function waitForBackground() {
-  const image = new Image();
-  image.src = "./assets/mora-background-v1.webp";
-  return image.decode?.().catch(() => {}) || Promise.resolve();
-}
-
-async function revealSiteWhenReady() {
-  await Promise.allSettled([testerSessionReady, dailyDeck3D, waitForBackground()]);
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => document.documentElement.classList.remove("site-loading"));
-  });
 }
 
 async function handleTesterLogin(event, destination) {
@@ -430,6 +419,8 @@ function showDailyMode() {
   dailyDeck.disabled = Boolean(savedDailyCard);
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
+    document.documentElement.classList.remove("daily-saved-pending");
+    document.body.classList.add("daily-result-ready");
     if (daily3DResultActive) {
       dailyDeck.disabled = false;
       document.body.classList.add("daily-3d-result");
@@ -644,12 +635,24 @@ function readSavedDailyCard() {
   }
 }
 
-function prepareDailyCardSelection() {
+function prepareDailyCardCandidate() {
+  if (pendingDailySelection) return pendingDailySelection;
   if (dailyDrawInFlight || readSavedDailyCard()) return;
-
   const card = getDailyCard();
   if (!card) return;
   const variantIndex = Math.floor(Math.random() * card.result.dayVariants.length);
+  pendingDailySelection = {
+    card,
+    variantIndex,
+    imageUrl: `/${card.image.replace(/^\/+/, "")}`,
+  };
+  return pendingDailySelection;
+}
+
+function prepareDailyCardSelection() {
+  const selection = pendingDailySelection || prepareDailyCardCandidate();
+  if (!selection || dailyDrawInFlight) return;
+  const { card, variantIndex } = selection;
   dailyDrawInFlight = true;
   dailyDeck.disabled = true;
   populateDailyResult(card, variantIndex);
@@ -667,19 +670,18 @@ function prepareDailyCardSelection() {
     // The prototype still completes when localStorage is unavailable.
   }
 
-  return {
-    card,
-    variantIndex,
-    imageUrl: `/${card.image.replace(/^\/+/, "")}`,
-  };
+  pendingDailySelection = null;
+  return selection;
 }
 
 function showDaily3DResult() {
+  const restoring = document.body.classList.contains("daily-3d-restoring");
   daily3DResultActive = true;
   dailyDeck.disabled = false;
   document.documentElement.classList.remove("daily-saved-pending");
   document.body.classList.remove("daily-3d-ritual", "daily-3d-animating", "daily-3d-restoring");
-  document.body.classList.add("daily-3d-result", "daily-3d-result-entering");
+  document.body.classList.add("daily-3d-result");
+  if (!restoring) document.body.classList.add("daily-3d-result-entering");
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
       document.body.classList.remove("daily-3d-result-entering");
@@ -876,8 +878,16 @@ for (let index = 0; index < deckCardCount; index += 1) {
   card.dataset.cardId = tarotCard.id;
   card.setAttribute("aria-label", `Выбрать карту ${index + 1}`);
   card.addEventListener("click", pickCard);
-  card.addEventListener("pointerdown", startCardDrag);
-  card.addEventListener("pointerenter", () => spreadDeck3DController?.setHovered(index));
+  card.addEventListener("pointerdown", (event) => {
+    const currentCard = spreadDeck.find((item) => item.id === card.dataset.cardId);
+    if (currentCard) spreadDeck3DController?.preloadFace(currentCard.image);
+    startCardDrag(event);
+  });
+  card.addEventListener("pointerenter", () => {
+    const currentCard = spreadDeck.find((item) => item.id === card.dataset.cardId);
+    if (currentCard) spreadDeck3DController?.preloadFace(currentCard.image);
+    spreadDeck3DController?.setHovered(index);
+  });
   card.addEventListener("pointerleave", () => spreadDeck3DController?.setHovered(null));
   card.addEventListener("focus", () => spreadDeck3DController?.setHovered(index));
   card.addEventListener("blur", () => spreadDeck3DController?.setHovered(null));
@@ -916,6 +926,11 @@ function renderDeck() {
     card.style.zIndex = String(index);
     if (Math.abs(offset * 98) <= visibleLimit) visibleCardIndices.push(index);
   });
+  visibleCardIndices.sort((left, right) => (
+    Math.abs(left - (deckCardCount - 1) / 2 + deckScroll / 98)
+    - Math.abs(right - (deckCardCount - 1) / 2 + deckScroll / 98)
+  ));
+  visibleSpreadCardIndices = visibleCardIndices;
   spreadDeck3DController?.setVisibleIndices(visibleCardIndices);
 }
 
@@ -975,8 +990,21 @@ topics.forEach((topic) => {
     ritual.dataset.step = "choose";
     showDeckHint();
     playDeckDiscoveryMotion();
+    preloadVisibleSpreadFaces();
   });
 });
+
+async function preloadVisibleSpreadFaces() {
+  const paths = visibleSpreadCardIndices
+    .slice(0, 10)
+    .map((index) => spreadDeck[index]?.image)
+    .filter(Boolean);
+  for (let index = 0; index < paths.length; index += 2) {
+    await Promise.allSettled(paths.slice(index, index + 2).map((path) => (
+      spreadDeck3DController?.preloadFace(path)
+    )));
+  }
+}
 
 slots.forEach((slot, slotIndex) => {
   slot.addEventListener("click", () => {
@@ -1364,14 +1392,48 @@ function closeReadingToSaved(returnChapter = null, wheelDirection = 0) {
 
 newSpreadButton.addEventListener("click", () => {
   if (newSpreadButton.disabled) return;
-  try {
-    const nextDeck = createNextDeckOrder(spreadDeck, spreadDeck.map((card) => card.id));
-    saveSpreadDeckOrder(nextDeck);
-    window.localStorage.removeItem(savedSpreadKey);
-    volatileFailedSpread = null;
-  } finally {
-    window.location.href = "./index.html?mode=spread";
-  }
+  const nextDeck = createNextDeckOrder(spreadDeck, spreadDeck.map((card) => card.id));
+  spreadDeck = nextDeck;
+  saveSpreadDeckOrder(nextDeck);
+  window.localStorage.removeItem(savedSpreadKey);
+  volatileFailedSpread = null;
+  selectedCards.length = 0;
+  picked = 0;
+  currentTopic = "";
+  selectionInFlight = false;
+  stateTransitionInFlight = false;
+  ritual.dataset.step = "topic";
+  selectedTopic.replaceChildren();
+  slots.forEach((slot, index) => {
+    slot.replaceChildren();
+    slot.className = "slot";
+    slot.setAttribute("aria-label", ["Первая карта", "Вторая карта", "Третья карта"][index]);
+  });
+  deckCards.forEach((card, index) => {
+    card.dataset.cardId = spreadDeck[index].id;
+    card.setAttribute("aria-label", `Выбрать карту ${index + 1}`);
+    card.disabled = false;
+    card.style.removeProperty("opacity");
+    card.style.removeProperty("pointer-events");
+    delete card.dataset.suppressClick;
+  });
+  spreadDeck3DController?.reset();
+  deckHint.classList.add("is-hidden");
+  document.body.classList.remove(
+    "saved-home",
+    "reading-ready",
+    "reading-transition",
+    "reading-entering",
+    "reading-to-saved",
+    "reading-saved-entering",
+  );
+  document.body.classList.remove("daily-mode");
+  dailyModeButton.classList.remove("active");
+  spreadModeButton.classList.add("active");
+  deckScroll = 0;
+  updateNextSlot();
+  renderDeck();
+  window.history.replaceState(null, "", window.location.pathname);
 });
 
 function updateNextSlot() {
@@ -1447,7 +1509,12 @@ async function endCardDrag(event) {
   cleanupDragListeners(source);
   target.classList.remove("is-target", "is-magnetized");
 
-  if (moved) source.dataset.suppressClick = "true";
+  if (!moved) {
+    dragState = null;
+    return;
+  }
+
+  source.dataset.suppressClick = "true";
   if (magnetized && spreadDeck3DController) {
     selectionInFlight = true;
     const card = spreadDeck.find((item) => item.id === source.dataset.cardId);

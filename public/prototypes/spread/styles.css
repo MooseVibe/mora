@@ -52,26 +52,22 @@ body {
   overscroll-behavior-x: none;
 }
 
-.starfield,
-.header,
-.mode-nav,
-main {
-  opacity: 1;
-  transition: opacity 560ms var(--ease);
-}
-
-html.site-loading .starfield,
-html.site-loading .header,
-html.site-loading .mode-nav,
-html.site-loading main {
-  opacity: 0;
-  pointer-events: none;
-}
-
 button,
 a {
   color: inherit;
   font: inherit;
+}
+
+.starfield,
+.header,
+.mode-nav,
+main {
+  animation: mora-page-enter 420ms var(--ease);
+}
+
+@keyframes mora-page-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 button {
@@ -83,11 +79,6 @@ main {
   z-index: 1;
   opacity: 1;
   transition: opacity 180ms ease-in-out;
-}
-
-html:not(.site-loading) main {
-  transition-duration: 560ms;
-  transition-timing-function: var(--ease);
 }
 
 body.mode-switching main {
@@ -834,8 +825,10 @@ body.daily-mode.daily-3d-result .daily-result-copy {
 }
 
 body.daily-mode.daily-3d-result .daily-result-card {
+  opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transition: opacity 250ms var(--ease), visibility 0s linear 250ms;
 }
 
 body.daily-3d-result .daily-deck {

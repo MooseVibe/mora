@@ -141,6 +141,11 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     transparent: true,
     depthWrite: false,
   });
+  const faceTextures = new Map();
+  function preloadFace(path) {
+    if (!faceTextures.has(path)) faceTextures.set(path, loadFaceTexture(renderer, path));
+    return faceTextures.get(path);
+  }
   function ensureCard(index) {
     if (cards[index]) return cards[index];
     const card = template.clone(true);
@@ -274,6 +279,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
 
   return {
     refresh: renderDeck,
+    preloadFace,
     setVisibleIndices(nextIndices) {
       visibleIndices = new Set(nextIndices);
       nextIndices.forEach(ensureCard);
@@ -290,6 +296,23 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     hideFan() {
       fanVisible = false;
       hoveredIndex = null;
+      renderDeck();
+    },
+    reset() {
+      window.cancelAnimationFrame(animationFrame);
+      selectedIndices.clear();
+      parkedResults.clear();
+      fanVisible = true;
+      hoveredIndex = null;
+      draggedIndex = null;
+      dragStartScale = null;
+      dragScaleAmount = 0;
+      hoverAmounts.fill(0);
+      cards.forEach((card, index) => {
+        if (!card) return;
+        card.visible = visibleIndices.has(index);
+        shadows[index].visible = visibleIndices.has(index);
+      });
       renderDeck();
     },
     startDrag(index) {
@@ -413,7 +436,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       const card = cards[index];
       const shadow = shadows[index];
       shadow.visible = false;
-      const texture = await loadFaceTexture(renderer, imageUrl);
+      const texture = await preloadFace(imageUrl);
       applyFaceTexture(card, texture);
 
       const startPosition = card.position.clone();

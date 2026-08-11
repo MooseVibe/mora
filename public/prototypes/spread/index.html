@@ -1,12 +1,11 @@
 <!doctype html>
-<html lang="ru" class="tester-session-pending site-loading">
+<html lang="ru" class="tester-session-pending">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mora — прототип расклада</title>
     <script>
       (() => {
-        window.setTimeout(() => document.documentElement.classList.remove("site-loading"), 8000);
         try {
           const params = new URLSearchParams(window.location.search);
           const isLocal = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
@@ -25,7 +24,8 @@
       })();
     </script>
     <link rel="stylesheet" href="/assets/fonts.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260810-entrance1" />
+    <link rel="preload" as="image" href="../3d-daily/assets/mora-card-back-v3.webp" fetchpriority="high" />
+    <link rel="stylesheet" href="./styles.css?v=20260811-stability1" />
     <script type="importmap">
       {
         "imports": {
@@ -289,6 +289,6 @@
       </section>
     </div>
 
-    <script type="module" src="./app.js?v=20260810-entrance1"></script>
+    <script type="module" src="./app.js?v=20260811-stability1"></script>
   </body>
 </html>
