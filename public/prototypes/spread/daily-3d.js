@@ -824,6 +824,16 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     }
   }
 
+  function hitTest(clientX, clientY) {
+    if (ritualState === "result") handleResultPointerMove({ clientX, clientY });
+    else handlePointerMove({ clientX, clientY });
+    return ritualState === "result"
+      ? resultHovered
+      : ritualState === "fan"
+        ? Boolean(hoveredCard)
+        : hovered;
+  }
+
   host.addEventListener("pointermove", handlePointerMove);
   host.addEventListener("pointerleave", handlePointerLeave);
   window.addEventListener("pointermove", handleResultPointerMove, { passive: true });
@@ -837,6 +847,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
 
   return {
     activate,
+    hitTest,
     restoreResult,
     setActive(active) {
       renderingActive = active;

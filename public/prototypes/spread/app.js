@@ -1,5 +1,5 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260811-stability1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260812-firstclick1";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260812-spreadflight1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
@@ -106,8 +106,8 @@ let spreadCooldownTimer;
 let volatileFailedSpread = null;
 let pendingDailySelection = null;
 let visibleSpreadCardIndices = [];
+let dailyActivationInFlight = false;
 
-dailyDeck.disabled = true;
 dailyDeck.classList.add("is-3d-loading");
 const dailyDeck3D = mountDailyDeck3D({
   canvas: dailyDeckCanvas,
@@ -123,7 +123,7 @@ const dailyDeck3D = mountDailyDeck3D({
 let daily3DReady = false;
 dailyDeck3D.then((controller) => {
   daily3DReady = Boolean(controller);
-  if (controller && testerSessionResolved && !readSavedDailyCard()) dailyDeck.disabled = false;
+  if (controller && testerSessionResolved) dailyDeck.disabled = Boolean(readSavedDailyCard());
 });
 
 const savedSpreadKey = "mora:prototype:lastSpread";
@@ -195,7 +195,7 @@ function restoreSpreadDeckOrder(cards) {
 }
 
 initStarfield();
-restorePrototypeTesterSession();
+const prototypeTesterSessionPromise = restorePrototypeTesterSession();
 restoreSavedSpread();
 const urlParams = new URLSearchParams(window.location.search);
 const resetDailyMode = urlParams.get("resetDaily");
@@ -253,15 +253,15 @@ async function restorePrototypeTesterSession() {
   }
 
   try {
-    const response = await fetch("/api/prototypes/tester-session", { cache: "no-store" });
-    if (!response.ok) return;
+    const response = await fetch("/api/prototypes/account-state", { cache: "no-store" });
+    if (response.status === 401) {
+      setPrototypeTesterAuthenticated(false);
+      return;
+    }
+    if (!response.ok) throw new Error("Unable to load account state");
     const payload = await response.json();
-    setPrototypeTesterAuthenticated(
-      payload.authenticated === true,
-      payload.isAdmin === true,
-      payload.nextSpreadAt,
-    );
-    if (prototypeTesterAuthenticated) await restorePrototypeAccountState();
+    setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt);
+    restorePrototypeAccountState(payload);
   } catch {
     // The public daily-card flow remains available when session lookup fails.
   } finally {
@@ -272,10 +272,7 @@ async function restorePrototypeTesterSession() {
   }
 }
 
-async function restorePrototypeAccountState() {
-  const response = await fetch("/api/prototypes/account-state", { cache: "no-store" });
-  if (!response.ok) throw new Error("Unable to load account state");
-  const payload = await response.json();
+function restorePrototypeAccountState(payload) {
   accountDailyState = payload.daily || null;
   accountSpreadSnapshot = payload.spread || null;
   prototypeNextDailyAt = Date.parse(payload.daily?.nextDailyAt || "") || 0;
@@ -416,9 +413,17 @@ function closeAuthGate() {
 }
 
 async function handleDailyDeckClick(event) {
-  const controller = await dailyDeck3D;
-  if (!controller || (event.detail !== 0 && !controller.isDeckHovered())) return;
-  controller.activate({ keyboard: event.detail === 0 });
+  if (dailyActivationInFlight || !dailyDeck.classList.contains("is-3d-ready")) return;
+  dailyActivationInFlight = true;
+  try {
+    const [controller] = await Promise.all([dailyDeck3D, prototypeTesterSessionPromise]);
+    if (!controller || readSavedDailyCard()) return;
+    const keyboard = event.detail === 0;
+    if (!keyboard && !controller.hitTest(event.clientX, event.clientY)) return;
+    controller.activate({ keyboard });
+  } finally {
+    dailyActivationInFlight = false;
+  }
 }
 
 async function switchMode(mode) {
@@ -471,7 +476,7 @@ function showDailyMode() {
   spreadModeButton.classList.remove("active");
 
   const savedDailyCard = readSavedDailyCard();
-  dailyDeck.disabled = Boolean(savedDailyCard) || !daily3DReady;
+  dailyDeck.disabled = Boolean(savedDailyCard);
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
     document.documentElement.classList.remove("daily-saved-pending");

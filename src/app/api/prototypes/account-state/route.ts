@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { prototypeAccountRequest } from '@/lib/prototype-testers'
+import { PROTOTYPE_ADMIN_EMAIL, prototypeAccountRequest } from '@/lib/prototype-testers'
 import { TAROT_CARD_LIST, getTarotCardDefinition } from '@/lib/tarot'
 
 function response(body: Record<string, unknown>, status = 200) {
@@ -58,6 +58,7 @@ export async function GET() {
   return response({
     accountId: account.user.id,
     email: account.user.email?.toLowerCase(),
+    isAdmin: account.user.email?.toLowerCase() === PROTOTYPE_ADMIN_EMAIL,
     daily,
     spread: result.data?.spread ?? null,
     nextSpreadAt: result.data?.nextSpreadAt ?? null,
