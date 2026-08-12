@@ -30,6 +30,7 @@ const readingNavItems = [...document.querySelectorAll(".reading-nav button")];
 const starfield = document.querySelector("#starfield");
 const dailyModeButton = document.querySelector("#daily-mode-button");
 const spreadModeButton = document.querySelector("#spread-mode-button");
+const brand = document.querySelector(".brand");
 const loginButton = document.querySelector(".login");
 const profileControl = document.querySelector(".profile-control");
 const profileTrigger = document.querySelector(".profile-trigger");
@@ -211,6 +212,10 @@ startInSpreadMode ? showSpreadMode() : showDailyMode();
 if (startInSpreadMode) window.history.replaceState(null, "", window.location.pathname);
 
 dailyModeButton.addEventListener("click", () => switchMode("daily"));
+brand.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (!document.body.classList.contains("daily-mode")) switchMode("daily");
+});
 spreadModeButton.addEventListener("click", () => {
   if (prototypeTesterAuthenticated) {
     switchMode("spread");
