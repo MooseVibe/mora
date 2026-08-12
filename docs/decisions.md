@@ -2791,3 +2791,5 @@ Daily commit `7bfee5e` и spread commit `00f1e82` выпущены из точн
 ## 2026-08-12 — Интервал карты дня и расклада сокращается до 12 часов
 
 Автор заменил прежний 24-часовой лимит на rolling-интервал 12 часов для обоих главных ритуалов. Первым изолированным пакетом синхронно меняются клиентский countdown, Edge Function и атомарные PostgreSQL-функции расклада; migration сохраняет `security invoker`, закрытые client grants и идемпотентный complete. Транзакционный тест с rollback подтвердил reserve → complete → повторный complete → cooldown и `nextSpreadAt` через 12 часов. Daily-интервал не имитируется локальным таймером: он будет добавлен вместе с серверным account-storage, чтобы одинаково работать на разных устройствах.
+
+Spread commit `e6b248c` выпущен в production deployment `dpl_2UaVCrgWQYydGptsvatGpWWGiGUh`; migration применена, Edge Function обновлена до v5 с `verify_jwt=true`. Production inspection подтвердил `12 hours` и отсутствие `24 hours` в обеих PostgreSQL-функциях, `12h` в Edge и cache-busted клиентский countdown.
