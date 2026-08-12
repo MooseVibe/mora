@@ -1,5 +1,5 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260812-firstclick1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260812-criticalpath1";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260812-spreadflight1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";

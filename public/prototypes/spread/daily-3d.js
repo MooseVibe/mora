@@ -225,7 +225,6 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   const initialSelection = onPrepare?.() || null;
   const loader = new GLTFLoader();
   const deckTemplatePromise = loader.loadAsync("../3d-daily/assets/mora-card.glb");
-  const resultSourcePromise = loader.loadAsync("../3d-daily/assets/mora-card-result.glb");
   const backTexturePromise = loadBackTexture(renderer);
   const initialFaceTexturePromise = initialSelection?.imageUrl
     ? loadFaceTexture(renderer, initialSelection.imageUrl)
@@ -238,16 +237,17 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   const size = bounds.getSize(new THREE.Vector3());
   template.scale.setScalar(3.55 / Math.max(size.x, size.z));
   template.updateMatrixWorld(true);
-  const resultTemplatePromise = resultSourcePromise.then((resultGltf) => {
-    const resultTemplate = resultGltf.scene;
-    applyMaterials(resultTemplate, materials);
-    const resultBounds = new THREE.Box3().setFromObject(resultTemplate);
-    const resultSize = resultBounds.getSize(new THREE.Vector3());
-    resultTemplate.scale.setScalar(3.55 / Math.max(resultSize.x, resultSize.z));
-    resultTemplate.updateMatrixWorld(true);
-    return resultTemplate;
-  });
+  let resultTemplatePromise;
   function loadResultTemplate() {
+    resultTemplatePromise ||= loader.loadAsync("../3d-daily/assets/mora-card-result.glb").then((resultGltf) => {
+      const resultTemplate = resultGltf.scene;
+      applyMaterials(resultTemplate, materials);
+      const resultBounds = new THREE.Box3().setFromObject(resultTemplate);
+      const resultSize = resultBounds.getSize(new THREE.Vector3());
+      resultTemplate.scale.setScalar(3.55 / Math.max(resultSize.x, resultSize.z));
+      resultTemplate.updateMatrixWorld(true);
+      return resultTemplate;
+    });
     return resultTemplatePromise;
   }
 
@@ -841,9 +841,14 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   resizeObserver.observe(host);
   resize();
   render();
-  await prepareResultAssets();
   host.classList.remove("is-3d-loading");
   host.classList.add("is-3d-ready");
+
+  const preloadResult = () => prepareResultAssets().catch((error) => {
+    console.error("Mora daily result preload failed", error);
+  });
+  if ("requestIdleCallback" in window) window.requestIdleCallback(preloadResult, { timeout: 1500 });
+  else window.setTimeout(preloadResult, 0);
 
   return {
     activate,

@@ -2821,3 +2821,7 @@ Commit `0438ecb` выпущен в production deployment `dpl_5fG8os4JZDGPmd1Q67
 ## 2026-08-12 — Первый click карты дня принимается до завершения account hydration
 
 Начальная интерактивность больше не привязана к нативному `disabled`: видимая ready-колода принимает click, а обработчик ждёт общий promise уже запущенного account-state и автоматически продолжает действие, если сервер подтвердил доступную pending-карту. Начальная сессия определяется тем же account-state ответом, поэтому отдельный последовательный tester-session GET удалён из critical path. Попадание Three.js пересчитывается по координатам самого click, а не по потенциально устаревшему hover от `pointermove`. Clean cut не меняется; при уже вытянутой серверной карте новый ритуал не начинается.
+
+## 2026-08-12 — Result-модель карты дня не блокирует первый интерактивный экран
+
+Production cold-load audit показал, что `mora-card-result.glb` и лицевая WebP участвовали в `await prepareResultAssets()` до класса `is-3d-ready`, хотя первый click и clean cut используют только deck GLB и рубашку. Result GLB теперь создаёт свой promise только при idle-preload или начале ритуала; preload больше не await-блокирует готовность колоды. Это убирает в среднем около 704 КБ transfer плюс decode/upload из critical readiness без уменьшения качества и без изменения утверждённых таймингов.
