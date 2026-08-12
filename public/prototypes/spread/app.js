@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260811-stability1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260811-stability1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260812-spreadflight1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS
@@ -69,6 +69,7 @@ let wheelGestureTimer;
 let scrollSettleTimer;
 let deckPromptTimer;
 let deckDiscoveryFrame;
+let spreadFacePreloadTimer;
 let dragState = null;
 let deckScroll = 0;
 let selectionInFlight = false;
@@ -977,6 +978,7 @@ function ensureSpreadDeck3D() {
     .then((controller) => {
       spreadDeck3DController = controller;
       renderDeck();
+      scheduleVisibleSpreadFaces();
       ritual.classList.add("spread-deck-3d-ready");
       return controller;
     })
@@ -1030,6 +1032,7 @@ function playDeckDiscoveryMotion() {
       deckDiscoveryFrame = window.requestAnimationFrame(moveDeck);
     } else {
       deck.classList.remove("is-discovering");
+      scheduleVisibleSpreadFaces();
     }
   }
 
@@ -1050,6 +1053,7 @@ ritual.addEventListener(
     const limit = ((deckCardCount - visibleDeckCards) * 98) / 2;
     deckScroll = Math.max(-limit, Math.min(limit, deckScroll - delta));
     renderDeck();
+    scheduleVisibleSpreadFaces();
   },
   { passive: false },
 );
@@ -1076,6 +1080,11 @@ async function preloadVisibleSpreadFaces() {
       spreadDeck3DController?.preloadFace(path)
     )));
   }
+}
+
+function scheduleVisibleSpreadFaces() {
+  window.clearTimeout(spreadFacePreloadTimer);
+  spreadFacePreloadTimer = window.setTimeout(preloadVisibleSpreadFaces, 80);
 }
 
 slots.forEach((slot, slotIndex) => {

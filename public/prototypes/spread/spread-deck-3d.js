@@ -43,9 +43,20 @@ function createCardShadowTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
+function createFacePlaceholderTexture() {
+  const texture = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+  texture.needsUpdate = true;
+  return texture;
+}
+
 function applyMaterials(root, renderer) {
   const materials = {
-    face: new THREE.MeshBasicMaterial({ color: 0x242323, side: THREE.DoubleSide }),
+    face: new THREE.MeshBasicMaterial({
+      color: 0x242323,
+      map: createFacePlaceholderTexture(),
+      side: THREE.DoubleSide,
+      toneMapped: false,
+    }),
     back: new THREE.MeshBasicMaterial({
       map: loadBackTexture(renderer),
       side: THREE.DoubleSide,
@@ -92,7 +103,6 @@ function applyFaceTexture(card, texture) {
     material.map = texture;
     material.color.set(0xffffff);
     material.toneMapped = false;
-    material.needsUpdate = true;
     object.material = material;
   });
 }
@@ -143,7 +153,12 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   });
   const faceTextures = new Map();
   function preloadFace(path) {
-    if (!faceTextures.has(path)) faceTextures.set(path, loadFaceTexture(renderer, path));
+    if (!faceTextures.has(path)) {
+      faceTextures.set(path, loadFaceTexture(renderer, path).then((texture) => {
+        renderer.initTexture(texture);
+        return texture;
+      }));
+    }
     return faceTextures.get(path);
   }
   function ensureCard(index) {
@@ -436,8 +451,9 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       const card = cards[index];
       const shadow = shadows[index];
       shadow.visible = false;
-      const texture = await preloadFace(imageUrl);
-      applyFaceTexture(card, texture);
+      const texturePromise = preloadFace(imageUrl);
+      const flightStartedAt = performance.now();
+      let firstFrameRecorded = false;
 
       const startPosition = card.position.clone();
       const startQuaternion = card.quaternion.clone();
@@ -472,7 +488,14 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       card.visible = true;
       shadow.material = shadow.material.clone();
       shadow.material.opacity = 0;
-      await tween(window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 820, (rawProgress) => {
+      const updateFlight = (rawProgress) => {
+        if (!firstFrameRecorded) {
+          firstFrameRecorded = true;
+          performance.measure("mora-spread-click-to-first-frame", {
+            start: flightStartedAt,
+            end: performance.now(),
+          });
+        }
         if (!textRevealStarted && rawProgress >= 0.7) {
           textRevealStarted = true;
           onTextReveal?.();
@@ -501,7 +524,12 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         card.quaternion.copy(horizontalTurn).multiply(straightenedBack);
         card.scale.lerpVectors(startScale, targetScale, progress);
         renderer.render(scene, camera);
-      });
+      };
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      await tween(reduceMotion ? 1 : 180, (progress) => updateFlight(progress * 0.22));
+      const texture = await texturePromise;
+      applyFaceTexture(card, texture);
+      await tween(reduceMotion ? 1 : 640, (progress) => updateFlight(0.22 + progress * 0.78));
 
       card.position.copy(targetPosition);
       card.quaternion.copy(frontCamera);
