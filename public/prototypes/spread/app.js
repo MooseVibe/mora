@@ -434,6 +434,7 @@ function showDailyMode() {
           imageUrl: `/${savedDailyCard.card.image.replace(/^\/+/, "")}`,
         });
         showDaily3DResult();
+        controller.requestRender();
       }).finally(() => {
         daily3DRestoreInFlight = false;
       });

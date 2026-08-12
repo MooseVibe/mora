@@ -819,6 +819,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   return {
     activate,
     restoreResult,
+    requestRender: ensureRendering,
     setActive(active) {
       renderingActive = active;
       if (active) ensureRendering();
