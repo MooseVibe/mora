@@ -96,7 +96,11 @@ let spreadDeck3DController;
 let spreadDeck3DPromise;
 let prototypeTesterAuthenticated = false;
 let prototypeTesterIsAdmin = false;
+let testerSessionResolved = false;
+let accountDailyState = null;
+let accountSpreadSnapshot = null;
 let prototypeNextSpreadAt = 0;
+let prototypeNextDailyAt = 0;
 let spreadCooldownTimer;
 let volatileFailedSpread = null;
 let pendingDailySelection = null;
@@ -118,7 +122,7 @@ const dailyDeck3D = mountDailyDeck3D({
 let daily3DReady = false;
 dailyDeck3D.then((controller) => {
   daily3DReady = Boolean(controller);
-  if (controller && !readSavedDailyCard()) dailyDeck.disabled = false;
+  if (controller && testerSessionResolved && !readSavedDailyCard()) dailyDeck.disabled = false;
 });
 
 const savedSpreadKey = "mora:prototype:lastSpread";
@@ -238,6 +242,7 @@ async function restorePrototypeTesterSession() {
   const localPreview = isLocalPrototype && params.get("testerPreview") === "1";
   if (localPreview) {
     setPrototypeTesterAuthenticated(true, true);
+    testerSessionResolved = true;
     document.documentElement.classList.remove("tester-session-pending");
     return;
   }
@@ -251,10 +256,31 @@ async function restorePrototypeTesterSession() {
       payload.isAdmin === true,
       payload.nextSpreadAt,
     );
+    if (prototypeTesterAuthenticated) await restorePrototypeAccountState();
   } catch {
     // The public daily-card flow remains available when session lookup fails.
   } finally {
+    testerSessionResolved = true;
     document.documentElement.classList.remove("tester-session-pending");
+    if (document.body.classList.contains("daily-mode")) showDailyMode();
+    else if (prototypeTesterAuthenticated) restoreSavedSpread();
+  }
+}
+
+async function restorePrototypeAccountState() {
+  const response = await fetch("/api/prototypes/account-state", { cache: "no-store" });
+  if (!response.ok) throw new Error("Unable to load account state");
+  const payload = await response.json();
+  accountDailyState = payload.daily || null;
+  accountSpreadSnapshot = payload.spread || null;
+  prototypeNextDailyAt = Date.parse(payload.daily?.nextDailyAt || "") || 0;
+  prototypeNextSpreadAt = Date.parse(payload.nextSpreadAt || "") || 0;
+  try {
+    window.localStorage.removeItem(savedDailyCardKey);
+    window.localStorage.removeItem(pendingDailyCardKey);
+    window.localStorage.removeItem(savedSpreadKey);
+  } catch {
+    // Server state remains authoritative when browser storage is unavailable.
   }
 }
 
@@ -297,13 +323,11 @@ async function handleTesterLogin(event, destination) {
 
     setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt);
     resetTesterLoginForm(form, emailInput);
-    if (destination === "spread") {
-      closeAuthGate();
-      await switchMode("spread");
-    } else {
-      closeLoginScreen();
-      showDailyMode();
-    }
+    const destinationUrl = destination === "spread"
+      ? `${window.location.pathname}?mode=spread`
+      : window.location.pathname;
+    window.location.replace(destinationUrl);
+    return;
   } catch {
     emailInput.setCustomValidity("Не удалось войти. Попробуй ещё раз.");
     emailInput.reportValidity();
@@ -346,7 +370,18 @@ async function logoutPrototypeTester() {
     await fetch("/api/prototypes/tester-session", { method: "DELETE" });
   } finally {
     setPrototypeTesterAuthenticated(false);
-    showDailyMode();
+    testerSessionResolved = true;
+    accountDailyState = null;
+    accountSpreadSnapshot = null;
+    prototypeNextDailyAt = 0;
+    try {
+      window.localStorage.removeItem(savedDailyCardKey);
+      window.localStorage.removeItem(pendingDailyCardKey);
+      window.localStorage.removeItem(savedSpreadKey);
+    } catch {
+      // Account data was never written to browser storage.
+    }
+    window.location.replace(window.location.pathname);
     profileLogout.disabled = false;
   }
 }
@@ -634,21 +669,34 @@ function getLocalDayKey(date = new Date()) {
 
 function readSavedDailyCard() {
   try {
-    const value = window.localStorage.getItem(savedDailyCardKey);
-    if (!value) return null;
-    const snapshot = JSON.parse(value);
+    if (!testerSessionResolved) return null;
+    const snapshot = prototypeTesterAuthenticated
+      ? accountDailyState?.status === "drawn" ? accountDailyState : null
+      : JSON.parse(window.localStorage.getItem(savedDailyCardKey) || "null");
+    if (!snapshot) return null;
+    if (prototypeTesterAuthenticated) {
+      if (prototypeNextDailyAt && prototypeNextDailyAt <= Date.now()) return null;
+      const card = TAROT_CARDS.find((item) => item.id === snapshot.cardId);
+      const variantIndex = Number(snapshot.variantIndex);
+      return card?.result?.dayVariants?.[variantIndex] ? { card, variantIndex } : null;
+    }
+    const drawnAt = Date.parse(snapshot?.drawnAt || "");
+    if (Number.isFinite(drawnAt) && drawnAt + spreadCooldownMs <= Date.now()) {
+      window.localStorage.removeItem(savedDailyCardKey);
+      return null;
+    }
     const dayKey = getLocalDayKey();
-    if (snapshot?.dayKey && snapshot.dayKey !== dayKey) {
+    if (!Number.isFinite(drawnAt) && snapshot?.dayKey && snapshot.dayKey !== dayKey) {
       window.localStorage.removeItem(savedDailyCardKey);
       return null;
     }
     const card = TAROT_CARDS.find((item) => item.id === snapshot?.cardId);
     const variantIndex = Number(snapshot?.variantIndex);
     if (!card?.result?.dayVariants?.[variantIndex]) return null;
-    if (!snapshot?.dayKey) {
+    if (!Number.isFinite(drawnAt)) {
       window.localStorage.setItem(
         savedDailyCardKey,
-        JSON.stringify({ ...snapshot, version: 2, dayKey }),
+        JSON.stringify({ ...snapshot, version: 3, drawnAt: new Date().toISOString() }),
       );
     }
     return { card, variantIndex };
@@ -659,6 +707,14 @@ function readSavedDailyCard() {
 
 function readPendingDailyCard() {
   try {
+    if (prototypeTesterAuthenticated) {
+      const snapshot = accountDailyState?.status === "pending" ? accountDailyState : null;
+      if (!snapshot) return null;
+      const card = TAROT_CARDS.find((item) => item.id === snapshot.cardId);
+      const variantIndex = Number(snapshot.variantIndex);
+      if (!card?.result?.dayVariants?.[variantIndex]) return null;
+      return { card, variantIndex, imageUrl: `/${card.image.replace(/^\/+/, "")}` };
+    }
     const snapshot = JSON.parse(window.localStorage.getItem(pendingDailyCardKey) || "null");
     if (snapshot?.dayKey !== getLocalDayKey()) {
       window.localStorage.removeItem(pendingDailyCardKey);
@@ -678,6 +734,7 @@ function readPendingDailyCard() {
 }
 
 function prepareDailyCardCandidate() {
+  if (!testerSessionResolved) return;
   if (pendingDailySelection) return pendingDailySelection;
   if (dailyDrawInFlight) return;
   const savedDailyCard = readSavedDailyCard();
@@ -692,6 +749,7 @@ function prepareDailyCardCandidate() {
     pendingDailySelection = storedCandidate;
     return pendingDailySelection;
   }
+  if (prototypeTesterAuthenticated) return;
   const card = getDailyCard();
   if (!card) return;
   const variantIndex = Math.floor(Math.random() * card.result.dayVariants.length);
@@ -723,24 +781,42 @@ function prepareDailyCardSelection() {
   dailyDrawInFlight = true;
   dailyDeck.disabled = true;
   populateDailyResult(card, variantIndex);
-  try {
-    window.localStorage.setItem(
-      savedDailyCardKey,
-      JSON.stringify({
-        version: 2,
-        dayKey: getLocalDayKey(),
-        cardId: card.id,
-        variantIndex,
-      }),
-    );
-  } catch {
-    // The prototype still completes when localStorage is unavailable.
-  }
-
-  try {
-    window.localStorage.removeItem(pendingDailyCardKey);
-  } catch {
-    // The completed card remains the source of truth when storage cleanup is unavailable.
+  if (prototypeTesterAuthenticated) {
+    const completedAt = new Date().toISOString();
+    prototypeNextDailyAt = Date.now() + spreadCooldownMs;
+    accountDailyState = {
+      status: "drawn",
+      cardId: card.id,
+      variantIndex,
+      drawnAt: completedAt,
+      nextDailyAt: new Date(prototypeNextDailyAt).toISOString(),
+    };
+    fetch("/api/prototypes/account-state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "complete-daily" }),
+      keepalive: true,
+    }).then(async (response) => {
+      if (!response.ok) throw new Error("Unable to save daily card");
+      const payload = await response.json();
+      accountDailyState = payload.daily;
+      prototypeNextDailyAt = Date.parse(payload.daily?.nextDailyAt || "") || prototypeNextDailyAt;
+    }).catch((error) => console.error("Mora daily account save failed", error));
+  } else {
+    try {
+      window.localStorage.setItem(
+        savedDailyCardKey,
+        JSON.stringify({
+          version: 3,
+          cardId: card.id,
+          variantIndex,
+          drawnAt: new Date().toISOString(),
+        }),
+      );
+      window.localStorage.removeItem(pendingDailyCardKey);
+    } catch {
+      // Guest daily state remains available in memory when storage is unavailable.
+    }
   }
 
   pendingDailySelection = null;
@@ -1282,8 +1358,8 @@ function revealSlotName(slot, text) {
   window.requestAnimationFrame(() => name.classList.add("is-visible"));
 }
 
-function saveLastSpread(reading, source) {
-  const snapshot = {
+function saveLastSpread(reading, source, persistedSnapshot = null) {
+  const snapshot = persistedSnapshot || {
     version: 2,
     topic: currentTopic,
     cardIds: selectedCards.map((card) => card.id),
@@ -1292,7 +1368,9 @@ function saveLastSpread(reading, source) {
     createdAt: new Date().toISOString(),
   };
 
-  try {
+  if (prototypeTesterAuthenticated) {
+    accountSpreadSnapshot = snapshot;
+  } else try {
     window.localStorage.setItem(savedSpreadKey, JSON.stringify(snapshot));
   } catch {
     // The prototype still completes when localStorage is unavailable.
@@ -1302,8 +1380,11 @@ function saveLastSpread(reading, source) {
 
 function readLastSpread() {
   try {
-    const value = window.localStorage.getItem(savedSpreadKey);
-    const snapshot = value ? JSON.parse(value) : volatileFailedSpread;
+    if (!testerSessionResolved) return null;
+    const value = prototypeTesterAuthenticated ? null : window.localStorage.getItem(savedSpreadKey);
+    const snapshot = prototypeTesterAuthenticated
+      ? accountSpreadSnapshot
+      : value ? JSON.parse(value) : volatileFailedSpread;
     if (!snapshot) return null;
     const cardIds = Array.isArray(snapshot.cardIds)
       ? snapshot.cardIds
@@ -1471,8 +1552,17 @@ function closeReadingToSaved(returnChapter = null, wheelDirection = 0) {
   }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 700);
 }
 
-newSpreadButton.addEventListener("click", () => {
+newSpreadButton.addEventListener("click", async () => {
   if (newSpreadButton.disabled) return;
+  if (prototypeTesterAuthenticated) {
+    const response = await fetch("/api/prototypes/account-state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "clear-account-spread" }),
+    }).catch(() => null);
+    if (!response?.ok) return;
+    accountSpreadSnapshot = null;
+  }
   const nextDeck = createNextDeckOrder(spreadDeck, spreadDeck.map((card) => card.id));
   spreadDeck = nextDeck;
   saveSpreadDeckOrder(nextDeck);
@@ -1688,7 +1778,7 @@ async function generateReading() {
     const source = payload.source || "ai";
     prototypeNextSpreadAt = Date.parse(payload.nextSpreadAt || "") || prototypeNextSpreadAt;
     populateReading(reading, selectedCards, source);
-    saveLastSpread(reading, source);
+    saveLastSpread(reading, source, payload.snapshot);
   } catch {
     populateReading(fallback, selectedCards, "fallback");
     volatileFailedSpread = {

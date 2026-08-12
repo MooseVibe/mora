@@ -109,6 +109,14 @@
 
 ## Open
 
+### Critical · Mora Next показывала localStorage другого пользователя после смены email
+
+**Статус:** Fix prepared · Needs production QA
+**Дата:** 2026-08-12
+**Где:** Mora Next, login/reload/card day/saved spread
+
+Общие ключи `dailyCard`, `pendingDailyCard` и `lastSpread` принадлежали origin браузера, а не аккаунту; обычный email также не подтверждался. Подготовленный пакет вводит OTP для всех email и закрытый `prototype_account_states` по Supabase Auth `user_id`. Для аккаунта server-state становится источником истины, legacy localStorage очищается, login/logout сбрасывает DOM/WebGL через reload. Проверить один account на двух устройствах и два account в одном браузере; затем перевести задачу в Done.
+
 ### High · 3D-колода расклада лагает на desktop/laptop
 
 **Статус:** Production QA

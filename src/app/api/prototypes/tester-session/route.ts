@@ -1,14 +1,9 @@
-import { randomBytes } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import {
-  hashPrototypeTesterToken,
   PROTOTYPE_ADMIN_EMAIL,
   PROTOTYPE_TESTER_COOKIE,
-  prototypeTesterRequest,
 } from '@/lib/prototype-testers'
-
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 
 function sessionResponse(body: Record<string, unknown>, init?: ResponseInit) {
   const response = NextResponse.json(body, init)
@@ -24,52 +19,15 @@ function normalizeEmail(value: unknown) {
 }
 
 async function createVerifiedTesterSession(email: string, isAdmin = false) {
-  if (isAdmin) return sessionResponse({ authenticated: true, isAdmin: true })
-
-  const token = randomBytes(32).toString('base64url')
-  const result = await prototypeTesterRequest({
-    action: 'create',
-    email,
-    tokenHash: hashPrototypeTesterToken(token),
-  })
-  if (!result.ok) return sessionResponse({ error: 'Unable to create tester session' }, { status: 502 })
-
-  const response = sessionResponse({
-    authenticated: true,
-    isAdmin: false,
-    nextSpreadAt: result.data?.nextSpreadAt ?? null,
-  })
-  response.cookies.set(PROTOTYPE_TESTER_COOKIE, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: COOKIE_MAX_AGE,
-  })
-  return response
+  return sessionResponse({ authenticated: true, isAdmin })
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const auth = await createServerClient()
   const { data: { user } } = await auth.auth.getUser()
   const email = user?.email?.toLowerCase()
   if (!email) return sessionResponse({ authenticated: false })
   if (email === PROTOTYPE_ADMIN_EMAIL) return createVerifiedTesterSession(email, true)
-
-  const token = request.cookies.get(PROTOTYPE_TESTER_COOKIE)?.value
-  if (token) {
-    const result = await prototypeTesterRequest({
-      action: 'verify',
-      tokenHash: hashPrototypeTesterToken(token),
-    })
-    if (result.ok && result.data?.authenticated === true) {
-      return sessionResponse({
-        authenticated: true,
-        isAdmin: false,
-        nextSpreadAt: result.data?.nextSpreadAt ?? null,
-      })
-    }
-  }
 
   return createVerifiedTesterSession(email)
 }
@@ -101,15 +59,7 @@ export async function POST(request: NextRequest) {
   return sessionResponse({ requiresOtp: true })
 }
 
-export async function DELETE(request: NextRequest) {
-  const token = request.cookies.get(PROTOTYPE_TESTER_COOKIE)?.value
-  if (token) {
-    await prototypeTesterRequest({
-      action: 'revoke',
-      tokenHash: hashPrototypeTesterToken(token),
-    })
-  }
-
+export async function DELETE() {
   const auth = await createServerClient()
   await auth.auth.signOut()
 

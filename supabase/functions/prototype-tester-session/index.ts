@@ -20,13 +20,117 @@ Deno.serve(async (request: Request) => {
     ? body.tokenHash
     : "";
 
-  if (!tokenHash) return json({ error: "Invalid session token" }, 400);
-
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
+
+  const accountActions = new Set([
+    "account-state",
+    "complete-daily",
+    "reserve-account-spread",
+    "complete-account-spread",
+    "release-account-spread",
+    "clear-account-spread",
+  ]);
+  if (accountActions.has(action)) {
+    const accessToken = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+    const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
+    if (userError || !user) return json({ error: "Authenticated account required" }, 401);
+
+    if (action === "account-state") {
+      const cardId = typeof body?.cardId === "string" ? body.cardId : "";
+      const variantIndex = Number.isInteger(body?.variantIndex) ? body.variantIndex : -1;
+      if (!cardId || variantIndex < 0 || variantIndex > 100) return json({ error: "Invalid daily candidate" }, 400);
+      const { data: daily, error: dailyError } = await supabase.rpc("prepare_prototype_daily", {
+        p_user_id: user.id,
+        p_card_id: cardId,
+        p_variant_index: variantIndex,
+      });
+      const { data: account, error: accountError } = await supabase
+        .from("prototype_account_states")
+        .select("spread_snapshot,last_spread_at")
+        .eq("user_id", user.id)
+        .single();
+      if (dailyError || accountError) return json({ error: "Unable to load account state" }, 500);
+      const nextSpreadAt = account.last_spread_at
+        ? new Date(new Date(account.last_spread_at).getTime() + COOLDOWN_MS).toISOString()
+        : null;
+      return json({ daily, spread: account.spread_snapshot, nextSpreadAt });
+    }
+
+    if (action === "complete-daily") {
+      const { data, error } = await supabase.rpc("complete_prototype_daily", { p_user_id: user.id });
+      if (error || !data) return json({ error: "Unable to complete daily card" }, 500);
+      return json(data, data.completed === true ? 200 : 409);
+    }
+
+    if (action === "clear-account-spread") {
+      const isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL;
+      let query = supabase
+        .from("prototype_account_states")
+        .update({ spread_snapshot: null, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .select("user_id");
+      if (!isAdmin) query = query.lte("last_spread_at", new Date(Date.now() - COOLDOWN_MS).toISOString());
+      const { data, error } = await query.maybeSingle();
+      if (error) return json({ error: "Unable to clear spread" }, 500);
+      return data ? json({ cleared: true }) : json({ cleared: false, reason: "cooldown" }, 409);
+    }
+
+    const reservationId = typeof body?.reservationId === "string" && /^[0-9a-f-]{36}$/i.test(body.reservationId)
+      ? body.reservationId
+      : "";
+    const isAdminAccount = user.email?.toLowerCase() === ADMIN_EMAIL;
+    if (
+      action !== "reserve-account-spread"
+      && !reservationId
+      && !(action === "complete-account-spread" && isAdminAccount)
+    ) {
+      return json({ error: "Invalid reservation" }, 400);
+    }
+
+    if (action === "reserve-account-spread") {
+      const { data, error } = await supabase.rpc("reserve_prototype_account_spread", { p_user_id: user.id });
+      if (error || !data) return json({ error: "Unable to reserve spread" }, 500);
+      return json(data, data.reserved === true ? 200 : 409);
+    }
+
+    if (action === "release-account-spread") {
+      const { data, error } = await supabase.rpc("release_prototype_account_spread", {
+        p_user_id: user.id,
+        p_reservation_id: reservationId,
+      });
+      return error || !data ? json({ error: "Unable to release spread" }, 500) : json(data);
+    }
+
+    const snapshot = body?.snapshot;
+    if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
+      return json({ error: "Invalid spread snapshot" }, 400);
+    }
+    if (isAdminAccount) {
+      const completedAt = new Date().toISOString();
+      const { error } = await supabase.from("prototype_account_states").upsert({
+        user_id: user.id,
+        spread_snapshot: snapshot,
+        last_spread_at: completedAt,
+        spread_reservation_id: null,
+        spread_reserved_at: null,
+        updated_at: completedAt,
+      }, { onConflict: "user_id" });
+      return error ? json({ error: "Unable to save admin spread" }, 500) : json({ completed: true, snapshot });
+    }
+    const { data, error } = await supabase.rpc("complete_prototype_account_spread", {
+      p_user_id: user.id,
+      p_reservation_id: reservationId,
+      p_snapshot: snapshot,
+    });
+    if (error || !data) return json({ error: "Unable to complete spread" }, 500);
+    return json(data, data.completed === true ? 200 : 409);
+  }
+
+  if (!tokenHash) return json({ error: "Invalid session token" }, 400);
 
   if (action === "verify") {
     const { data, error } = await supabase

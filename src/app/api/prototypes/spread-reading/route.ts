@@ -1,10 +1,8 @@
 import { getTarotCardDefinition } from '@/lib/tarot'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import {
-  hashPrototypeTesterToken,
   PROTOTYPE_ADMIN_EMAIL,
-  PROTOTYPE_TESTER_COOKIE,
-  prototypeTesterRequest,
+  prototypeAccountRequest,
 } from '@/lib/prototype-testers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -170,19 +168,20 @@ export async function POST(request: NextRequest) {
 
   const auth = await createServerClient()
   const { data: { user } } = await auth.auth.getUser()
+  if (!user?.email) {
+    return NextResponse.json({ error: 'Authenticated account required' }, { status: 401 })
+  }
+  const { data: { session } } = await auth.auth.getSession()
+  if (!session?.access_token) {
+    return NextResponse.json({ error: 'Authenticated account required' }, { status: 401 })
+  }
   const isAdmin = user?.email?.toLowerCase() === PROTOTYPE_ADMIN_EMAIL
-  const testerToken = request.cookies.get(PROTOTYPE_TESTER_COOKIE)?.value
-  const testerTokenHash = testerToken ? hashPrototypeTesterToken(testerToken) : null
+  const accessToken = session.access_token
   let reservationId: string | null = null
 
   if (!isAdmin) {
-    if (!testerTokenHash) {
-      return NextResponse.json({ error: 'Tester session required' }, { status: 401 })
-    }
-
-    const reservation = await prototypeTesterRequest({
-      action: 'reserve-spread',
-      tokenHash: testerTokenHash,
+    const reservation = await prototypeAccountRequest(accessToken, {
+      action: 'reserve-account-spread',
     }).catch(() => null)
     if (!reservation?.ok || reservation.data?.reserved !== true) {
       return NextResponse.json({
@@ -194,10 +193,9 @@ export async function POST(request: NextRequest) {
   }
 
   const releaseReservation = async () => {
-    if (!testerTokenHash || !reservationId) return
-    await prototypeTesterRequest({
-      action: 'release-spread',
-      tokenHash: testerTokenHash,
+    if (!reservationId) return
+    await prototypeAccountRequest(accessToken, {
+      action: 'release-account-spread',
       reservationId,
     }).catch(() => null)
     reservationId = null
@@ -245,27 +243,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const reading = await generateWithGemini(apiKey, prompt, cardIds)
-    let nextSpreadAt: string | null = null
-
-    if (testerTokenHash && reservationId) {
-      let completion = null
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        completion = await prototypeTesterRequest({
-          action: 'complete-spread',
-          tokenHash: testerTokenHash,
-          reservationId,
-        }).catch(() => null)
-        if (completion?.ok && completion.data?.completed === true) break
-        if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 200))
-      }
-      if (!completion?.ok || completion.data?.completed !== true) {
-        throw new Error(`Unable to complete spread: ${completion?.data?.reason ?? completion?.status ?? 'failed'}`)
-      }
-      nextSpreadAt = completion.data.nextSpreadAt ?? null
-      reservationId = null
+    const snapshot = {
+      version: 2,
+      topic,
+      cardIds,
+      reading,
+      source: 'gemini',
+      createdAt: new Date().toISOString(),
     }
+    let completion = null
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      completion = await prototypeAccountRequest(accessToken, {
+        action: 'complete-account-spread',
+        reservationId,
+        snapshot,
+      }).catch(() => null)
+      if (completion?.ok && completion.data?.completed === true) break
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 200))
+    }
+    if (!completion?.ok || completion.data?.completed !== true) {
+      throw new Error(`Unable to complete spread: ${completion?.data?.reason ?? completion?.status ?? 'failed'}`)
+    }
+    const nextSpreadAt = completion.data.nextSpreadAt ?? null
+    reservationId = null
 
-    return NextResponse.json({ reading, source: 'gemini', nextSpreadAt })
+    return NextResponse.json({ reading, source: 'gemini', nextSpreadAt, snapshot })
   } catch (error) {
     console.error('[gemini]', providerError(error))
     await releaseReservation()

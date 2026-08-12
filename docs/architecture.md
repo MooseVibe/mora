@@ -48,7 +48,8 @@ mora/
 │   │   │   └── journal.css
 │   │   └── api/
 │   │       ├── draws/route.ts  # POST /api/draws — сохранение вытянутой карты
-│   │       ├── prototypes/tester-session/route.ts # HttpOnly tester-session и admin OTP Mora Next
+│   │       ├── prototypes/tester-session/route.ts # обязательный email OTP Mora Next
+│   │       ├── prototypes/account-state/route.ts # карта дня и snapshot расклада текущего Auth user
 │   │       └── prototypes/spread-reading/route.ts # защищённый Gemini-only текст расклада
 │   ├── components/
 │   │   ├── TaroApp.tsx         # главный клиентский компонент лендинга
@@ -85,8 +86,9 @@ mora/
 | Дневник карт | `src/app/journal/page.tsx` + `src/components/JournalClient.tsx` | Полный список вытягиваний пользователя с фильтрами и full-result reader для записей; outcome/note пока визуальные, без сохранения состояния |
 | QA просмотр карт | `src/app/qa/cards/page.tsx` | Служебный noindex-preview всех карт и вариантов текстов. Локально открыт, в production требует `CARD_QA_TOKEN` |
 | Sync pending draw | `src/components/CardSyncOnMount.tsx` | При входе читает `mora:pendingDraw` из localStorage и отправляет в `/api/draws` |
-| AI-расклад Mora Next | `src/app/api/prototypes/spread-reading/route.ts` | Проверяет tester cookie или подтверждённую admin-сессию, резервирует попытку до Gemini и завершает её только после валидного чтения |
-| Tester-session | `src/app/api/prototypes/tester-session/route.ts` + `src/lib/prototype-testers.ts` + `supabase/functions/prototype-tester-session/index.ts` | 30-дневная HttpOnly-сессия обычного тестера, admin OTP и серверный RPC-контракт `reserve / complete / release` |
+| AI-расклад Mora Next | `src/app/api/prototypes/spread-reading/route.ts` | Требует подтверждённую Supabase Auth-сессию, атомарно резервирует попытку текущего `user_id` до Gemini и сохраняет snapshot только после валидного чтения |
+| Account-state Mora Next | `src/app/api/prototypes/account-state/route.ts` + `src/lib/prototype-testers.ts` + `supabase/functions/prototype-tester-session/index.ts` | Передаёт подтверждённый access token в Edge Function; закрытая RLS-таблица `prototype_account_states` хранит server-pending/complete карты дня, последний spread snapshot и 12-часовые timestamps по `auth.users.id` |
+| Tester-session | `src/app/api/prototypes/tester-session/route.ts` | Любой email входит через Supabase OTP; старые tester-cookie очищаются и больше не определяют владельца данных |
 | Mora Next | `public/prototypes/spread/` | Изолированный UI/WebGL-прототип карты дня и расклада; production-маршруты не заменяет. `daily-3d.js` обслуживает утверждённую карту дня, `spread-deck-3d.js` — пока неутверждённый 3D-flow выбора трёх карт |
 | 3D-ассеты карт | `public/prototypes/3d-daily/assets/` | `mora-card.glb` используется для стопок и вееров; `mora-card-result.glb` — только для крупных выбранных/result-карт. Имена mesh/material, особенно `_front`, считаются контрактом кода |
 

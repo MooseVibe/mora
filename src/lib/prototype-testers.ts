@@ -1,21 +1,14 @@
-import { createHash } from 'node:crypto'
-
 export const PROTOTYPE_TESTER_COOKIE = 'mora-prototype-tester'
 export const PROTOTYPE_ADMIN_EMAIL = 'iliushka00@bk.ru'
 
-export function hashPrototypeTesterToken(token: string) {
-  return createHash('sha256').update(token).digest('hex')
-}
-
-export async function prototypeTesterRequest(body: Record<string, string>) {
+export async function prototypeAccountRequest(accessToken: string, body: Record<string, unknown>) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) return { ok: false, status: 503, data: null }
+  if (!url || !accessToken) return { ok: false, status: 401, data: null }
 
   const response = await fetch(`${url}/functions/v1/prototype-tester-session`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${key}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
