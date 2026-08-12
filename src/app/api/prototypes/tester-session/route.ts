@@ -23,52 +23,8 @@ function normalizeEmail(value: unknown) {
   return email
 }
 
-export async function GET(request: NextRequest) {
-  const auth = await createServerClient()
-  const { data: { user } } = await auth.auth.getUser()
-  if (user?.email?.toLowerCase() === PROTOTYPE_ADMIN_EMAIL) {
-    return sessionResponse({ authenticated: true, isAdmin: true })
-  }
-
-  const token = request.cookies.get(PROTOTYPE_TESTER_COOKIE)?.value
-  if (!token) return sessionResponse({ authenticated: false })
-
-  const result = await prototypeTesterRequest({
-    action: 'verify',
-    tokenHash: hashPrototypeTesterToken(token),
-  })
-  return sessionResponse({
-    authenticated: result.ok && result.data?.authenticated === true,
-    isAdmin: false,
-    nextSpreadAt: result.data?.nextSpreadAt ?? null,
-  })
-}
-
-export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null)
-  const email = normalizeEmail(body?.email)
-  if (!email) return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
-  if (email === PROTOTYPE_ADMIN_EMAIL) {
-    const auth = await createServerClient()
-    const { data: { user } } = await auth.auth.getUser()
-    if (user?.email?.toLowerCase() === PROTOTYPE_ADMIN_EMAIL) {
-      return NextResponse.json({ authenticated: true, isAdmin: true })
-    }
-
-    const otp = typeof body?.otp === 'string' ? body.otp.replace(/\D/g, '').slice(0, 8) : ''
-    if (otp) {
-      const { error } = await auth.auth.verifyOtp({ email, token: otp, type: 'email' })
-      if (error) return sessionResponse({ error: 'Invalid OTP' }, { status: 401 })
-      return sessionResponse({ authenticated: true, isAdmin: true })
-    }
-
-    const { error } = await auth.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    })
-    if (error) return sessionResponse({ error: 'Unable to send OTP' }, { status: 502 })
-    return sessionResponse({ requiresOtp: true })
-  }
+async function createVerifiedTesterSession(email: string, isAdmin = false) {
+  if (isAdmin) return sessionResponse({ authenticated: true, isAdmin: true })
 
   const token = randomBytes(32).toString('base64url')
   const result = await prototypeTesterRequest({
@@ -76,7 +32,6 @@ export async function POST(request: NextRequest) {
     email,
     tokenHash: hashPrototypeTesterToken(token),
   })
-
   if (!result.ok) return sessionResponse({ error: 'Unable to create tester session' }, { status: 502 })
 
   const response = sessionResponse({
@@ -92,6 +47,58 @@ export async function POST(request: NextRequest) {
     maxAge: COOKIE_MAX_AGE,
   })
   return response
+}
+
+export async function GET(request: NextRequest) {
+  const auth = await createServerClient()
+  const { data: { user } } = await auth.auth.getUser()
+  const email = user?.email?.toLowerCase()
+  if (!email) return sessionResponse({ authenticated: false })
+  if (email === PROTOTYPE_ADMIN_EMAIL) return createVerifiedTesterSession(email, true)
+
+  const token = request.cookies.get(PROTOTYPE_TESTER_COOKIE)?.value
+  if (token) {
+    const result = await prototypeTesterRequest({
+      action: 'verify',
+      tokenHash: hashPrototypeTesterToken(token),
+    })
+    if (result.ok && result.data?.authenticated === true) {
+      return sessionResponse({
+        authenticated: true,
+        isAdmin: false,
+        nextSpreadAt: result.data?.nextSpreadAt ?? null,
+      })
+    }
+  }
+
+  return createVerifiedTesterSession(email)
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => null)
+  const email = normalizeEmail(body?.email)
+  if (!email) return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+  const auth = await createServerClient()
+  const { data: { user } } = await auth.auth.getUser()
+  if (user?.email?.toLowerCase() === email) {
+    return createVerifiedTesterSession(email, email === PROTOTYPE_ADMIN_EMAIL)
+  }
+
+  const otp = typeof body?.otp === 'string' ? body.otp.replace(/\D/g, '').slice(0, 8) : ''
+  if (otp) {
+    const { data, error } = await auth.auth.verifyOtp({ email, token: otp, type: 'email' })
+    if (error || data.user?.email?.toLowerCase() !== email) {
+      return sessionResponse({ error: 'Invalid OTP' }, { status: 401 })
+    }
+    return createVerifiedTesterSession(email, email === PROTOTYPE_ADMIN_EMAIL)
+  }
+
+  const { error } = await auth.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: email !== PROTOTYPE_ADMIN_EMAIL },
+  })
+  if (error) return sessionResponse({ error: 'Unable to send OTP' }, { status: 502 })
+  return sessionResponse({ requiresOtp: true })
 }
 
 export async function DELETE(request: NextRequest) {
