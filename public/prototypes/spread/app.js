@@ -1,5 +1,5 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260812-criticalpath1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260812-dailyflip1";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260812-spreadflight1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
@@ -417,7 +417,7 @@ async function handleDailyDeckClick(event) {
   dailyActivationInFlight = true;
   try {
     const [controller] = await Promise.all([dailyDeck3D, prototypeTesterSessionPromise]);
-    if (!controller || readSavedDailyCard()) return;
+    if (!controller || (readSavedDailyCard() && !controller.isResultActive())) return;
     const keyboard = event.detail === 0;
     if (!keyboard && !controller.hitTest(event.clientX, event.clientY)) return;
     controller.activate({ keyboard });
