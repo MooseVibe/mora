@@ -222,10 +222,15 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   deckGroup.scale.setScalar(embeddedDeckScale);
   scene.add(deckGroup);
 
-  const [gltf, backTexture] = await Promise.all([
-    new GLTFLoader().loadAsync("../3d-daily/assets/mora-card.glb"),
-    loadBackTexture(renderer),
-  ]);
+  const initialSelection = onPrepare?.() || null;
+  const loader = new GLTFLoader();
+  const deckTemplatePromise = loader.loadAsync("../3d-daily/assets/mora-card.glb");
+  const resultSourcePromise = loader.loadAsync("../3d-daily/assets/mora-card-result.glb");
+  const backTexturePromise = loadBackTexture(renderer);
+  const initialFaceTexturePromise = initialSelection?.imageUrl
+    ? loadFaceTexture(renderer, initialSelection.imageUrl)
+    : null;
+  const [gltf, backTexture] = await Promise.all([deckTemplatePromise, backTexturePromise]);
   const materials = createMaterials(backTexture);
   const template = gltf.scene;
   applyMaterials(template, materials);
@@ -233,21 +238,16 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   const size = bounds.getSize(new THREE.Vector3());
   template.scale.setScalar(3.55 / Math.max(size.x, size.z));
   template.updateMatrixWorld(true);
-  let resultTemplatePromise = null;
+  const resultTemplatePromise = resultSourcePromise.then((resultGltf) => {
+    const resultTemplate = resultGltf.scene;
+    applyMaterials(resultTemplate, materials);
+    const resultBounds = new THREE.Box3().setFromObject(resultTemplate);
+    const resultSize = resultBounds.getSize(new THREE.Vector3());
+    resultTemplate.scale.setScalar(3.55 / Math.max(resultSize.x, resultSize.z));
+    resultTemplate.updateMatrixWorld(true);
+    return resultTemplate;
+  });
   function loadResultTemplate() {
-    if (!resultTemplatePromise) {
-      resultTemplatePromise = new GLTFLoader()
-        .loadAsync("../3d-daily/assets/mora-card-result.glb")
-        .then((resultGltf) => {
-          const resultTemplate = resultGltf.scene;
-          applyMaterials(resultTemplate, materials);
-          const resultBounds = new THREE.Box3().setFromObject(resultTemplate);
-          const resultSize = resultBounds.getSize(new THREE.Vector3());
-          resultTemplate.scale.setScalar(3.55 / Math.max(resultSize.x, resultSize.z));
-          resultTemplate.updateMatrixWorld(true);
-          return resultTemplate;
-        });
-    }
     return resultTemplatePromise;
   }
 
@@ -274,8 +274,12 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   let hoveredCard = null;
   let resultCard = null;
   let resultHovered = false;
-  let preparedSelection = null;
-  let preparedFaceTexture = null;
+  let preparedSelection = initialSelection;
+  let preparedFaceTexture = initialFaceTexturePromise?.then((texture) => {
+    renderer.initTexture(texture);
+    return texture;
+  }) || null;
+  let preparedImageUrl = initialSelection?.imageUrl || "";
   let hoverAmount = 0;
   let ritualState = "idle";
   let frameId;
@@ -355,14 +359,27 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       ? Math.abs((hovered ? 1 : 0) - hoverAmount) > 0.002
       : ritualState === "fan"
         ? cards.some((card) => Math.abs((card === hoveredCard ? 1 : 0) - card.userData.hoverAmount) > 0.002)
-        : ritualState === "result" && resultCard?.userData.resultTarget
-          ? resultHovered || resultCard.quaternion.angleTo(resultCard.userData.resultTarget.quaternion) > 0.001
-          : true;
+        : true;
     frameId = hoverSettling ? window.requestAnimationFrame(render) : null;
   }
 
   function ensureRendering() {
     if (renderingActive && !frameId) frameId = window.requestAnimationFrame(render);
+  }
+
+  function prepareResultAssets(selection = onPrepare?.()) {
+    if (!selection?.imageUrl) return Promise.resolve();
+    if (preparedImageUrl === selection.imageUrl && preparedFaceTexture) {
+      return Promise.all([loadResultTemplate(), preparedFaceTexture]);
+    }
+
+    preparedSelection = selection;
+    preparedImageUrl = selection.imageUrl;
+    preparedFaceTexture = loadFaceTexture(renderer, selection.imageUrl).then((texture) => {
+      renderer.initTexture(texture);
+      return texture;
+    });
+    return Promise.all([loadResultTemplate(), preparedFaceTexture]);
   }
 
   function handlePointerMove(event) {
@@ -535,11 +552,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
 
   async function beginRitual() {
     if (ritualState !== "idle") return;
-    preparedSelection = onPrepare?.() || null;
-    preparedFaceTexture = preparedSelection?.imageUrl
-      ? loadFaceTexture(renderer, preparedSelection.imageUrl)
-      : null;
-    loadResultTemplate();
+    prepareResultAssets();
     ritualState = "cutting";
     ensureRendering();
     hovered = false;
@@ -647,6 +660,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     await Promise.all([separationPromise, faceTexturePromise]);
     preparedSelection = null;
     preparedFaceTexture = null;
+    preparedImageUrl = "";
 
     deckGroup.updateWorldMatrix(true, true);
     const pullDirection = fanPullDirection.clone().transformDirection(deckGroup.matrixWorld);
@@ -771,7 +785,10 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     const resultTemplate = await loadResultTemplate();
     const card = resultTemplate.clone(true);
     scene.add(card);
-    await loadFaceTexture(renderer, selection.imageUrl).then((texture) => applyFaceTexture(card, texture));
+    const faceTexture = preparedImageUrl === selection.imageUrl && preparedFaceTexture
+      ? preparedFaceTexture
+      : loadFaceTexture(renderer, selection.imageUrl);
+    await faceTexture.then((texture) => applyFaceTexture(card, texture));
     scene.attach(card);
     deckGroup.visible = false;
     floor.visible = false;
@@ -790,6 +807,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     placeResultShadow(target);
     resultCard = card;
     ritualState = "result";
+    renderer.render(scene, camera);
   }
 
   function activate({ keyboard = false } = {}) {
@@ -813,13 +831,13 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   resizeObserver.observe(host);
   resize();
   render();
+  await prepareResultAssets();
   host.classList.remove("is-3d-loading");
   host.classList.add("is-3d-ready");
 
   return {
     activate,
     restoreResult,
-    requestRender: ensureRendering,
     setActive(active) {
       renderingActive = active;
       if (active) ensureRendering();

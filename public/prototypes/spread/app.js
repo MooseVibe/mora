@@ -101,6 +101,7 @@ let volatileFailedSpread = null;
 let pendingDailySelection = null;
 let visibleSpreadCardIndices = [];
 
+dailyDeck.disabled = true;
 dailyDeck.classList.add("is-3d-loading");
 const dailyDeck3D = mountDailyDeck3D({
   canvas: dailyDeckCanvas,
@@ -113,9 +114,15 @@ const dailyDeck3D = mountDailyDeck3D({
   console.error("Mora daily 3D deck failed to load", error);
   return null;
 });
+let daily3DReady = false;
+dailyDeck3D.then((controller) => {
+  daily3DReady = Boolean(controller);
+  if (controller && !readSavedDailyCard()) dailyDeck.disabled = false;
+});
 
 const savedSpreadKey = "mora:prototype:lastSpread";
 const savedDailyCardKey = "mora:prototype:dailyCard";
+const pendingDailyCardKey = "mora:prototype:pendingDailyCard";
 const isLocalPrototype = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const spreadCooldownMs = 24 * 60 * 60 * 1000;
 const suitTags = {
@@ -188,6 +195,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const resetDailyMode = urlParams.get("resetDaily");
 if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always")) {
   window.localStorage.removeItem(savedDailyCardKey);
+  window.localStorage.removeItem(pendingDailyCardKey);
   if (resetDailyMode === "1") {
     urlParams.delete("resetDaily");
     window.history.replaceState(null, "", `${window.location.pathname}?${urlParams}`.replace(/\?$/, ""));
@@ -408,6 +416,7 @@ function showDailyMode() {
     "daily-result-entering",
     "daily-3d-result",
     "daily-3d-result-entering",
+    "daily-3d-error",
     "daily-3d-ritual",
     "daily-3d-animating",
   );
@@ -416,7 +425,7 @@ function showDailyMode() {
   spreadModeButton.classList.remove("active");
 
   const savedDailyCard = readSavedDailyCard();
-  dailyDeck.disabled = Boolean(savedDailyCard);
+  dailyDeck.disabled = Boolean(savedDailyCard) || !daily3DReady;
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
     document.documentElement.classList.remove("daily-saved-pending");
@@ -428,13 +437,18 @@ function showDailyMode() {
       daily3DRestoreInFlight = true;
       document.body.classList.add("daily-3d-restoring");
       dailyDeck3D.then(async (controller) => {
-        if (!controller) return;
+        if (!controller) {
+          showDaily3DError();
+          return;
+        }
         await controller.restoreResult({
           ...savedDailyCard,
           imageUrl: `/${savedDailyCard.card.image.replace(/^\/+/, "")}`,
         });
         showDaily3DResult();
-        controller.requestRender();
+      }).catch((error) => {
+        console.error("Mora daily 3D result failed to restore", error);
+        showDaily3DError();
       }).finally(() => {
         daily3DRestoreInFlight = false;
       });
@@ -454,6 +468,7 @@ function showSpreadMode() {
     "daily-result-entering",
     "daily-3d-result",
     "daily-3d-result-entering",
+    "daily-3d-error",
     "daily-3d-ritual",
     "daily-3d-animating",
   );
@@ -463,6 +478,11 @@ function showSpreadMode() {
   if (readLastSpread()) {
     restoreSavedSpread();
   }
+}
+
+function showDaily3DError() {
+  document.body.classList.remove("daily-3d-restoring");
+  document.body.classList.add("daily-3d-error");
 }
 
 function applyDailyResultTilt() {
@@ -636,9 +656,41 @@ function readSavedDailyCard() {
   }
 }
 
+function readPendingDailyCard() {
+  try {
+    const snapshot = JSON.parse(window.localStorage.getItem(pendingDailyCardKey) || "null");
+    if (snapshot?.dayKey !== getLocalDayKey()) {
+      window.localStorage.removeItem(pendingDailyCardKey);
+      return null;
+    }
+    const card = TAROT_CARDS.find((item) => item.id === snapshot?.cardId);
+    const variantIndex = Number(snapshot?.variantIndex);
+    if (!card?.result?.dayVariants?.[variantIndex]) return null;
+    return {
+      card,
+      variantIndex,
+      imageUrl: `/${card.image.replace(/^\/+/, "")}`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function prepareDailyCardCandidate() {
   if (pendingDailySelection) return pendingDailySelection;
-  if (dailyDrawInFlight || readSavedDailyCard()) return;
+  if (dailyDrawInFlight) return;
+  const savedDailyCard = readSavedDailyCard();
+  if (savedDailyCard) {
+    return {
+      ...savedDailyCard,
+      imageUrl: `/${savedDailyCard.card.image.replace(/^\/+/, "")}`,
+    };
+  }
+  const storedCandidate = readPendingDailyCard();
+  if (storedCandidate) {
+    pendingDailySelection = storedCandidate;
+    return pendingDailySelection;
+  }
   const card = getDailyCard();
   if (!card) return;
   const variantIndex = Math.floor(Math.random() * card.result.dayVariants.length);
@@ -647,6 +699,19 @@ function prepareDailyCardCandidate() {
     variantIndex,
     imageUrl: `/${card.image.replace(/^\/+/, "")}`,
   };
+  try {
+    window.localStorage.setItem(
+      pendingDailyCardKey,
+      JSON.stringify({
+        version: 1,
+        dayKey: getLocalDayKey(),
+        cardId: card.id,
+        variantIndex,
+      }),
+    );
+  } catch {
+    // The prepared card remains stable for the current page when storage is unavailable.
+  }
   return pendingDailySelection;
 }
 
@@ -671,6 +736,12 @@ function prepareDailyCardSelection() {
     // The prototype still completes when localStorage is unavailable.
   }
 
+  try {
+    window.localStorage.removeItem(pendingDailyCardKey);
+  } catch {
+    // The completed card remains the source of truth when storage cleanup is unavailable.
+  }
+
   pendingDailySelection = null;
   return selection;
 }
@@ -680,7 +751,7 @@ function showDaily3DResult() {
   daily3DResultActive = true;
   dailyDeck.disabled = false;
   document.documentElement.classList.remove("daily-saved-pending");
-  document.body.classList.remove("daily-3d-ritual", "daily-3d-animating", "daily-3d-restoring");
+  document.body.classList.remove("daily-3d-ritual", "daily-3d-animating", "daily-3d-restoring", "daily-3d-error");
   document.body.classList.add("daily-3d-result");
   if (!restoring) document.body.classList.add("daily-3d-result-entering");
   window.requestAnimationFrame(() => {

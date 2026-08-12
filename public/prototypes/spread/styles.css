@@ -588,7 +588,7 @@ html.daily-saved-pending .daily-deck {
   visibility: hidden;
 }
 
-body.daily-result-ready .daily-card-screen {
+body.daily-result-ready:not(.daily-3d-result) .daily-card-screen {
   opacity: 0;
   pointer-events: none;
 }
@@ -824,11 +824,22 @@ body.daily-mode.daily-3d-result .daily-result-copy {
   transition: opacity 360ms var(--ease), transform 440ms var(--ease);
 }
 
+body.daily-mode.daily-result-ready:not(.daily-3d-error) .daily-result-card,
 body.daily-mode.daily-3d-result .daily-result-card {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 250ms var(--ease), visibility 0s linear 250ms;
+}
+
+body.daily-mode.daily-result-ready #daily-result-image {
+  visibility: hidden;
+  opacity: 0;
+}
+
+body.daily-mode.daily-result-ready.daily-3d-error #daily-result-image {
+  visibility: visible;
+  opacity: 1;
 }
 
 body.daily-3d-result .daily-deck {
@@ -853,9 +864,12 @@ body.daily-3d-result .daily-card-heading {
   pointer-events: none;
 }
 
-body.daily-3d-restoring .daily-card-heading,
-body.daily-3d-restoring .daily-deck-canvas {
+body.daily-3d-restoring .daily-card-heading {
   opacity: 0;
+}
+
+body.daily-3d-restoring .daily-deck {
+  visibility: hidden;
 }
 
 body.daily-3d-result-entering .daily-result-copy {
@@ -1052,7 +1066,7 @@ body.daily-result-entering .daily-result-copy {
   pointer-events: none;
 }
 
-.daily-result-card img {
+#daily-result-image {
   position: absolute;
   inset: var(--daily-result-card-inner-inset);
   display: block;
@@ -1065,7 +1079,7 @@ body.daily-result-entering .daily-result-copy {
   transition: opacity 220ms ease-out;
 }
 
-body.daily-result-entering .daily-result-card img {
+body.daily-result-entering #daily-result-image {
   opacity: 0;
 }
 
