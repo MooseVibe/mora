@@ -125,7 +125,7 @@ const savedSpreadKey = "mora:prototype:lastSpread";
 const savedDailyCardKey = "mora:prototype:dailyCard";
 const pendingDailyCardKey = "mora:prototype:pendingDailyCard";
 const isLocalPrototype = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
-const spreadCooldownMs = 24 * 60 * 60 * 1000;
+const spreadCooldownMs = 12 * 60 * 60 * 1000;
 const suitTags = {
   "Пентакли": "./icons/suit-pentacles.svg",
   "Мечи": "./icons/suit-swords.svg",
