@@ -2829,3 +2829,7 @@ Production cold-load audit показал, что `mora-card-result.glb` и ли
 ## 2026-08-12 — Версионированные ресурсы Mora Next кешируются браузером
 
 Vercel по умолчанию отдавал prototype JS/CSS/GLB/WebP и общий `cards.js` с `max-age=0, must-revalidate`, поэтому обычный повторный вход создавал лишние conditional requests. Для этих статических ресурсов установлен `max-age=86400, stale-while-revalidate=604800`; HTML и приватные API не кешируются. Годовой `immutable` не используется, потому что часть 3D-файлов пока имеет стабильные имена и может обновляться до завершения asset-pipeline.
+
+## 2026-08-12 — Deck GLB и собственные модули обнаруживаются из HTML
+
+Critical deck GLB раньше начинал скачиваться только после последовательного разбора полного body → `app.js` → `daily-3d.js` → Three/GLTFLoader. В HTML добавлены high-priority fetch preload для `mora-card.glb` и modulepreload для `app.js`/`cards.js`/`daily-3d.js`; рубашка уже имела image preload. Пути, CORS-mode и query версии совпадают с реальными consumers, чтобы браузер переиспользовал response. Three.js пока остаётся на jsDelivr отдельным следующим пакетом.

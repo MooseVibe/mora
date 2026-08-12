@@ -25,6 +25,10 @@
     </script>
     <link rel="stylesheet" href="/assets/fonts.css" />
     <link rel="preload" as="image" href="../3d-daily/assets/mora-card-back-v3.webp" fetchpriority="high" />
+    <link rel="preload" as="fetch" href="../3d-daily/assets/mora-card.glb" type="model/gltf-binary" crossorigin fetchpriority="high" />
+    <link rel="modulepreload" href="./app.js?v=20260812-preload1" />
+    <link rel="modulepreload" href="/assets/cards.js" />
+    <link rel="modulepreload" href="./daily-3d.js?v=20260812-criticalpath1" />
     <link rel="stylesheet" href="./styles.css?v=20260811-stability1" />
     <script type="importmap">
       {
@@ -289,6 +293,6 @@
       </section>
     </div>
 
-    <script type="module" src="./app.js?v=20260812-criticalpath1"></script>
+    <script type="module" src="./app.js?v=20260812-preload1"></script>
   </body>
 </html>
