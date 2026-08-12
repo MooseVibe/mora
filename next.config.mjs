@@ -6,6 +6,13 @@ const imageCacheHeaders = [
   },
 ];
 
+const prototypeCacheHeaders = [
+  {
+    key: 'Cache-Control',
+    value: 'public, max-age=86400, stale-while-revalidate=604800',
+  },
+];
+
 const nextConfig = {
   async headers() {
     return [
@@ -28,6 +35,30 @@ const nextConfig = {
       {
         source: '/assets/fonts/:path*',
         headers: imageCacheHeaders,
+      },
+      {
+        source: '/assets/cards.js',
+        headers: prototypeCacheHeaders,
+      },
+      {
+        source: '/prototypes/3d-daily/assets/:path*',
+        headers: prototypeCacheHeaders,
+      },
+      {
+        source: '/prototypes/spread/app.js',
+        headers: prototypeCacheHeaders,
+      },
+      {
+        source: '/prototypes/spread/daily-3d.js',
+        headers: prototypeCacheHeaders,
+      },
+      {
+        source: '/prototypes/spread/spread-deck-3d.js',
+        headers: prototypeCacheHeaders,
+      },
+      {
+        source: '/prototypes/spread/styles.css',
+        headers: prototypeCacheHeaders,
       },
     ];
   },

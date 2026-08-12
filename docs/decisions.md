@@ -2825,3 +2825,7 @@ Commit `0438ecb` выпущен в production deployment `dpl_5fG8os4JZDGPmd1Q67
 ## 2026-08-12 — Result-модель карты дня не блокирует первый интерактивный экран
 
 Production cold-load audit показал, что `mora-card-result.glb` и лицевая WebP участвовали в `await prepareResultAssets()` до класса `is-3d-ready`, хотя первый click и clean cut используют только deck GLB и рубашку. Result GLB теперь создаёт свой promise только при idle-preload или начале ритуала; preload больше не await-блокирует готовность колоды. Это убирает в среднем около 704 КБ transfer плюс decode/upload из critical readiness без уменьшения качества и без изменения утверждённых таймингов.
+
+## 2026-08-12 — Версионированные ресурсы Mora Next кешируются браузером
+
+Vercel по умолчанию отдавал prototype JS/CSS/GLB/WebP и общий `cards.js` с `max-age=0, must-revalidate`, поэтому обычный повторный вход создавал лишние conditional requests. Для этих статических ресурсов установлен `max-age=86400, stale-while-revalidate=604800`; HTML и приватные API не кешируются. Годовой `immutable` не используется, потому что часть 3D-файлов пока имеет стабильные имена и может обновляться до завершения asset-pipeline.
