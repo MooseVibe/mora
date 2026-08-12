@@ -111,7 +111,7 @@
 
 ### High · 3D-колода расклада лагает на desktop/laptop
 
-**Статус:** Needs QA
+**Статус:** Production QA
 **Дата:** 2026-08-10
 **Где:** Mora Next, выбор трёх карт
 **Источник:** повторяющийся production-сигнал с разных устройств
@@ -132,7 +132,7 @@
 - daily idle-loop остановлен, а realtime shadow-pass ограничен верхней картой стопки и отключён при скрытом receiver веера;
 - «Ещё расклад» сбрасывает готовую сцену in-page без повторной загрузки session, Three.js и GLB.
 
-**Подтверждение:** локально прошли daily ritual/result и повторный вход, полный desktop click-flow из трёх карт, возврат, in-page «Ещё расклад», повторный выбор после reset, mobile first-paint/crossfade и отсутствие console errors. Для click-latency пакета отдельно прошли `git diff --check`, JS syntax, lint и production build. Следующий шаг — production release по аппруву автора и повторный тест на тех же удалённых устройствах. GPU instancing или предвыбор трёх карт делать только если этот retest покажет остаточную просадку.
+**Подтверждение:** локально прошли daily ritual/result и повторный вход, полный desktop click-flow из трёх карт, возврат, in-page «Ещё расклад», повторный выбор после reset, mobile first-paint/crossfade и отсутствие console errors. Для click-latency пакета отдельно прошли `git diff --check`, JS syntax, lint и production build. Commits `7bfee5e` и `00f1e82` выпущены как production deployment `dpl_HgkvZ7GapBDvAeFfCSHWggiAfAtd`; smoke подтвердил новые модули и защиту AI-маршрута. Следующий шаг — повторный визуальный тест на реальных устройствах. GPU instancing или предвыбор трёх карт делать только если этот retest покажет остаточную просадку.
 
 ### Critical · Шаг выбора карт не объясняет основное действие
 
