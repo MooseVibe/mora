@@ -443,11 +443,16 @@ function showDailyMode() {
   dailyDeck3D.then((controller) => controller?.setActive(true));
   resetSavedCardTilt();
   savedReturnChapter = null;
+  stateTransitionInFlight = false;
   document.body.classList.remove(
     "saved-home",
     "reading-ready",
     "reading-transition",
     "reading-entering",
+    "saved-to-reading",
+    "saved-reading-entering",
+    "reading-to-saved",
+    "reading-saved-entering",
     "daily-result-ready",
     "daily-result-entering",
     "daily-3d-result",
@@ -1505,7 +1510,7 @@ function resetReadingScroll(chapterIndex = 0) {
 }
 
 function openSavedReading(chapterIndex = 0, wheelDirection = 0) {
-  if (stateTransitionInFlight) return;
+  if (stateTransitionInFlight || document.body.classList.contains("daily-mode")) return;
   const snapshot = readLastSpread();
   if (!snapshot) return;
 
@@ -1519,10 +1524,15 @@ function openSavedReading(chapterIndex = 0, wheelDirection = 0) {
   resetReadingScroll(targetChapter);
 
   window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => document.body.classList.add("saved-reading-entering"));
+    window.requestAnimationFrame(() => {
+      if (!document.body.classList.contains("daily-mode")) {
+        document.body.classList.add("saved-reading-entering");
+      }
+    });
   });
 
   window.setTimeout(() => {
+    if (document.body.classList.contains("daily-mode")) return;
     document.body.classList.remove("saved-home", "saved-to-reading", "saved-reading-entering");
     document.body.classList.add("reading-ready");
     resetReadingScroll(targetChapter);
@@ -1531,7 +1541,7 @@ function openSavedReading(chapterIndex = 0, wheelDirection = 0) {
 }
 
 function closeReadingToSaved(returnChapter = null, wheelDirection = 0) {
-  if (stateTransitionInFlight) return;
+  if (stateTransitionInFlight || document.body.classList.contains("daily-mode")) return;
   const snapshot = readLastSpread();
   if (!snapshot) return;
 
@@ -1542,10 +1552,15 @@ function closeReadingToSaved(returnChapter = null, wheelDirection = 0) {
   document.body.classList.add("reading-to-saved");
 
   window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => document.body.classList.add("reading-saved-entering"));
+    window.requestAnimationFrame(() => {
+      if (!document.body.classList.contains("daily-mode")) {
+        document.body.classList.add("reading-saved-entering");
+      }
+    });
   });
 
   window.setTimeout(() => {
+    if (document.body.classList.contains("daily-mode")) return;
     document.body.classList.remove("reading-ready", "reading-to-saved", "reading-saved-entering");
     document.body.classList.add("saved-home");
     stateTransitionInFlight = false;
@@ -1825,18 +1840,22 @@ function populateReading(reading, cards, source = "fallback") {
 }
 
 function showReading() {
+  if (document.body.classList.contains("daily-mode")) return;
   readingCopy.scrollTop = 0;
   setActiveChapter(0);
   document.body.classList.add("reading-transition");
 
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
-      document.body.classList.add("reading-entering");
+      if (!document.body.classList.contains("daily-mode")) {
+        document.body.classList.add("reading-entering");
+      }
     });
   });
 
   window.setTimeout(
     () => {
+      if (document.body.classList.contains("daily-mode")) return;
       document.body.classList.add("reading-ready");
       document.body.classList.remove("reading-transition", "reading-entering");
     },

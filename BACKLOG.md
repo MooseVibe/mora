@@ -109,6 +109,14 @@
 
 ## Open
 
+### High · Навигация чтения могла остаться поверх карты дня
+
+**Статус:** Fix prepared · Needs author QA
+**Дата:** 2026-08-12
+**Где:** Mora Next, завершение расклада → переключение на карту дня
+
+Отложенный `showReading()` после Gemini и callbacks перехода saved ↔ reading могли дописать spread-классы уже после переключения в `daily-mode`. Подготовленный фикс очищает все reading transition-классы при входе в карту дня и запрещает отложенным callbacks менять DOM вне spread-mode. Motion-flow и тайминги не меняются.
+
 ### Critical · Mora Next показывала localStorage другого пользователя после смены email
 
 **Статус:** Production · Needs cross-device author QA

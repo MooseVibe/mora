@@ -2809,3 +2809,7 @@ Spread commit `e6b248c` выпущен в production deployment `dpl_2UaVCrgWQYy
 Commit `0438ecb` выпущен в production deployment `dpl_5fG8os4JZDGPmd1Q67mGfXzRAuTx`; migration `20260812085514_add_prototype_account_state.sql` применена, Edge Function `prototype-tester-session` v6 активна с `verify_jwt=true`. Production smoke подтвердил новую версию клиента, закрытый `401` account API без сессии и отсутствие гостевой авторизации. Permission-check подтвердил, что `anon/authenticated` не читают account-state и не вызывают service RPC; daily и spread содержат rolling `12 hours`.
 
 В честь релиза по явному запросу автора очищены только spread cooldown/reservation у всех 8 записей `prototype_testers`; 7 записей имели spread-state до reset, после reset осталось 0. Новая account-state таблица на момент reset была пустой. Карту дня массово не очищали. Старые browser snapshots не мигрируются в аккаунт, потому что доказать их владельца невозможно; после подтверждённого входа они удаляются.
+
+## 2026-08-12 — Отложенные переходы расклада не управляют картой дня
+
+`generateReading()` и переходы saved ↔ reading завершаются асинхронно, поэтому их callback мог добавить `reading-ready` или transition-классы уже после выбора таба «Карта дня». При входе в daily теперь атомарно очищаются все классы состояния чтения и снимается transition-lock; каждый отложенный reading callback перед изменением DOM проверяет, что `daily-mode` не активен. Тайминги и утверждённые анимации внутри расклада не меняются.
