@@ -60,6 +60,10 @@ const nextConfig = {
         source: '/prototypes/spread/styles.css',
         headers: prototypeCacheHeaders,
       },
+      {
+        source: '/vendor/three/0.180.0/:path*',
+        headers: prototypeCacheHeaders,
+      },
     ];
   },
 };

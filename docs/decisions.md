@@ -2832,4 +2832,8 @@ Vercel по умолчанию отдавал prototype JS/CSS/GLB/WebP и об�
 
 ## 2026-08-12 — Deck GLB и собственные модули обнаруживаются из HTML
 
-Critical deck GLB раньше начинал скачиваться только после последовательного разбора полного body → `app.js` → `daily-3d.js` → Three/GLTFLoader. В HTML добавлены high-priority fetch preload для `mora-card.glb` и modulepreload для `app.js`/`cards.js`/`daily-3d.js`; рубашка уже имела image preload. Пути, CORS-mode и query версии совпадают с реальными consumers, чтобы браузер переиспользовал response. Three.js пока остаётся на jsDelivr отдельным следующим пакетом.
+Critical deck GLB раньше начинал скачиваться только после последовательного разбора полного body → `app.js` → `daily-3d.js` → Three/GLTFLoader. В HTML добавлены high-priority fetch preload для `mora-card.glb` и modulepreload для `app.js`/`cards.js`/`daily-3d.js`; рубашка уже имела image preload. Пути, CORS-mode и query версии совпадают с реальными consumers, чтобы браузер переиспользовал response. Origin Three.js меняется отдельным следующим коммитом.
+
+## 2026-08-12 — Mora Next обслуживает Three.js 0.180.0 с собственного origin
+
+Cold start больше не открывает отдельное DNS/TCP/TLS-соединение к jsDelivr: официальные неизменённые `three.module.js`, `three.core.js`, `GLTFLoader.js` и `BufferGeometryUtils.js` версии `0.180.0` сохранены под versioned `/vendor/three/0.180.0/`. SHA-256 vendor-файлов сверены с CDN-копиями; import map меняет только origin, не runtime. Два входных модуля имеют modulepreload, вложенные зависимости обнаруживаются их стандартными imports. Standalone `/prototypes/3d-daily/` остаётся без изменений.
