@@ -151,11 +151,14 @@ body.prototype-tester .profile-control {
   display: block;
 }
 
-html.tester-session-pending .login,
-html.tester-session-pending .profile-control,
-html.tester-session-pending #spread-mode-button {
+html.tester-session-pending .starfield,
+html.tester-session-pending .header,
+html.tester-session-pending .mode-nav,
+html.tester-session-pending main {
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  animation: none;
 }
 
 .profile-trigger {

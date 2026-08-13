@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { PROTOTYPE_ADMIN_EMAIL, prototypeAccountRequest } from '@/lib/prototype-testers'
+import { prototypeAccountRequest } from '@/lib/prototype-testers'
 import { TAROT_CARD_LIST, getTarotCardDefinition } from '@/lib/tarot'
 
 function response(body: Record<string, unknown>, status = 200) {
@@ -12,11 +12,8 @@ function response(body: Record<string, unknown>, status = 200) {
 
 async function authenticatedAccount() {
   const auth = await createServerClient()
-  const { data: { user } } = await auth.auth.getUser()
-  if (!user?.email) return null
   const { data: { session } } = await auth.auth.getSession()
-  if (!session?.access_token) return null
-  return { user, accessToken: session.access_token }
+  return session?.access_token ?? null
 }
 
 function dailyCandidate() {
@@ -43,25 +40,24 @@ function validDaily(value: unknown) {
 }
 
 export async function GET() {
-  const account = await authenticatedAccount()
-  if (!account) return response({ error: 'Authenticated account required' }, 401)
-
+  const auth = await createServerClient()
   const candidate = dailyCandidate()
-  const result = await prototypeAccountRequest(account.accessToken, {
-    action: 'account-state',
-    ...candidate,
+  const { data, error } = await auth.rpc('bootstrap_own_prototype_account', {
+    p_card_id: candidate.cardId,
+    p_variant_index: candidate.variantIndex,
   })
-  if (!result.ok) return response({ error: 'Unable to load account state' }, result.status || 502)
+  if (error?.code === '42501') return response({ error: 'Authenticated account required' }, 401)
+  if (error || !data) return response({ error: 'Unable to load account state' }, 502)
 
-  const daily = validDaily(result.data?.daily)
+  const daily = validDaily(data.daily)
   if (!daily) return response({ error: 'Invalid daily account state' }, 502)
   return response({
-    accountId: account.user.id,
-    email: account.user.email?.toLowerCase(),
-    isAdmin: account.user.email?.toLowerCase() === PROTOTYPE_ADMIN_EMAIL,
+    accountId: data.accountId,
+    email: data.email,
+    isAdmin: data.isAdmin === true,
     daily,
-    spread: result.data?.spread ?? null,
-    nextSpreadAt: result.data?.nextSpreadAt ?? null,
+    spread: data.spread ?? null,
+    nextSpreadAt: data.nextSpreadAt ?? null,
   })
 }
 
@@ -74,7 +70,7 @@ export async function POST(request: NextRequest) {
     return response({ error: 'Invalid account action' }, 400)
   }
 
-  const result = await prototypeAccountRequest(account.accessToken, { action })
+  const result = await prototypeAccountRequest(account, { action })
   if (!result.ok) return response(result.data ?? { error: 'Unable to update account state' }, result.status || 502)
   if (action === 'complete-daily') {
     const daily = validDaily({ ...result.data, status: 'drawn' })
