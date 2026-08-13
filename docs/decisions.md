@@ -2887,3 +2887,5 @@ Fix выпущен commit `04f28bb` в production deployment `dpl_GN1Fhos5oTSie3
 ## 2026-08-13 — Стартовый spread применяется после полной инициализации UI
 
 Возврат после авторизации из spread-модалки открывает `?mode=spread`, но не может запускать `showSpreadMode()` до создания `deckCards`: обращение к `const` в temporal dead zone синхронно обрывало модуль до регистрации глобальных click handlers. При этом ранее запущенный account promise продолжал показывать daily-result, создавая визуально готовый, но неинтерактивный экран. Применение стартового режима перенесено ниже создания DOM-карт и после регистрации обработчиков; WebGL-монтаж остаётся ленивым и сохраняет существующий catch/fallback.
+
+Fix выпущен commit `81bb922` в production deployment `dpl_EE8ZXyi7mcQptx5uem2Q4KbHrUau`; реальный production browser smoke подтвердил работу таба и профиля без console errors.
