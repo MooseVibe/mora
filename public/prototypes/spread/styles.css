@@ -812,7 +812,7 @@ body.daily-mode.daily-3d-result .daily-result {
   grid-template-columns: minmax(0, 584px) 376px;
   align-items: center;
   justify-content: center;
-  gap: 80px;
+  gap: 68px;
   padding: 0 200px;
   background:
     radial-gradient(circle at 78% 48%, rgba(255, 255, 255, 0.045), transparent 34%);
