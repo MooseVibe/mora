@@ -28,6 +28,7 @@ Deno.serve(async (request: Request) => {
 
   const accountActions = new Set([
     "account-state",
+    "adopt-guest-daily",
     "complete-daily",
     "reserve-account-spread",
     "complete-account-spread",
@@ -60,6 +61,21 @@ Deno.serve(async (request: Request) => {
       const { data, error } = await supabase.rpc("complete_prototype_daily", { p_user_id: userId });
       if (error || !data) return json({ error: "Unable to complete daily card" }, 500);
       return json(data, data.completed === true ? 200 : 409);
+    }
+
+    if (action === "adopt-guest-daily") {
+      const cardId = typeof body?.cardId === "string" ? body.cardId : "";
+      const variantIndex = Number.isInteger(body?.variantIndex) ? body.variantIndex : -1;
+      if (!cardId || variantIndex < 0 || variantIndex > 100) {
+        return json({ error: "Invalid guest daily card" }, 400);
+      }
+      const { data, error } = await supabase.rpc("adopt_prototype_guest_daily", {
+        p_user_id: userId,
+        p_card_id: cardId,
+        p_variant_index: variantIndex,
+      });
+      if (error || !data) return json({ error: "Unable to adopt guest daily card" }, 500);
+      return json(data);
     }
 
     if (action === "clear-account-spread") {

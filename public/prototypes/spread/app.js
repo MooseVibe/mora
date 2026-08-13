@@ -275,6 +275,7 @@ async function restorePrototypeTesterSession() {
     return;
   }
 
+  const guestDailyCard = readGuestDailyCardForAdoption();
   try {
     const response = await fetch("/api/prototypes/account-state", { cache: "no-store" });
     if (response.status === 401) {
@@ -284,7 +285,25 @@ async function restorePrototypeTesterSession() {
     if (!response.ok) throw new Error("Unable to load account state");
     const payload = await response.json();
     setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt);
-    restorePrototypeAccountState(payload);
+    let clearGuestDaily = true;
+    if (payload.daily?.status !== "drawn" && guestDailyCard) {
+      const adoptionResponse = await fetch("/api/prototypes/account-state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "adopt-guest-daily",
+          cardId: guestDailyCard.cardId,
+          variantIndex: guestDailyCard.variantIndex,
+        }),
+      });
+      if (adoptionResponse.ok) {
+        const adoption = await adoptionResponse.json();
+        payload.daily = adoption.daily;
+      } else {
+        clearGuestDaily = false;
+      }
+    }
+    restorePrototypeAccountState(payload, clearGuestDaily);
   } catch {
     // The public daily-card flow remains available when session lookup fails.
   } finally {
@@ -297,14 +316,30 @@ async function restorePrototypeTesterSession() {
   }
 }
 
-function restorePrototypeAccountState(payload) {
+function readGuestDailyCardForAdoption() {
+  try {
+    const snapshot = JSON.parse(window.localStorage.getItem(savedDailyCardKey) || "null");
+    const drawnAt = Date.parse(snapshot?.drawnAt || "");
+    const card = TAROT_CARDS.find((item) => item.id === snapshot?.cardId);
+    const variantIndex = Number(snapshot?.variantIndex);
+    if (!card?.result?.dayVariants?.[variantIndex]) return null;
+    if (!Number.isFinite(drawnAt) || drawnAt + spreadCooldownMs <= Date.now()) return null;
+    return { cardId: card.id, variantIndex };
+  } catch {
+    return null;
+  }
+}
+
+function restorePrototypeAccountState(payload, clearGuestDaily = true) {
   accountDailyState = payload.daily || null;
   accountSpreadSnapshot = payload.spread || null;
   prototypeNextDailyAt = Date.parse(payload.daily?.nextDailyAt || "") || 0;
   prototypeNextSpreadAt = Date.parse(payload.nextSpreadAt || "") || 0;
   try {
-    window.localStorage.removeItem(savedDailyCardKey);
-    window.localStorage.removeItem(pendingDailyCardKey);
+    if (clearGuestDaily) {
+      window.localStorage.removeItem(savedDailyCardKey);
+      window.localStorage.removeItem(pendingDailyCardKey);
+    }
     window.localStorage.removeItem(savedSpreadKey);
   } catch {
     // Server state remains authoritative when browser storage is unavailable.

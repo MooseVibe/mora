@@ -87,8 +87,21 @@ export async function POST(request: NextRequest) {
     })
     return response({ recorded: true })
   }
-  if (!['complete-daily', 'clear-account-spread'].includes(action)) {
+  if (!['adopt-guest-daily', 'complete-daily', 'clear-account-spread'].includes(action)) {
     return response({ error: 'Invalid account action' }, 400)
+  }
+
+  if (action === 'adopt-guest-daily') {
+    const cardId = typeof body?.cardId === 'string' ? body.cardId : ''
+    const variantIndex = Number(body?.variantIndex)
+    const card = getTarotCardDefinition(cardId)
+    if (!card?.result?.dayVariants?.[variantIndex]) {
+      return response({ error: 'Invalid guest daily card' }, 400)
+    }
+    const result = await prototypeAccountRequest(account, { action, cardId, variantIndex })
+    if (!result.ok) return response(result.data ?? { error: 'Unable to adopt guest daily card' }, result.status || 502)
+    const daily = validDaily(result.data)
+    return daily ? response({ daily }) : response({ error: 'Invalid daily account state' }, 502)
   }
 
   const result = await prototypeAccountRequest(account, { action })

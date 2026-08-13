@@ -280,6 +280,8 @@ Field-fix commit `df3741e` выпущен в production deployment `dpl_9q3hYLxm
 
 Password-login commit `088aa22` выпущен в production deployment `dpl_Hh8KopTrvCHNTpZpdtkbwprRWf9N`. Production smoke подтвердил password-step, успешный вход `200`, `isAdmin:false` и обычный pending account-state без начатого cooldown; `password1` cache-bust опубликован без незавершённых stripface/GLB-изменений.
 
+Локально подготовлен отдельный guest→account daily transfer: если гость уже вытянул действующую карту, после настоящей авторизации сервер под row lock записывает именно её в account как drawn и запускает новый rolling 12-hour cooldown от серверного времени. Уже действующая account-карта всегда приоритетнее и не перезаписывается; guest snapshot удаляется только после подтверждённого ответа. Rollback assertion проверил adoption, повтор и account priority. Migration/Edge/client ещё не выпущены.
+
 Следующий локальный performance-шаг удалил из `mora-card.glb` и `mora-card-result.glb` встроенную WebP карты «Мир», которую runtime всегда заменяет выбранным лицом до flip. Размеры стали `487500 → 48272` и `459944 → 20716` байт; meshes/nodes/accessors и оставшиеся binary buffer views проверены на идентичность. Daily Mora Next и сохранённый standalone `/prototypes/3d-daily/index.html` загружают canvas без ошибок. Изменение ещё не выпущено и ждёт визуального подтверждения daily ritual/result и авторизованного spread.
 
 Не строить большую админку и не записывать чувствительные вопросы или полные тексты без явного согласия. Аналитика показывает, что человек сделал, но причину ухода нужно узнавать через вопрос или интервью.
