@@ -66,6 +66,27 @@ export async function POST(request: NextRequest) {
   if (!account) return response({ error: 'Authenticated account required' }, 401)
   const body = await request.json().catch(() => null)
   const action = body?.action
+  if (action === 'client-event') {
+    const allowedEvents = new Set([
+      'daily-state-resolved',
+      'daily-3d-ready',
+      'daily-deck-pointer',
+      'daily-deck-click',
+      'daily-restore-started',
+      'daily-restore-completed',
+      'daily-restore-failed',
+    ])
+    const event = typeof body?.event === 'string' ? body.event : ''
+    if (!allowedEvents.has(event)) return response({ error: 'Invalid client event' }, 400)
+    console.info('[mora-client]', {
+      event,
+      trace: typeof body?.trace === 'string' ? body.trace.slice(0, 64) : '',
+      dailyState: ['pending', 'drawn', 'none'].includes(body?.dailyState) ? body.dailyState : 'none',
+      deckReady: body?.deckReady === true,
+      deckDisabled: body?.deckDisabled === true,
+    })
+    return response({ recorded: true })
+  }
   if (!['complete-daily', 'clear-account-spread'].includes(action)) {
     return response({ error: 'Invalid account action' }, 400)
   }

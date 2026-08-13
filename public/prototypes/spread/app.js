@@ -107,6 +107,27 @@ let volatileFailedSpread = null;
 let pendingDailySelection = null;
 let visibleSpreadCardIndices = [];
 let dailyActivationInFlight = false;
+const clientEventTrace = crypto.randomUUID?.() || String(Date.now());
+const sentClientEvents = new Set();
+
+function reportClientEvent(event, once = true) {
+  if (!testerSessionResolved || !prototypeTesterAuthenticated) return;
+  if (once && sentClientEvents.has(event)) return;
+  sentClientEvents.add(event);
+  fetch("/api/prototypes/account-state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "client-event",
+      event,
+      trace: clientEventTrace,
+      dailyState: accountDailyState?.status || "none",
+      deckReady: dailyDeck.classList.contains("is-3d-ready"),
+      deckDisabled: dailyDeck.disabled,
+    }),
+    keepalive: true,
+  }).catch(() => {});
+}
 
 dailyDeck.classList.add("is-3d-loading");
 const dailyDeck3D = mountDailyDeck3D({
@@ -124,6 +145,7 @@ let daily3DReady = false;
 dailyDeck3D.then((controller) => {
   daily3DReady = Boolean(controller);
   if (controller && testerSessionResolved) dailyDeck.disabled = Boolean(readSavedDailyCard());
+  if (controller) reportClientEvent("daily-3d-ready");
 });
 
 const savedSpreadKey = "mora:prototype:lastSpread";
@@ -241,6 +263,7 @@ loginScreenForm.addEventListener("submit", (event) => handleTesterLogin(event, "
 authGateClose.addEventListener("click", closeAuthGate);
 authGateForm.addEventListener("submit", (event) => handleTesterLogin(event, "spread"));
 dailyDeck.addEventListener("click", handleDailyDeckClick);
+dailyDeck.addEventListener("pointerdown", () => reportClientEvent("daily-deck-pointer"));
 
 async function restorePrototypeTesterSession() {
   const params = new URLSearchParams(window.location.search);
@@ -266,6 +289,8 @@ async function restorePrototypeTesterSession() {
     // The public daily-card flow remains available when session lookup fails.
   } finally {
     testerSessionResolved = true;
+    reportClientEvent("daily-state-resolved");
+    if (daily3DReady) reportClientEvent("daily-3d-ready");
     document.documentElement.classList.remove("tester-session-pending");
     if (document.body.classList.contains("daily-mode")) showDailyMode();
     else if (prototypeTesterAuthenticated) restoreSavedSpread();
@@ -413,6 +438,7 @@ function closeAuthGate() {
 }
 
 async function handleDailyDeckClick(event) {
+  reportClientEvent("daily-deck-click");
   if (dailyActivationInFlight || !dailyDeck.classList.contains("is-3d-ready")) return;
   dailyActivationInFlight = true;
   try {
@@ -487,9 +513,11 @@ function showDailyMode() {
     } else if (!daily3DRestoreInFlight) {
       daily3DRestoreInFlight = true;
       document.body.classList.add("daily-3d-restoring");
+      reportClientEvent("daily-restore-started", false);
       dailyDeck3D.then(async (controller) => {
         if (!controller) {
           showDaily3DError();
+          reportClientEvent("daily-restore-failed", false);
           return;
         }
         await controller.restoreResult({
@@ -497,9 +525,11 @@ function showDailyMode() {
           imageUrl: `/${savedDailyCard.card.image.replace(/^\/+/, "")}`,
         });
         showDaily3DResult();
+        reportClientEvent("daily-restore-completed", false);
       }).catch((error) => {
         console.error("Mora daily 3D result failed to restore", error);
         showDaily3DError();
+        reportClientEvent("daily-restore-failed", false);
       }).finally(() => {
         daily3DRestoreInFlight = false;
       });
@@ -1398,7 +1428,7 @@ function readLastSpread() {
     if (!testerSessionResolved) return null;
     const value = prototypeTesterAuthenticated ? null : window.localStorage.getItem(savedSpreadKey);
     const snapshot = prototypeTesterAuthenticated
-      ? accountSpreadSnapshot
+      ? accountSpreadSnapshot || volatileFailedSpread
       : value ? JSON.parse(value) : volatileFailedSpread;
     if (!snapshot) return null;
     const cardIds = Array.isArray(snapshot.cardIds)
@@ -1577,16 +1607,17 @@ function closeReadingToSaved(returnChapter = null, wheelDirection = 0) {
   }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 700);
 }
 
-newSpreadButton.addEventListener("click", async () => {
+newSpreadButton.addEventListener("click", () => {
   if (newSpreadButton.disabled) return;
+  const previousSnapshot = accountSpreadSnapshot;
+  let clearAccountSpread;
   if (prototypeTesterAuthenticated) {
-    const response = await fetch("/api/prototypes/account-state", {
+    accountSpreadSnapshot = null;
+    clearAccountSpread = fetch("/api/prototypes/account-state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "clear-account-spread" }),
-    }).catch(() => null);
-    if (!response?.ok) return;
-    accountSpreadSnapshot = null;
+    }).then((response) => response.ok).catch(() => false);
   }
   const nextDeck = createNextDeckOrder(spreadDeck, spreadDeck.map((card) => card.id));
   spreadDeck = nextDeck;
@@ -1630,6 +1661,12 @@ newSpreadButton.addEventListener("click", async () => {
   updateNextSlot();
   renderDeck();
   window.history.replaceState(null, "", window.location.pathname);
+
+  clearAccountSpread?.then((cleared) => {
+    if (cleared) return;
+    accountSpreadSnapshot = previousSnapshot;
+    restoreSavedSpread();
+  });
 });
 
 function updateNextSlot() {

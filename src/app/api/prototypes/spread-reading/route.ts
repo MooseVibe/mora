@@ -114,7 +114,7 @@ function providerError(error: unknown) {
 
 async function generateWithGemini(apiKey: string, prompt: string, cardIds: string[]) {
   let response: Response | null = null
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     response = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent',
       {
@@ -134,8 +134,11 @@ async function generateWithGemini(apiKey: string, prompt: string, cardIds: strin
         signal: AbortSignal.timeout(60_000),
       },
     )
-    if (response.status !== 503 || attempt === 1) break
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    const transient = response.status === 408 || response.status === 429 || response.status >= 500
+    if (!transient || attempt === 2) break
+    await response.body?.cancel()
+    const delay = 1000 * (2 ** attempt) + Math.floor(Math.random() * 250)
+    await new Promise((resolve) => setTimeout(resolve, delay))
   }
   if (!response) throw new Error('Gemini returned no response')
   if (!response.ok) {
