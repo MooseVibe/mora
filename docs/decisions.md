@@ -2849,3 +2849,5 @@ Cold start больше не открывает отдельное DNS/TCP/TLS-�
 ## 2026-08-13 — Read-only account bootstrap не проходит через Edge
 
 Начальное восстановление карты дня и последнего расклада выполняется одним authenticated PostgREST RPC вместо дополнительного вызова Edge Function. Экспонированная функция — `security invoker`; изменяющая таблицу реализация изолирована в закрытой схеме `mora_private` и сама получает владельца через `auth.uid()`, а email через `auth.jwt()`. Клиент не передаёт `user_id` или email и по-прежнему не имеет прямого доступа к `prototype_account_states`; все последующие записи остаются за Edge Function v7 с проверкой JWT. Такой boundary сохраняет межаккаунтную изоляцию, но убирает Edge hop из критического read-path. Rollback с двумя auth users, grants и security advisor прошли; пять локальных authenticated reload ускорились с медианы около `1.12 s` до `269 ms` (`364/255/269/250/767 ms`).
+
+Пакет выпущен в production deployment `dpl_J4GTG1SqNaLCXsDKCsALKcN7hVWr`; отдельный CSS cache-bust гарантирует доставку pending-screen поведения без включения незавершённых GLB/3D-изменений.
