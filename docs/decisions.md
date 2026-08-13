@@ -2881,3 +2881,5 @@ Password-login выпущен commit `088aa22` в production deployment `dpl_Hh8
 ## 2026-08-13 — Idle-колода принимает клик по цельному объёму карты
 
 Production-диагностика редкого non-click подтвердила, что pointer и click доходят до готового daily controller, но точный Three.js raycast может промахнуться в зазоре между пятью mesh-частями модели. Для собранной idle-колоды после точного raycast добавлен fallback по world-space bounding box только верхней 3D-карты. Веер и result-flip по-прежнему требуют точного попадания в конкретную mesh-геометрию; размеры DOM-кнопки не превращаются в общую кликабельную область. Визуал, motion-flow и модель не меняются.
+
+Fix выпущен commit `04f28bb` в production deployment `dpl_GN1Fhos5oTSie3LH2cYno2F199Gs`; production alias и модуль `deckhit1` прошли smoke.
