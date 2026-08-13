@@ -2869,3 +2869,5 @@ Field-fix выпущен точным архивом commit `df3741e` в product
 ## 2026-08-13 — Технический QA-аккаунт входит по паролю, а не без проверки
 
 Чтобы повторные QA-проходы не расходовали общий лимит встроенной почты Supabase, только `moratest@bk.ru` использует стандартный `signInWithPassword`. Email-only bypass запрещён: сервер всё равно криптографически подтверждает владельца через Supabase Auth. Аккаунт остаётся обычным authenticated user без admin-исключения и подчиняется тем же rolling 12-hour cooldown карты дня и расклада. Пароль не хранится в репозитории или клиенте.
+
+Password-login выпущен commit `088aa22` в production deployment `dpl_Hh8KopTrvCHNTpZpdtkbwprRWf9N`; production smoke подтвердил `isAdmin:false` и обычный account-state.

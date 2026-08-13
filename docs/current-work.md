@@ -278,6 +278,8 @@ Field-fix commit `df3741e` выпущен в production deployment `dpl_9q3hYLxm
 
 Для повторяемого QA без расходования встроенного Supabase email quota создан обычный подтверждённый Auth account `moratest@bk.ru` с password-входом. Он не является admin: после входа использует тот же account-state и rolling 12-hour cooldown карты дня/расклада, что остальные тестеры. Пароль хранится только как Supabase password hash и не находится в клиенте, API-коде или git.
 
+Password-login commit `088aa22` выпущен в production deployment `dpl_Hh8KopTrvCHNTpZpdtkbwprRWf9N`. Production smoke подтвердил password-step, успешный вход `200`, `isAdmin:false` и обычный pending account-state без начатого cooldown; `password1` cache-bust опубликован без незавершённых stripface/GLB-изменений.
+
 Следующий локальный performance-шаг удалил из `mora-card.glb` и `mora-card-result.glb` встроенную WebP карты «Мир», которую runtime всегда заменяет выбранным лицом до flip. Размеры стали `487500 → 48272` и `459944 → 20716` байт; meshes/nodes/accessors и оставшиеся binary buffer views проверены на идентичность. Daily Mora Next и сохранённый standalone `/prototypes/3d-daily/index.html` загружают canvas без ошибок. Изменение ещё не выпущено и ждёт визуального подтверждения daily ritual/result и авторизованного spread.
 
 Не строить большую админку и не записывать чувствительные вопросы или полные тексты без явного согласия. Аналитика показывает, что человек сделал, но причину ухода нужно узнавать через вопрос или интервью.
