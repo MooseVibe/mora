@@ -287,6 +287,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const resultPressPoint = new THREE.Vector2();
+  const idleDeckHitBox = new THREE.Box3();
 
   function resize() {
     const rect = host.getBoundingClientRect();
@@ -394,7 +395,14 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       return;
     }
     hoveredCard = null;
-    hovered = raycaster.intersectObjects(cards, true).length > 0;
+    const exactHit = raycaster.intersectObjects(cards, true).length > 0;
+    if (ritualState === "idle" && !exactHit) {
+      deckGroup.updateWorldMatrix(true, true);
+      idleDeckHitBox.setFromObject(cards.at(-1));
+      hovered = raycaster.ray.intersectsBox(idleDeckHitBox);
+    } else {
+      hovered = exactHit;
+    }
     ensureRendering();
   }
 
