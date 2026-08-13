@@ -1,5 +1,6 @@
 export const PROTOTYPE_TESTER_COOKIE = 'mora-prototype-tester'
 export const PROTOTYPE_ADMIN_EMAIL = 'iliushka00@bk.ru'
+export const PROTOTYPE_PASSWORD_TESTER_EMAIL = 'moratest@bk.ru'
 
 export async function prototypeAccountRequest(accessToken: string, body: Record<string, unknown>) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL

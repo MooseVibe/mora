@@ -318,14 +318,17 @@ async function handleTesterLogin(event, destination) {
   if (!emailInput.reportValidity()) return;
 
   const pendingEmail = form.dataset.pendingEmail || "";
-  const isOtpStep = Boolean(pendingEmail);
-  const requestBody = isOtpStep
-    ? { email: pendingEmail, otp: emailInput.value }
+  const pendingMethod = form.dataset.pendingMethod || "";
+  const isVerificationStep = Boolean(pendingEmail);
+  const requestBody = isVerificationStep
+    ? pendingMethod === "password"
+      ? { email: pendingEmail, password: emailInput.value }
+      : { email: pendingEmail, otp: emailInput.value }
     : { email: emailInput.value };
 
   const submitButton = form.querySelector('button[type="submit"]');
   submitButton.disabled = true;
-  submitButton.textContent = isOtpStep ? "Проверяем…" : "Входим…";
+  submitButton.textContent = isVerificationStep ? "Проверяем…" : "Входим…";
 
   try {
     const response = await fetch("/api/prototypes/tester-session", {
@@ -335,8 +338,22 @@ async function handleTesterLogin(event, destination) {
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Tester session failed");
+    if (payload.requiresPassword) {
+      form.dataset.pendingEmail = emailInput.value.trim().toLowerCase();
+      form.dataset.pendingMethod = "password";
+      emailInput.value = "";
+      emailInput.type = "password";
+      emailInput.inputMode = "text";
+      emailInput.removeAttribute("pattern");
+      emailInput.placeholder = "Пароль";
+      emailInput.setAttribute("aria-label", "Пароль");
+      submitButton.textContent = "Войти";
+      emailInput.focus();
+      return;
+    }
     if (payload.requiresOtp) {
       form.dataset.pendingEmail = emailInput.value.trim().toLowerCase();
+      form.dataset.pendingMethod = "otp";
       emailInput.value = "";
       emailInput.type = "text";
       emailInput.inputMode = "numeric";
@@ -369,6 +386,7 @@ async function handleTesterLogin(event, destination) {
 
 function resetTesterLoginForm(form, input) {
   delete form.dataset.pendingEmail;
+  delete form.dataset.pendingMethod;
   input.value = "";
   input.type = "email";
   input.inputMode = "email";

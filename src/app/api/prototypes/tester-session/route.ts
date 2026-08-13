@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import {
   PROTOTYPE_ADMIN_EMAIL,
+  PROTOTYPE_PASSWORD_TESTER_EMAIL,
   PROTOTYPE_TESTER_COOKIE,
 } from '@/lib/prototype-testers'
 
@@ -40,6 +41,17 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await auth.auth.getUser()
   if (user?.email?.toLowerCase() === email) {
     return createVerifiedTesterSession(email, email === PROTOTYPE_ADMIN_EMAIL)
+  }
+
+  if (email === PROTOTYPE_PASSWORD_TESTER_EMAIL) {
+    const password = typeof body?.password === 'string' ? body.password : ''
+    if (!password) return sessionResponse({ requiresPassword: true })
+
+    const { data, error } = await auth.auth.signInWithPassword({ email, password })
+    if (error || data.user?.email?.toLowerCase() !== email) {
+      return sessionResponse({ error: 'Invalid password' }, { status: 401 })
+    }
+    return createVerifiedTesterSession(email)
   }
 
   const otp = typeof body?.otp === 'string' ? body.otp.replace(/\D/g, '').slice(0, 8) : ''

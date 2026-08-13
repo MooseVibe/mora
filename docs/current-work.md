@@ -276,6 +276,8 @@ Fallback авторизованного пользователя не откры
 
 Field-fix commit `df3741e` выпущен в production deployment `dpl_9q3hYLxmXVJvJ5eF785jqf2p619w`: transient retry Gemini, мгновенный optimistic reset «Ещё расклад», навигация fallback для account user и обезличенная диагностика редкого daily deck non-click. Production smoke подтвердил страницу и новый `fieldfix1` app bundle `200`, guest account-state `401`; незавершённые GLB/stripface-изменения в релиз не вошли.
 
+Для повторяемого QA без расходования встроенного Supabase email quota создан обычный подтверждённый Auth account `moratest@bk.ru` с password-входом. Он не является admin: после входа использует тот же account-state и rolling 12-hour cooldown карты дня/расклада, что остальные тестеры. Пароль хранится только как Supabase password hash и не находится в клиенте, API-коде или git.
+
 Следующий локальный performance-шаг удалил из `mora-card.glb` и `mora-card-result.glb` встроенную WebP карты «Мир», которую runtime всегда заменяет выбранным лицом до flip. Размеры стали `487500 → 48272` и `459944 → 20716` байт; meshes/nodes/accessors и оставшиеся binary buffer views проверены на идентичность. Daily Mora Next и сохранённый standalone `/prototypes/3d-daily/index.html` загружают canvas без ошибок. Изменение ещё не выпущено и ждёт визуального подтверждения daily ritual/result и авторизованного spread.
 
 Не строить большую админку и не записывать чувствительные вопросы или полные тексты без явного согласия. Аналитика показывает, что человек сделал, но причину ухода нужно узнавать через вопрос или интервью.
