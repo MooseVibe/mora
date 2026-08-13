@@ -230,8 +230,6 @@ if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always"))
   }
 }
 const startInSpreadMode = urlParams.get("mode") === "spread";
-startInSpreadMode ? showSpreadMode() : showDailyMode();
-if (startInSpreadMode) window.history.replaceState(null, "", window.location.pathname);
 
 dailyModeButton.addEventListener("click", () => switchMode("daily"));
 brand.addEventListener("click", (event) => {
@@ -1141,6 +1139,9 @@ for (let index = 0; index < deckCardCount; index += 1) {
   deck.append(card);
   deckCards.push(card);
 }
+
+startInSpreadMode ? showSpreadMode() : showDailyMode();
+if (startInSpreadMode) window.history.replaceState(null, "", window.location.pathname);
 
 function ensureSpreadDeck3D() {
   if (spreadDeck3DPromise) return spreadDeck3DPromise;

@@ -2883,3 +2883,7 @@ Password-login выпущен commit `088aa22` в production deployment `dpl_Hh8
 Production-диагностика редкого non-click подтвердила, что pointer и click доходят до готового daily controller, но точный Three.js raycast может промахнуться в зазоре между пятью mesh-частями модели. Для собранной idle-колоды после точного raycast добавлен fallback по world-space bounding box только верхней 3D-карты. Веер и result-flip по-прежнему требуют точного попадания в конкретную mesh-геометрию; размеры DOM-кнопки не превращаются в общую кликабельную область. Визуал, motion-flow и модель не меняются.
 
 Fix выпущен commit `04f28bb` в production deployment `dpl_GN1Fhos5oTSie3LH2cYno2F199Gs`; production alias и модуль `deckhit1` прошли smoke.
+
+## 2026-08-13 — Стартовый spread применяется после полной инициализации UI
+
+Возврат после авторизации из spread-модалки открывает `?mode=spread`, но не может запускать `showSpreadMode()` до создания `deckCards`: обращение к `const` в temporal dead zone синхронно обрывало модуль до регистрации глобальных click handlers. При этом ранее запущенный account promise продолжал показывать daily-result, создавая визуально готовый, но неинтерактивный экран. Применение стартового режима перенесено ниже создания DOM-карт и после регистрации обработчиков; WebGL-монтаж остаётся ленивым и сохраняет существующий catch/fallback.
