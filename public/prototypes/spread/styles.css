@@ -1874,13 +1874,13 @@ body.saved-home .saved-spread {
 
 .saved-actions {
   display: flex;
-  width: 100%;
+  width: fit-content;
   justify-content: center;
   gap: 12px;
 }
 
 .saved-action {
-  width: min(100%, 320px);
+  width: auto;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

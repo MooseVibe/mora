@@ -2927,3 +2927,7 @@ Hotfix выпущен commit `2641e2d` в production deployment `dpl_B9Fgmnzhkcf
 Кнопка `На главную` на полном экране входа вызывает существующее закрытие auth-screen и возвращает пользователя в состояние, из которого он начал вход. Она и `Закрыть` в spread auth-modal переиспользуют общий secondary-стиль: прозрачный фон и обводка без внешнего glow.
 
 Auth action, GigaChat narrative prompt и saved daily/spread actions выпущены отдельными commits `76fc34a`, `8c188d3`, `26f2126` через clean archive docs commit `37df8fb`. Production deployment `dpl_evuhGQyWXbuzNt3kU4UjV162pLQy` Ready на `mora-vnkt.vercel.app`; опубликованный модуль подтверждает `actiontimer1` и отсутствие stripface experiment.
+
+## 2026-08-14 — Action-группа сохранённого расклада использует hug-content
+
+Контейнер кнопок больше не растягивается на всю ширину, а `Новый расклад…`/`Ещё расклад` и `Читать расклад` не получают фиксированные `320px`. Desktop-группа использует `fit-content`, кнопки — естественную ширину текста и прежний внутренний padding; gap остаётся `12px`.
