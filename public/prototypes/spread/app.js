@@ -38,6 +38,7 @@ const profileMenu = document.querySelector("#profile-menu");
 const profileLogout = document.querySelector(".profile-logout");
 const loginScreen = document.querySelector("#login-screen");
 const loginScreenBrand = document.querySelector(".login-screen-brand");
+const loginScreenHome = document.querySelector(".login-screen-home");
 const loginScreenForm = document.querySelector("#login-screen-form");
 const loginScreenEmail = document.querySelector("#login-screen-email");
 const authGate = document.querySelector("#auth-gate");
@@ -257,6 +258,7 @@ loginScreenBrand.addEventListener("click", (event) => {
   event.preventDefault();
   closeLoginScreen();
 });
+loginScreenHome.addEventListener("click", closeLoginScreen);
 loginScreenForm.addEventListener("submit", (event) => handleTesterLogin(event, "daily"));
 authGateClose.addEventListener("click", closeAuthGate);
 authGateForm.addEventListener("submit", (event) => handleTesterLogin(event, "spread"));
