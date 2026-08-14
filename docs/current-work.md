@@ -300,6 +300,8 @@ Guest→account daily transfer выпущен commit `b7748c8` в production dep
 
 Экран входа получил secondary-кнопку `На главную`, которая закрывает auth-screen и возвращает пользователя в состояние Mora Next, из которого он пришёл; `Закрыть` в spread auth-modal использует тот же secondary-стиль без glow. Изменение включено в текущий release candidate.
 
+Release commits `76fc34a`, `8c188d3`, `26f2126` и docs commit `37df8fb` выпущены из чистого archive точного `37df8fb` в production deployment `dpl_evuhGQyWXbuzNt3kU4UjV162pLQy`. Alias `mora-vnkt.vercel.app` Ready; production отдаёт cache-version `actiontimer1`, обработчики countdown/read action и не содержит `stripface`. Страница прошла HTTP smoke, а spread-reading без auth вернул ожидаемый `401`. Незавершённый stripface/GLB experiment остался только в dirty worktree.
+
 Не строить большую админку и не записывать чувствительные вопросы или полные тексты без явного согласия. Аналитика показывает, что человек сделал, но причину ухода нужно узнавать через вопрос или интервью.
 
 Первая волна: 20–30 человек, 7–14 дней, одна карта и до трёх завершённых раскладов за календарный день. Перед более широким тестом добавить очередь и повтор GigaChat-запросов после `429`.
