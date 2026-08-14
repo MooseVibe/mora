@@ -2895,3 +2895,9 @@ Fix выпущен commit `81bb922` в production deployment `dpl_EE8ZXyi7mcQptx
 После двух полевых случаев клиппинга «Справедливость» не разрешаем заголовку выходить за контейнер, не разрываем слово и не уменьшаем утверждённый шрифт без нового макета. В текущем экране результата desktop-gap между текстовой колонкой и картой уменьшён `80 → 68px`, возвращая заголовку `12px` доступной ширины. Автор проверил это локально на искусственно восстановленной «Справедливости»; mobile-раскладка и прочая типографика не меняются.
 
 Fix `13cc554` выпущен в production deployment `dpl_dnGUasy91LR8waLQ6YsKnmYtCUHK`; production alias отдаёт CSS cache-version `justicegap1`. Незавершённый stripface/GLB experiment в deployment не вошёл.
+
+## 2026-08-14 — Production-расклад снова переключается с Gemini на GigaChat
+
+После трёх подтверждённых `503 UNAVAILABLE / high demand` от Gemini маршрут последовательно пробует Gemini и GigaChat, сохраняя один контракт, reservation и completion-flow. Успех GigaChat считается обычным завершённым раскладом и сохраняет фактический `source`; локальный несохраняемый fallback появляется только после отказа обоих провайдеров. Обезличенный success-log содержит только provider source и status, поэтому восстановление Gemini видно по следующему `source: gemini` без записи пользователя, карт или текста.
+
+GigaChat использует Sensitive Production env и официальный корневой сертификат Минцифры. Сертификат подключён отдельным HTTPS-agent только для OAuth и chat endpoint GigaChat и включён в serverless trace; `NODE_TLS_REJECT_UNAUTHORIZED=0` и глобальное расширение доверия не используются. Реальный OAuth и минимальный строгий JSON Schema запрос к `GigaChat-2` вернули `200`.

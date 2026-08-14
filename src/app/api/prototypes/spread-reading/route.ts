@@ -5,6 +5,9 @@ import {
   prototypeAccountRequest,
 } from '@/lib/prototype-testers'
 import { NextRequest, NextResponse } from 'next/server'
+import { readFileSync } from 'node:fs'
+import { Agent, request as httpsRequest } from 'node:https'
+import { join } from 'node:path'
 
 const schema = {
   type: 'object',
@@ -54,6 +57,11 @@ type Reading = {
   cards: Array<{ cardId: string; title: string; meaning: string; context: string }>
   conclusion: { title: string; text: string }
 }
+
+type ProviderSource = 'gemini' | 'gigachat'
+
+let gigaToken: { value: string; expiresAt: number } | null = null
+let gigaOauthAgent: Agent | null = null
 
 const allowedTopics = new Set([
   'Внутреннее состояние',
@@ -150,6 +158,107 @@ async function generateWithGemini(apiKey: string, prompt: string, cardIds: strin
   return parseReading(payload?.candidates?.[0]?.content?.parts?.[0]?.text, cardIds)
 }
 
+function gigaRequest(url: string, headers: Record<string, string>, body: string, timeout: number) {
+  const agent = gigaOauthAgent ?? new Agent({
+    ca: readFileSync(join(process.cwd(), 'certs/russian_trusted_root_ca_pem.crt')),
+  })
+  gigaOauthAgent = agent
+
+  return new Promise<{ status: number; text: string }>((resolve, reject) => {
+    const request = httpsRequest(url, {
+      method: 'POST',
+      agent,
+      headers,
+      timeout,
+    }, (incoming) => {
+      const chunks: Buffer[] = []
+      incoming.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
+      incoming.on('end', () => resolve({
+        status: incoming.statusCode ?? 0,
+        text: Buffer.concat(chunks).toString('utf8'),
+      }))
+    })
+    request.on('timeout', () => request.destroy(new Error('GigaChat request timed out')))
+    request.on('error', reject)
+    request.end(body)
+  })
+}
+
+async function getGigaToken(credentials: string) {
+  if (gigaToken && gigaToken.expiresAt > Date.now() + 60_000) return gigaToken.value
+
+  let response: { status: number; text: string } | null = null
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      response = await gigaRequest(
+        'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
+        {
+          Accept: 'application/json',
+          Authorization: `Basic ${credentials}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          RqUID: crypto.randomUUID(),
+        },
+        'scope=GIGACHAT_API_PERS',
+        15_000,
+      )
+      if (response.status >= 200 && response.status < 300) break
+      if (attempt === 1) break
+    } catch (error) {
+      if (attempt === 1) throw error
+    }
+  }
+  if (!response) throw new Error('GigaChat OAuth returned no response')
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`GigaChat OAuth returned ${response.status}: ${response.text.slice(0, 400)}`)
+  }
+
+  const payload = JSON.parse(response.text)
+  if (typeof payload?.access_token !== 'string' || typeof payload?.expires_at !== 'number') {
+    throw new Error('GigaChat OAuth returned an invalid token')
+  }
+  gigaToken = { value: payload.access_token, expiresAt: payload.expires_at }
+  return gigaToken.value
+}
+
+async function generateWithGigaChat(credentials: string, prompt: string, cardIds: string[]) {
+  const token = await getGigaToken(credentials)
+  let lastError: unknown = null
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await gigaRequest(
+        'https://api.giga.chat/v1/chat/completions',
+        {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        JSON.stringify({
+          model: 'GigaChat-2',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          response_format: { type: 'json_schema', schema, strict: true },
+        }),
+        25_000,
+      )
+      if (response.status < 200 || response.status >= 300) {
+        const error = new Error(`GigaChat returned ${response.status}: ${response.text.slice(0, 400)}`)
+        if ((response.status === 429 || response.status >= 500) && attempt === 0) {
+          lastError = error
+          continue
+        }
+        throw error
+      }
+
+      return parseReading(JSON.parse(response.text)?.choices?.[0]?.message?.content, cardIds)
+    } catch (error) {
+      lastError = error
+      if (attempt === 1) throw error
+    }
+  }
+  throw lastError ?? new Error('GigaChat returned no response')
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null) as SpreadRequest | null
   const { topic, cardIds } = body ?? {}
@@ -238,20 +347,47 @@ export async function POST(request: NextRequest) {
     'version всегда равен 1.',
   ].join('\n')
 
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
+  const providers: Array<{
+    source: ProviderSource
+    generate: () => Promise<Reading>
+  }> = []
+  if (process.env.GEMINI_API_KEY) {
+    providers.push({
+      source: 'gemini',
+      generate: () => generateWithGemini(process.env.GEMINI_API_KEY!, prompt, cardIds),
+    })
+  }
+  if (process.env.GIGACHAT_CREDENTIALS) {
+    providers.push({
+      source: 'gigachat',
+      generate: () => generateWithGigaChat(process.env.GIGACHAT_CREDENTIALS!, prompt, cardIds),
+    })
+  }
+  if (providers.length === 0) {
     await releaseReservation()
-    return NextResponse.json({ error: 'Gemini is not configured' }, { status: 503 })
+    return NextResponse.json({ error: 'Reading providers are not configured' }, { status: 503 })
   }
 
   try {
-    const reading = await generateWithGemini(apiKey, prompt, cardIds)
+    let selected: { reading: Reading; source: ProviderSource } | null = null
+    for (const provider of providers) {
+      try {
+        selected = { reading: await provider.generate(), source: provider.source }
+        console.info('[provider]', { source: provider.source, status: 'completed' })
+        break
+      } catch (error) {
+        console.error(`[${provider.source}]`, providerError(error))
+      }
+    }
+    if (!selected) throw new Error('All reading providers are unavailable')
+
+    const { reading, source } = selected
     const snapshot = {
       version: 2,
       topic,
       cardIds,
       reading,
-      source: 'gemini',
+      source,
       createdAt: new Date().toISOString(),
     }
     let completion = null
@@ -270,10 +406,10 @@ export async function POST(request: NextRequest) {
     const nextSpreadAt = completion.data.nextSpreadAt ?? null
     reservationId = null
 
-    return NextResponse.json({ reading, source: 'gemini', nextSpreadAt, snapshot })
+    return NextResponse.json({ reading, source, nextSpreadAt, snapshot })
   } catch (error) {
-    console.error('[gemini]', providerError(error))
+    console.error('[spread-reading]', providerError(error))
     await releaseReservation()
-    return NextResponse.json({ error: 'Gemini is unavailable' }, { status: 502 })
+    return NextResponse.json({ error: 'Reading providers are unavailable' }, { status: 502 })
   }
 }

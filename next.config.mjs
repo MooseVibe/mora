@@ -14,6 +14,11 @@ const prototypeCacheHeaders = [
 ];
 
 const nextConfig = {
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/prototypes/spread-reading': ['./certs/russian_trusted_root_ca_pem.crt'],
+    },
+  },
   async headers() {
     return [
       {
