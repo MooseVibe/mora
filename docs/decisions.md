@@ -2907,3 +2907,5 @@ GigaChat использует Sensitive Production env и официальный
 ## 2026-08-14 — Protocol metadata расклада принадлежит серверу
 
 Первый production fallback после подключения GigaChat показал: Gemini вернул `503`, а структурированный ответ GigaChat дошёл до Mora, но не прошёл строгую проверку reading-contract. `version` и `cardId` не являются творческим содержанием модели: сервер знает версию протокола и порядок трёх выбранных карт. Поэтому после JSON parse сервер закрепляет `version: 1` и позиционные IDs, schema требует ровно три cards, а AI по-прежнему обязан вернуть все заголовки и тексты нужных типов. Это не принимает неполный расклад, но не превращает расхождение служебных ID провайдера в пользовательский fallback.
+
+Hotfix выпущен commit `2641e2d` в production deployment `dpl_B9Fgmnzhkcf8c2HqbbZvVaCkMXrQ`; alias `mora-vnkt.vercel.app`, страница `200` и auth-boundary spread route `401` прошли smoke.
