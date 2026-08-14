@@ -1024,9 +1024,31 @@ body.daily-result-entering .daily-result-copy {
   text-wrap: pretty;
 }
 
-.daily-result-share {
+.daily-result-actions {
+  display: flex;
   flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.daily-result-share,
+.daily-result-cooldown {
   width: 216px;
+}
+
+.daily-result-cooldown {
+  width: 260px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.daily-result-cooldown:disabled {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+  color: #a8a8a8;
+  cursor: default;
+  opacity: 1;
+  scale: 1;
 }
 
 .daily-result-card {
@@ -2489,9 +2511,16 @@ body.reading-to-saved.reading-saved-entering .reading {
     line-height: 24px;
   }
 
-  .daily-result-share {
-    width: min(100%, 216px);
+  .daily-result-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
     margin-top: 48px;
+  }
+
+  .daily-result-share,
+  .daily-result-cooldown {
+    width: 100%;
   }
 
   .reading-nav {

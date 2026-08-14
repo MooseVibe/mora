@@ -34,12 +34,12 @@
     <link rel="stylesheet" href="/assets/fonts.css" />
     <link rel="preload" as="image" href="../3d-daily/assets/mora-card-back-v3.webp" fetchpriority="high" />
     <link rel="preload" as="fetch" href="../3d-daily/assets/mora-card.glb" type="model/gltf-binary" crossorigin fetchpriority="high" />
-    <link rel="modulepreload" href="./app.js?v=20260813-authresume1" />
+    <link rel="modulepreload" href="./app.js?v=20260814-actiontimer1" />
     <link rel="modulepreload" href="/assets/cards.js" />
     <link rel="modulepreload" href="./daily-3d.js?v=20260813-deckhit1" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/build/three.module.js" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/examples/jsm/loaders/GLTFLoader.js" />
-    <link rel="stylesheet" href="./styles.css?v=20260813-justicegap1" />
+    <link rel="stylesheet" href="./styles.css?v=20260814-actiontimer1" />
   </head>
   <body class="daily-mode">
     <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
@@ -106,7 +106,12 @@
               <div id="daily-result-text"></div>
             </div>
           </div>
-          <button class="daily-result-share primary-action" type="button">Поделиться</button>
+          <div class="daily-result-actions">
+            <button class="daily-result-share primary-action secondary-action" type="button">Поделиться</button>
+            <button class="daily-result-cooldown primary-action" id="daily-cooldown" type="button" disabled>
+              Новая карта через 12:00:00
+            </button>
+          </div>
         </div>
         <div class="daily-result-card">
           <div class="daily-result-card-tilt">
@@ -175,6 +180,9 @@
           <div class="saved-actions">
             <button class="saved-action primary-action" id="new-spread" type="button">
               Ещё расклад
+            </button>
+            <button class="saved-action primary-action secondary-action" id="read-spread" type="button">
+              Читать расклад
             </button>
           </div>
         </div>

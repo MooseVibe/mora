@@ -20,6 +20,7 @@ const savedTopic = document.querySelector("#saved-topic");
 const savedCards = document.querySelector("#saved-cards");
 const savedSpread = document.querySelector("#saved-spread");
 const newSpreadButton = document.querySelector("#new-spread");
+const readSpreadButton = document.querySelector("#read-spread");
 const stage = document.querySelector(".card-stage");
 const readingTopic = document.querySelector("#reading-topic");
 const reading = document.querySelector("#reading");
@@ -56,6 +57,7 @@ const dailyResultSuitIcon = document.querySelector("#daily-result-suit-icon");
 const dailyResultSuitLabel = document.querySelector("#daily-result-suit-label");
 const dailyResultText = document.querySelector("#daily-result-text");
 const dailyResultImage = document.querySelector("#daily-result-image");
+const dailyCooldownButton = document.querySelector("#daily-cooldown");
 const dailyResultCard = document.querySelector(".daily-result-card");
 const dailyResultCardTilt = document.querySelector(".daily-result-card-tilt");
 const readingStatusCopy = document.querySelector(".status-copy");
@@ -104,6 +106,7 @@ let accountSpreadSnapshot = null;
 let prototypeNextSpreadAt = 0;
 let prototypeNextDailyAt = 0;
 let spreadCooldownTimer;
+let dailyCooldownTimer;
 let volatileFailedSpread = null;
 let pendingDailySelection = null;
 let visibleSpreadCardIndices = [];
@@ -928,6 +931,7 @@ function showDaily3DResult() {
   document.documentElement.classList.remove("daily-saved-pending");
   document.body.classList.remove("daily-3d-ritual", "daily-3d-animating", "daily-3d-restoring", "daily-3d-error");
   document.body.classList.add("daily-3d-result");
+  updateDailyCooldownButton();
   if (!restoring) document.body.classList.add("daily-3d-result-entering");
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
@@ -1545,6 +1549,41 @@ function renderSavedSpread(snapshot) {
   updateNewSpreadButton(snapshot);
 }
 
+function formatCooldown(remaining) {
+  const totalSeconds = Math.max(0, Math.ceil(remaining / 1000));
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function updateDailyCooldownButton() {
+  window.clearInterval(dailyCooldownTimer);
+  let cooldownEndsAt = prototypeNextDailyAt;
+
+  if (!cooldownEndsAt && !prototypeTesterAuthenticated) {
+    try {
+      const snapshot = JSON.parse(window.localStorage.getItem(savedDailyCardKey) || "null");
+      const drawnAt = Date.parse(snapshot?.drawnAt || "");
+      cooldownEndsAt = Number.isFinite(drawnAt) ? drawnAt + spreadCooldownMs : 0;
+    } catch {
+      cooldownEndsAt = 0;
+    }
+  }
+
+  const render = () => {
+    const remaining = cooldownEndsAt - Date.now();
+    dailyCooldownButton.textContent = `Новая карта через ${formatCooldown(remaining)}`;
+    if (remaining <= 0) {
+      window.clearInterval(dailyCooldownTimer);
+      dailyCooldownTimer = undefined;
+    }
+  };
+
+  render();
+  if (cooldownEndsAt > Date.now()) dailyCooldownTimer = window.setInterval(render, 1000);
+}
+
 function updateNewSpreadButton(snapshot = readLastSpread()) {
   window.clearInterval(spreadCooldownTimer);
   spreadCooldownTimer = undefined;
@@ -1565,11 +1604,7 @@ function updateNewSpreadButton(snapshot = readLastSpread()) {
       return;
     }
 
-    const totalSeconds = Math.ceil(remaining / 1000);
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
-    newSpreadButton.textContent = `Новый расклад через ${hours}:${minutes}:${seconds}`;
+    newSpreadButton.textContent = `Новый расклад через ${formatCooldown(remaining)}`;
   };
 
   render();
@@ -1635,6 +1670,8 @@ function openSavedReading(chapterIndex = 0, wheelDirection = 0) {
     stateTransitionInFlight = false;
   }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 700);
 }
+
+readSpreadButton.addEventListener("click", () => openSavedReading());
 
 function closeReadingToSaved(returnChapter = null, wheelDirection = 0) {
   if (stateTransitionInFlight || document.body.classList.contains("daily-mode")) return;
