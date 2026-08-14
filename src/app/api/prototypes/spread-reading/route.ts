@@ -236,7 +236,12 @@ async function getGigaToken(credentials: string) {
   return gigaToken.value
 }
 
-async function generateWithGigaChat(credentials: string, prompt: string, cardIds: string[]) {
+async function generateWithGigaChat(
+  credentials: string,
+  systemPrompt: string,
+  prompt: string,
+  cardIds: string[],
+) {
   const token = await getGigaToken(credentials)
   let lastError: unknown = null
 
@@ -250,8 +255,11 @@ async function generateWithGigaChat(credentials: string, prompt: string, cardIds
           'Content-Type': 'application/json',
         },
         JSON.stringify({
-          model: 'GigaChat-2',
-          messages: [{ role: 'user', content: prompt }],
+          model: 'GigaChat-2-Pro',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt },
+          ],
           temperature: 0.3,
           response_format: { type: 'json_schema', schema, strict: true },
         }),
@@ -363,6 +371,52 @@ export async function POST(request: NextRequest) {
     'version всегда равен 1.',
   ].join('\n')
 
+  const cardTags = cards.map((card) => card!.result?.tags || ['Старший аркан'])
+  const majorCount = cardTags.filter((tags) => tags.includes('Старший аркан')).length
+  const suits = ['Жезлы', 'Кубки', 'Мечи', 'Пентакли']
+    .map((suit) => ({ suit, count: cardTags.filter((tags) => tags.includes(suit)).length }))
+    .filter(({ count }) => count > 0)
+  const repeatedRanks = Array.from(new Set(cards.map((card) => card!.num)))
+    .filter((rank) => cards.filter((card) => card!.num === rank).length > 1)
+
+  const gigaSystemPrompt = [
+    'Ты — русскоязычный таролог Mora. Объясняй расклад человеку без знаний таро: конкретно, спокойно и обычными словами.',
+    'Верни только JSON по переданной схеме. Интерфейс сам показывает названия пяти секций.',
+    'Никогда не вставляй в title, meaning, context или text служебные метки «Сейчас», «Что мешает», «Что делать», «Итог», фигурные скобки или номера секций.',
+    'Каждая позиция прежде всего отвечает на свой вопрос: карта 1 — что происходит сейчас; карта 2 — что мешает; карта 3 — что конкретно делать. При этом все три главы образуют одну историю и могут объяснять связь с соседними картами.',
+    'Пиши короткими предложениями. Не используй эзотерические и терапевтические штампы, философские обобщения и абстрактные советы.',
+    'Не пиши формальные фразы вроде «расклад показывает», «рассматривается ситуация» или «проверяется текущее состояние». Сразу называй конкретное наблюдение.',
+    'Не объявляй человеку нехватку способностей или качеств. Описывай конкретную нагрузку, конфликт задач или способ действия.',
+    'Не придумывай значение отдельного символа по памяти. Связывай видимые детали только с переданным смыслом карты.',
+    'Не используй слова и обороты «выгорание», «бережно относиться к себе», «осознанно», «восстановить силы». Вместо них называй конкретное действие или наблюдаемую проблему.',
+    'Не предсказывай события и не утверждай как факт мысли или действия других людей. Не приказывай расставаться, увольняться, лечиться или тратить деньги.',
+  ].join('\n')
+
+  const gigaPrompt = [
+    `Тема расклада: ${topic}.`,
+    'Позиции: 1 — Сейчас; 2 — Что мешает; 3 — Что делать.',
+    ...cards.map((card, index) => (
+      [
+        `Карта ${index + 1}: ${card!.name}.`,
+        `cardId: ${card!.id}.`,
+        `Масть или тип: ${(card!.result?.tags || ['Старший аркан']).join(', ')}. Номер или ранг: ${card!.num}.`,
+        `Видимые детали Mora: ${card!.visualHint}.`,
+        `Сцена RWS: ${rwsScenes[card!.id] || 'Используй только видимые детали Mora и не дополняй сцену по памяти.'}`,
+        `Смысл карты: ${card!.archetype}. ${card!.description}`,
+      ].join(' ')
+    )),
+    `Проверенные факты для общего рисунка: Старших арканов ${majorCount} из 3; масти — ${suits.length ? suits.map(({ suit, count }) => `${suit}: ${count}`).join(', ') : 'у Старших арканов мастей нет'}; повтор ранга — ${repeatedRanks.length ? repeatedRanks.join(', ') : 'нет'}; движение смыслов — ${cards.map((card) => card!.archetype).join(' → ')}.`,
+    'Заполни пять экранов через поля JSON:',
+    'overview.text: 2–4 коротких предложения. Начни с одного проверенного факта выше. Если нет общей масти, повторов и большинства Старших арканов, используй движение смыслов. Объясни его именно в выбранной теме. Не пересказывай назначение расклада и не подводи итог заранее.',
+    'У каждой карты два разных по задаче абзаца. context не пересказывает meaning другими словами.',
+    'cards[0].meaning: 2–3 предложения. Объясни, что изображено на карте по переданной сцене RWS и видимым деталям Mora, что это канонически значит и как проявляется в теме на позиции «Сейчас». Назови минимум две переданные видимые детали. cards[0].context: 2–3 новых предложения. Раскрой ситуацию подробнее и объясни, как состояние первой карты приводит к препятствию второй карты.',
+    'cards[1].meaning: 2–3 предложения. Объясни изображение, канонический смысл и его проявление в теме на позиции «Что мешает». Назови минимум две переданные видимые детали. cards[1].context: 2–3 новых предложения. Покажи причинную связь с первой картой и объясни, почему именно это препятствие делает необходимым действие третьей карты.',
+    'cards[2].meaning: 2–3 предложения. Объясни изображение, канонический смысл и его проявление в теме на позиции «Что делать». Назови минимум две переданные видимые детали. cards[2].context: 2–3 новых предложения. Покажи, как действие третьей карты отвечает на состояние первой и препятствие второй, затем назови один выполнимый шаг.',
+    'conclusion.text: 2–4 предложения с прямым итогом трёх карт и разумным действием сейчас. Не повторяй предыдущие абзацы.',
+    'title каждой карты дословно совпадает с её русским названием. cardId верни без изменений. version равен 1.',
+    'Не пиши внутри текстовых полей названия секций или пояснения формата. Связывай позиции через конкретные значения карт, но не повторяй уже сказанные фразы и выводы.',
+  ].join('\n')
+
   const providers: Array<{
     source: ProviderSource
     generate: () => Promise<Reading>
@@ -376,7 +430,12 @@ export async function POST(request: NextRequest) {
   if (process.env.GIGACHAT_CREDENTIALS) {
     providers.push({
       source: 'gigachat',
-      generate: () => generateWithGigaChat(process.env.GIGACHAT_CREDENTIALS!, prompt, cardIds),
+      generate: () => generateWithGigaChat(
+        process.env.GIGACHAT_CREDENTIALS!,
+        gigaSystemPrompt,
+        gigaPrompt,
+        cardIds,
+      ),
     })
   }
   if (providers.length === 0) {
@@ -397,7 +456,14 @@ export async function POST(request: NextRequest) {
     }
     if (!selected) throw new Error('All reading providers are unavailable')
 
-    const { reading, source } = selected
+    const { reading: providerReading, source } = selected
+    const reading = {
+      ...providerReading,
+      cards: providerReading.cards.map((card, index) => ({
+        ...card,
+        title: cards[index]!.name,
+      })),
+    }
     const snapshot = {
       version: 2,
       topic,
