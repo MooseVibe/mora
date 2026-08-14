@@ -12,7 +12,7 @@ import { join } from 'node:path'
 const schema = {
   type: 'object',
   properties: {
-    version: { type: 'integer' },
+    version: { type: 'integer', enum: [1] },
     overview: {
       type: 'object',
       properties: {
@@ -23,6 +23,8 @@ const schema = {
     },
     cards: {
       type: 'array',
+      minItems: 3,
+      maxItems: 3,
       items: {
         type: 'object',
         properties: {
@@ -110,7 +112,21 @@ function parseReading(text: unknown, cardIds: string[]) {
   } catch {
     throw new Error('Provider returned malformed JSON')
   }
-  if (!isReading(reading, cardIds)) throw new Error('Provider returned an invalid reading')
+  if (reading && typeof reading === 'object' && Array.isArray((reading as Partial<Reading>).cards)) {
+    const candidate = reading as Partial<Reading>
+    reading = {
+      ...candidate,
+      version: 1,
+      cards: candidate.cards!.map((card, index) => ({
+        ...card,
+        cardId: cardIds[index],
+      })),
+    }
+  }
+  if (!isReading(reading, cardIds)) {
+    const candidate = reading as Partial<Reading> | null
+    throw new Error(`Provider returned an invalid reading (cards=${Array.isArray(candidate?.cards) ? candidate.cards.length : 'invalid'})`)
+  }
   return reading
 }
 

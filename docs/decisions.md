@@ -2903,3 +2903,7 @@ Fix `13cc554` выпущен в production deployment `dpl_dnGUasy91LR8waLQ6YsKn
 GigaChat использует Sensitive Production env и официальный корневой сертификат Минцифры. Сертификат подключён отдельным HTTPS-agent только для OAuth и chat endpoint GigaChat и включён в serverless trace; `NODE_TLS_REJECT_UNAUTHORIZED=0` и глобальное расширение доверия не используются. Реальный OAuth и минимальный строгий JSON Schema запрос к `GigaChat-2` вернули `200`.
 
 Пакет выпущен commit `4e909be` в production deployment `dpl_A77kHp7catkdRxqq4fuNi9zKwCBZ`; alias `mora-vnkt.vercel.app`, страница `200` и auth-boundary spread route `401` прошли smoke. Перед deploy сегодняшних завершённых server-side раскладов и активных reservations оказалось `0`, поэтому более широкий data reset не выполнялся.
+
+## 2026-08-14 — Protocol metadata расклада принадлежит серверу
+
+Первый production fallback после подключения GigaChat показал: Gemini вернул `503`, а структурированный ответ GigaChat дошёл до Mora, но не прошёл строгую проверку reading-contract. `version` и `cardId` не являются творческим содержанием модели: сервер знает версию протокола и порядок трёх выбранных карт. Поэтому после JSON parse сервер закрепляет `version: 1` и позиционные IDs, schema требует ровно три cards, а AI по-прежнему обязан вернуть все заголовки и тексты нужных типов. Это не принимает неполный расклад, но не превращает расхождение служебных ID провайдера в пользовательский fallback.
