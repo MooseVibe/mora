@@ -42,10 +42,7 @@ const loginScreenBrand = document.querySelector(".login-screen-brand");
 const loginScreenHome = document.querySelector(".login-screen-home");
 const loginScreenForm = document.querySelector("#login-screen-form");
 const loginScreenEmail = document.querySelector("#login-screen-email");
-const authGate = document.querySelector("#auth-gate");
-const authGateForm = document.querySelector("#auth-gate-form");
-const authGateEmail = document.querySelector("#auth-gate-email");
-const authGateClose = document.querySelector(".auth-gate-close");
+const guestSpreadLogin = document.querySelector(".guest-spread-login");
 const dailyDeck = document.querySelector("#daily-deck");
 const dailyDeckCanvas = document.querySelector("#daily-deck-canvas");
 const spreadDeck3DHost = document.querySelector("#spread-deck-3d");
@@ -89,6 +86,7 @@ let touchStartedOnLastChapter = false;
 let savedTouchStartY = 0;
 let wheelNeedsRelease = false;
 let blockedWheelDirection = 0;
+let loginDestination = "daily";
 let wheelReleaseTimer;
 let savedReturnChapter = null;
 let dailyResultTiltFrame;
@@ -234,20 +232,16 @@ if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always"))
   }
 }
 const startInSpreadMode = urlParams.get("mode") === "spread";
+const startInLogin = urlParams.get("login") === "1";
 
 dailyModeButton.addEventListener("click", () => switchMode("daily"));
 brand.addEventListener("click", (event) => {
   event.preventDefault();
   if (!document.body.classList.contains("daily-mode")) switchMode("daily");
 });
-spreadModeButton.addEventListener("click", () => {
-  if (prototypeTesterAuthenticated) {
-    switchMode("spread");
-  } else {
-    openAuthGate();
-  }
-});
-loginButton.addEventListener("click", openLoginScreen);
+spreadModeButton.addEventListener("click", () => switchMode("spread"));
+loginButton.addEventListener("click", () => openLoginScreen("daily"));
+guestSpreadLogin.addEventListener("click", () => openLoginScreen("spread"));
 profileTrigger.addEventListener("click", () => {
   const open = profileTrigger.getAttribute("aria-expanded") !== "true";
   profileTrigger.setAttribute("aria-expanded", String(open));
@@ -262,9 +256,7 @@ loginScreenBrand.addEventListener("click", (event) => {
   closeLoginScreen();
 });
 loginScreenHome.addEventListener("click", closeLoginScreen);
-loginScreenForm.addEventListener("submit", (event) => handleTesterLogin(event, "daily"));
-authGateClose.addEventListener("click", closeAuthGate);
-authGateForm.addEventListener("submit", (event) => handleTesterLogin(event, "spread"));
+loginScreenForm.addEventListener("submit", (event) => handleTesterLogin(event, loginDestination));
 dailyDeck.addEventListener("click", handleDailyDeckClick);
 dailyDeck.addEventListener("pointerdown", () => reportClientEvent("daily-deck-pointer"));
 
@@ -352,7 +344,7 @@ function restorePrototypeAccountState(payload, clearGuestDaily = true) {
 async function handleTesterLogin(event, destination) {
   event.preventDefault();
   const form = event.currentTarget;
-  const emailInput = destination === "spread" ? authGateEmail : loginScreenEmail;
+  const emailInput = loginScreenEmail;
   if (!emailInput.reportValidity()) return;
 
   const pendingEmail = form.dataset.pendingEmail || "";
@@ -469,7 +461,8 @@ async function logoutPrototypeTester() {
   }
 }
 
-function openLoginScreen() {
+function openLoginScreen(destination = "daily") {
+  loginDestination = destination;
   loginScreen.setAttribute("aria-hidden", "false");
   document.body.classList.add("login-screen-open");
   window.setTimeout(() => loginScreenEmail.focus(), 220);
@@ -478,19 +471,8 @@ function openLoginScreen() {
 function closeLoginScreen() {
   loginScreen.setAttribute("aria-hidden", "true");
   document.body.classList.remove("login-screen-open");
-  loginButton.focus();
-}
-
-function openAuthGate() {
-  authGate.setAttribute("aria-hidden", "false");
-  document.body.classList.add("auth-gate-open");
-  window.setTimeout(() => authGateEmail.focus(), 220);
-}
-
-function closeAuthGate() {
-  authGate.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("auth-gate-open");
-  spreadModeButton.focus();
+  (loginDestination === "spread" ? guestSpreadLogin : loginButton).focus();
+  loginDestination = "daily";
 }
 
 async function handleDailyDeckClick(event) {
@@ -596,7 +578,7 @@ function showDailyMode() {
 }
 
 function showSpreadMode() {
-  ensureSpreadDeck3D();
+  if (prototypeTesterAuthenticated) ensureSpreadDeck3D();
   dailyDeck3D.then((controller) => controller?.setActive(false));
   resetDailyResultTilt();
   document.body.classList.remove(
@@ -1148,6 +1130,12 @@ for (let index = 0; index < deckCardCount; index += 1) {
 
 startInSpreadMode ? showSpreadMode() : showDailyMode();
 if (startInSpreadMode) window.history.replaceState(null, "", window.location.pathname);
+if (startInLogin) {
+  prototypeTesterSessionPromise.then(() => {
+    if (!prototypeTesterAuthenticated) openLoginScreen("daily");
+    window.history.replaceState(null, "", window.location.pathname);
+  });
+}
 
 function ensureSpreadDeck3D() {
   if (spreadDeck3DPromise) return spreadDeck3DPromise;

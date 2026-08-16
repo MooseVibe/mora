@@ -34,12 +34,12 @@
     <link rel="stylesheet" href="/assets/fonts.css" />
     <link rel="preload" as="image" href="../3d-daily/assets/mora-card-back-v3.webp" fetchpriority="high" />
     <link rel="preload" as="fetch" href="../3d-daily/assets/mora-card.glb" type="model/gltf-binary" crossorigin fetchpriority="high" />
-    <link rel="modulepreload" href="./app.js?v=20260814-actiontimer1" />
+    <link rel="modulepreload" href="./app.js?v=20260816-welcome1" />
     <link rel="modulepreload" href="/assets/cards.js" />
     <link rel="modulepreload" href="./daily-3d.js?v=20260813-deckhit1" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/build/three.module.js" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/examples/jsm/loaders/GLTFLoader.js" />
-    <link rel="stylesheet" href="./styles.css?v=20260814-actionhug1" />
+    <link rel="stylesheet" href="./styles.css?v=20260816-savedactions216" />
   </head>
   <body class="daily-mode">
     <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
@@ -68,7 +68,6 @@
       </button>
       <button class="mode-button" id="spread-mode-button" type="button" aria-label="Расклад из трёх карт">
         <img class="mode-button-icon" src="./icons/tab-two.svg" alt="" />
-        <img class="mode-button-lock" src="./icons/lock.svg" alt="" />
       </button>
     </nav>
 
@@ -126,26 +125,32 @@
         </div>
         <div class="ritual-heading">
           <h1>Расклад из трёх карт</h1>
-          <p id="ritual-subtitle">На что хочешь посмотреть?</p>
-          <div class="topics" aria-label="Тема расклада">
-            <button class="topic" data-topic="Внутреннее состояние" type="button">
-              <img src="./icons/star-four.svg" alt="" />
-              <span>Внутреннее состояние</span>
-            </button>
-            <button class="topic" data-topic="Работа" type="button">
-              <img src="./icons/bag.svg" alt="" />
-              <span>Работа</span>
-            </button>
-            <button class="topic" data-topic="Отношения" type="button">
-              <img src="./icons/heart.svg" alt="" />
-              <span>Отношения</span>
-            </button>
-            <button class="topic" data-topic="Выбор" type="button">
-              <img src="./icons/diamonds-four.svg" alt="" />
-              <span>Выбор</span>
-            </button>
+          <div class="guest-spread-state">
+            <p>Чтобы делать расклады, войдите или зарегистрируйтесь</p>
+            <button class="guest-spread-login primary-action" type="button">Войти</button>
           </div>
-          <button class="selected-topic" id="selected-topic" type="button" aria-label="Изменить тему"></button>
+          <div class="spread-authenticated-controls">
+            <p id="ritual-subtitle">На что хочешь посмотреть?</p>
+            <div class="topics" aria-label="Тема расклада">
+              <button class="topic" data-topic="Внутреннее состояние" type="button">
+                <img src="./icons/star-four.svg" alt="" />
+                <span>Внутреннее состояние</span>
+              </button>
+              <button class="topic" data-topic="Работа" type="button">
+                <img src="./icons/bag.svg" alt="" />
+                <span>Работа</span>
+              </button>
+              <button class="topic" data-topic="Отношения" type="button">
+                <img src="./icons/heart.svg" alt="" />
+                <span>Отношения</span>
+              </button>
+              <button class="topic" data-topic="Выбор" type="button">
+                <img src="./icons/diamonds-four.svg" alt="" />
+                <span>Выбор</span>
+              </button>
+            </div>
+            <button class="selected-topic" id="selected-topic" type="button" aria-label="Изменить тему"></button>
+          </div>
         </div>
 
         <div class="slots" aria-label="Выбранные карты">
@@ -277,33 +282,14 @@
             autocomplete="email"
             required
           />
-          <button class="primary-action" type="submit">Продолжить</button>
-          <button class="login-screen-home primary-action secondary-action" type="button">На главную</button>
+          <div class="login-screen-actions">
+            <button class="primary-action" type="submit">Продолжить</button>
+            <button class="login-screen-home primary-action secondary-action" type="button">На главную</button>
+          </div>
         </form>
       </div>
     </section>
 
-    <div class="auth-gate" id="auth-gate" aria-hidden="true">
-      <div class="auth-gate-backdrop" aria-hidden="true"></div>
-      <section class="auth-gate-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
-        <h2 id="auth-gate-title">Чтобы делать расклады<br />войдите или зарегистрируйтесь</h2>
-        <form class="auth-gate-form" id="auth-gate-form">
-          <label class="visually-hidden" for="auth-gate-email">Электронная почта</label>
-          <input
-            class="auth-gate-input"
-            id="auth-gate-email"
-            name="email"
-            type="email"
-            placeholder="Электронная почта"
-            autocomplete="email"
-            required
-          />
-          <button class="auth-gate-submit primary-action" type="submit">Продолжить</button>
-          <button class="auth-gate-close primary-action secondary-action" type="button">Закрыть</button>
-        </form>
-      </section>
-    </div>
-
-    <script type="module" src="./app.js?v=20260814-actiontimer1"></script>
+    <script type="module" src="./app.js?v=20260816-welcome1"></script>
   </body>
 </html>
