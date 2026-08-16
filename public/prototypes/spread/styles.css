@@ -1840,6 +1840,7 @@ body.saved-home .saved-spread {
 }
 
 .saved-action:disabled {
+  width: auto;
   background: rgba(255, 255, 255, 0.06);
   box-shadow: none;
   color: #a8a8a8;
