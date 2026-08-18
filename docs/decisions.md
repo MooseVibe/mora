@@ -3015,3 +3015,5 @@ Supabase Function logs показали точную причину общего
 ## 2026-08-18 — Reading владеет фоном, header возвращается через fade
 
 Desktop reading-контейнер рисует тот же Mora texture и radial-слой самостоятельно, поэтому переход из saved spread не показывает промежуточный базовый surface. Header остаётся в DOM и переключает только `opacity/visibility`: скрытие завершается за `220ms`, а после закрытия reading он плавно проявляется за `400ms`.
+
+Изменение выпущено commit `58768e8` в production deployment `dpl_YJZnrDSGGLXf62HRiBY4ETPimF4t` из clean archive без защищённого stripface/GLB scope.
