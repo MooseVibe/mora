@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const ADMIN_EMAIL = "iliushka00@bk.ru";
+const UNLIMITED_SPREAD_EMAILS = new Set(["iliushka00@bk.ru", "moratest@bk.ru"]);
 const COOLDOWN_MS = 12 * 60 * 60 * 1000;
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -54,7 +54,7 @@ Deno.serve(async (request: Request) => {
         p_variant_index: variantIndex,
       });
       if (error || !data) return json({ error: "Unable to load account state" }, 500);
-      return json({ accountId: userId, email: userEmail, isAdmin: userEmail === ADMIN_EMAIL, ...data });
+      return json({ accountId: userId, email: userEmail, isAdmin: UNLIMITED_SPREAD_EMAILS.has(userEmail), ...data });
     }
 
     if (action === "complete-daily") {
@@ -79,7 +79,7 @@ Deno.serve(async (request: Request) => {
     }
 
     if (action === "clear-account-spread") {
-      const isAdmin = userEmail === ADMIN_EMAIL;
+      const isAdmin = UNLIMITED_SPREAD_EMAILS.has(userEmail);
       let query = supabase
         .from("prototype_account_states")
         .update({ spread_snapshot: null, updated_at: new Date().toISOString() })
@@ -94,7 +94,7 @@ Deno.serve(async (request: Request) => {
     const reservationId = typeof body?.reservationId === "string" && /^[0-9a-f-]{36}$/i.test(body.reservationId)
       ? body.reservationId
       : "";
-    const isAdminAccount = userEmail === ADMIN_EMAIL;
+    const isAdminAccount = UNLIMITED_SPREAD_EMAILS.has(userEmail);
     if (
       action !== "reserve-account-spread"
       && !reservationId
@@ -104,6 +104,9 @@ Deno.serve(async (request: Request) => {
     }
 
     if (action === "reserve-account-spread") {
+      if (isAdminAccount) {
+        return json({ reserved: true, reservationId: crypto.randomUUID() });
+      }
       const { data, error } = await supabase.rpc("reserve_prototype_account_spread", { p_user_id: userId });
       if (error || !data) return json({ error: "Unable to reserve spread" }, 500);
       return json(data, data.reserved === true ? 200 : 409);
