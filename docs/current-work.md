@@ -337,6 +337,12 @@ Release commits `76fc34a`, `8c188d3`, `26f2126` и docs commit `37df8fb` вып�
 
 Перед тем как выдать автору промпт для нового чата:
 
+## Handoff — 2026-08-18
+
+Новый positional prompt для реального `/api/prototypes/spread-reading` выпущен в production из чистого commit `01d7a47` как deployment `dpl_EF3UmdBtDjPoSYZj2iCskwJd33jN`: пять секций теперь «Общий взгляд → Прошлое → Настоящее → Будущее → Итог», при сохранении `reading.version=1` и snapshot version `2`. `npm run lint`, clean-archive build, production page `200`, новые HTML-подписи и auth guard AI-маршрута `401` подтверждены. Отдельный `scripts/spread-text-lab.mjs` удалён по решению автора; следующий шаг — ручной production-расклад автора и оценка текста Gemini/GigaChat. Если новый контент отклонён, rollback target — предыдущий commit `b9d49fb`.
+
+Dirty worktree дополнительно содержит отдельный root-cause fix stale daily 3D result после 12h cooldown/background tab. Он не вошёл в commit `01d7a47` и production deployment; QA полного flow и отдельный release ожидаются.
+
 1. Сверь этот файл с фактическим состоянием кода.
 2. Обнови дату и краткий список в «Последнем рабочем цикле».
 3. Удали из «Следующих шагов» завершённое и добавь новые ближайшие задачи.
