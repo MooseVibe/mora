@@ -10,12 +10,14 @@ export function isUnlimitedPrototypeAccount(email: string | null | undefined) {
 
 export async function prototypeAccountRequest(accessToken: string, body: Record<string, unknown>) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!url || !accessToken) return { ok: false, status: 401, data: null }
+  const apiKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !apiKey || !accessToken) return { ok: false, status: 401, data: null }
 
   const response = await fetch(`${url}/functions/v1/prototype-tester-session`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      apikey: apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),

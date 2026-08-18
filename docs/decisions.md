@@ -2997,3 +2997,7 @@ Desktop-глава «Итог» не повторяет заголовок provi
 Обратный переход сохраняет полноэкранные главы в потоке, не возвращая старый `display:none`: при активном «Общем взгляде» содержимое соседних глав скрывается через `visibility`, поэтому scroll-высота не схлопывается и фрагмент «Прошлого» не просвечивает снизу.
 
 Desktop reading package выпущен commit `8ccc645` в production deployment `dpl_2HWBeX7cFsPExwD1Mi2bJwitHLS7`. Deploy собран из точного clean archive: stripface/GLB experiment и отдельный stale-daily reset fix остались только в dirty worktree.
+
+## 2026-08-18 — Account writes передают JWT и Supabase apikey отдельно
+
+Server-to-Edge вызовы `prototype-tester-session` отправляют user access token в `Authorization` и project publishable key в `apikey`. Без второго заголовка обновлённый Supabase gateway возвращал `503` после уже успешной генерации Gemini, поэтому готовое чтение не сохранялось и клиент показывал fallback. Секретный service-role key в Vercel и браузер не передаётся.

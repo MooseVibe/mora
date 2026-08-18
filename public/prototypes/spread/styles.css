@@ -1992,6 +1992,12 @@ body.reading-to-saved .saved-spread {
   transition: opacity 650ms var(--ease);
 }
 
+body.saved-to-reading .saved-spread {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
 body.saved-to-reading .saved-spread-heading,
 body.saved-to-reading .saved-actions {
   transition: opacity 400ms var(--ease), transform 650ms var(--ease);
