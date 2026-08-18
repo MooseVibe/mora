@@ -3005,3 +3005,5 @@ Server-to-Edge вызовы `prototype-tester-session` отправляют user
 Hotfix выпущен точным commit `50488ef` в production deployment `dpl_8o15ej77SznUCeGBx7V4JYoowP49`; старый экран сохранённого расклада также скрывается без transition сразу при входе в деталку, чтобы его фон не появлялся в промежуточном кадре.
 
 Повторный production E2E подтвердил, что `apikey` не устранил Edge `503`. Успешная генерация больше не подменяется fallback из-за независимого сбоя persistence: маршрут возвращает валидный reading и snapshot клиенту, освобождает reservation и помечает ответ `persisted:false`. Это восстанавливает текущий reading-flow, но не считается починкой серверного сохранения после reload.
+
+Защитное разделение generation/persistence выпущено commit `fe414a1` в production deployment `dpl_79WwDCBTzN95m86swA6xe1ZknyLc`; точная причина Edge `503` требует отдельной диагностики deployed Supabase Function.
