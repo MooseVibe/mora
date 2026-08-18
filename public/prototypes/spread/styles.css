@@ -111,7 +111,10 @@ body.mode-switching main {
   height: var(--prototype-header-height);
   padding: 20px 80px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0));
+  opacity: 1;
   pointer-events: none;
+  visibility: visible;
+  transition: opacity 400ms var(--ease), visibility 0s linear 0s;
 }
 
 body.reading-transition .header,
@@ -121,6 +124,7 @@ body.reading-to-saved .header {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transition: opacity 220ms ease-in, visibility 0s linear 220ms;
 }
 
 .brand,
@@ -1865,8 +1869,12 @@ body.saved-home .saved-spread {
   grid-template-columns: minmax(0, 1fr) minmax(320px, 42vw);
   height: 100svh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 78% 20%, rgba(255, 255, 255, 0.08), transparent 34rem);
+  background-color: var(--prototype-surface);
+  background-image:
+    radial-gradient(circle at 78% 20%, rgba(255, 255, 255, 0.08), transparent 34rem),
+    url("./assets/mora-background-v1.webp");
+  background-position: center, center;
+  background-size: auto, cover;
   opacity: 0;
   transition:
     opacity 650ms var(--ease),

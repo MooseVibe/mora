@@ -3011,3 +3011,7 @@ Hotfix выпущен точным commit `50488ef` в production deployment `dp
 ## 2026-08-18 — Edge `503` был boot-error склеенного dashboard bundle
 
 Supabase Function logs показали точную причину общего отказа сохранения: deployed `prototype-tester-session` содержал второе объявление `createClient` на строке 260 и падал до запуска handler. Dashboard bundle полностью заменён чистым одиночным `supabase/functions/prototype-tester-session/index.ts`; прямой Edge smoke после deploy вернул `200`. В исходнике также восстановлена `ADMIN_EMAIL`, потому что unlimited-allowlist commit `9f782da` переименовал объявление, но оставил старую ссылку в guest-create action.
+
+## 2026-08-18 — Reading владеет фоном, header возвращается через fade
+
+Desktop reading-контейнер рисует тот же Mora texture и radial-слой самостоятельно, поэтому переход из saved spread не показывает промежуточный базовый surface. Header остаётся в DOM и переключает только `opacity/visibility`: скрытие завершается за `220ms`, а после закрытия reading он плавно проявляется за `400ms`.
