@@ -22,10 +22,13 @@ const savedSpread = document.querySelector("#saved-spread");
 const newSpreadButton = document.querySelector("#new-spread");
 const readSpreadButton = document.querySelector("#read-spread");
 const stage = document.querySelector(".card-stage");
-const readingTopic = document.querySelector("#reading-topic");
 const reading = document.querySelector("#reading");
 const readingCopy = document.querySelector(".reading-copy");
 const readingBoundaryButton = document.querySelector(".reading-boundary-hint");
+const readingCloseButton = document.querySelector(".reading-close");
+const readingPrevButton = document.querySelector(".reading-prev");
+const readingNextButton = document.querySelector(".reading-next");
+const readingSummaryHomeButton = document.querySelector(".reading-summary-home");
 const chapters = [...document.querySelectorAll(".chapter")];
 const readingNavItems = [...document.querySelectorAll(".reading-nav button")];
 const starfield = document.querySelector("#starfield");
@@ -719,20 +722,9 @@ function populateDailyResult(card, variantIndex) {
   ).slice(0, 2);
   const title = card.result.title || card.name;
   const titleMeta = card.result.titleMeta || "";
-  const suit = (card.result.tags || []).find((tag) => suitTags[tag]);
-  const isMajorArcana = (card.result.tags || []).includes("Старший аркан");
-  const fallbackTag = (card.result.tags || [])[0] || "Таро";
-  const tagIcon = isMajorArcana
-    ? `./icons/arcana-${card.num}.svg`
-    : suitTags[suit];
   dailyResultTitleMain.textContent = titleMeta ? `${title} — ` : title;
   dailyResultTitleMeta.textContent = titleMeta;
-  dailyResultSuitLabel.textContent = isMajorArcana ? "Старший аркан" : suit || fallbackTag;
-  dailyResultSuitIcon.hidden = !tagIcon;
-  dailyResultSuit.classList.toggle("without-icon", !tagIcon);
-  if (tagIcon) {
-    dailyResultSuitIcon.style.setProperty("--daily-result-tag-icon", `url("${tagIcon}")`);
-  }
+  populateCardTag(dailyResultSuit, dailyResultSuitLabel, dailyResultSuitIcon, card);
   dailyResultText.replaceChildren();
   paragraphs.forEach((paragraph) => {
     const item = document.createElement("p");
@@ -741,6 +733,18 @@ function populateDailyResult(card, variantIndex) {
   });
   dailyResultImage.src = `/${card.image.replace(/^\/+/, "")}`;
   dailyResultImage.alt = card.name;
+}
+
+function populateCardTag(container, label, icon, card) {
+  const tags = card.result.tags || [];
+  const suit = tags.find((tag) => suitTags[tag]);
+  const isMajorArcana = tags.includes("Старший аркан");
+  const tagIcon = isMajorArcana ? `./icons/arcana-${card.num}.svg` : suitTags[suit];
+
+  label.textContent = isMajorArcana ? "Старший аркан" : suit || tags[0] || "Таро";
+  icon.hidden = !tagIcon;
+  container.classList.toggle("without-icon", !tagIcon);
+  if (tagIcon) icon.style.setProperty("--daily-result-tag-icon", `url("${tagIcon}")`);
 }
 
 function getLocalDayKey(date = new Date()) {
@@ -1231,7 +1235,6 @@ topics.forEach((topic) => {
   topic.addEventListener("click", () => {
     currentTopic = topic.dataset.topic;
     selectedTopic.innerHTML = topic.innerHTML;
-    readingTopic.textContent = `Расклад · ${currentTopic.toLowerCase()}`;
     ritual.dataset.step = "choose";
     showDeckHint();
     playDeckDiscoveryMotion();
@@ -1510,7 +1513,7 @@ function restoreSavedSpread() {
 function renderSavedSpread(snapshot) {
   resetSavedCardTilt();
   currentTopic = snapshot.topic;
-  populateReading(snapshot.reading, snapshot.cards, snapshot.source);
+  populateReading(snapshot.reading, snapshot.cards);
   savedTopic.replaceChildren();
   const icon = document.createElement("img");
   const label = document.createElement("span");
@@ -1692,14 +1695,14 @@ newSpreadButton.addEventListener("click", () => {
   if (newSpreadButton.disabled) return;
   const previousSnapshot = accountSpreadSnapshot;
   let clearAccountSpread;
-  if (prototypeTesterAuthenticated) {
+  if (prototypeTesterAuthenticated && !prototypeTesterIsAdmin) {
     accountSpreadSnapshot = null;
     clearAccountSpread = fetch("/api/prototypes/account-state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "clear-account-spread" }),
     }).then((response) => response.ok).catch(() => false);
-  }
+  } else if (prototypeTesterAuthenticated) accountSpreadSnapshot = null;
   const nextDeck = createNextDeckOrder(spreadDeck, spreadDeck.map((card) => card.id));
   spreadDeck = nextDeck;
   saveSpreadDeckOrder(nextDeck);
@@ -1920,10 +1923,10 @@ async function generateReading() {
     const reading = payload.reading;
     const source = payload.source || "ai";
     prototypeNextSpreadAt = Date.parse(payload.nextSpreadAt || "") || prototypeNextSpreadAt;
-    populateReading(reading, selectedCards, source);
+    populateReading(reading, selectedCards);
     saveLastSpread(reading, source, payload.snapshot);
   } catch {
-    populateReading(fallback, selectedCards, "fallback");
+    populateReading(fallback, selectedCards);
     volatileFailedSpread = {
       version: 2,
       topic: currentTopic,
@@ -1941,10 +1944,8 @@ async function generateReading() {
   window.setTimeout(showReading, remainingRitual);
 }
 
-function populateReading(reading, cards, source = "fallback") {
-  const sourceLabel = { gemini: "Gemini", gigachat: "GigaChat", fallback: "Fallback", ai: "AI" }[source] || source;
-  readingTopic.textContent = `1 из 5 · Общий взгляд · ${currentTopic || "тема"} · ${sourceLabel}`;
-  chapters[0].querySelector("h2").textContent = reading.overview.title;
+function populateReading(reading, cards) {
+  chapters[0].querySelector("h2").textContent = `Расклад на тему ${currentTopic || "Тема"}`;
   chapters[0].querySelector("p").textContent = reading.overview.text;
 
   cards.forEach((card, index) => {
@@ -1952,6 +1953,12 @@ function populateReading(reading, cards, source = "fallback") {
     const chapter = chapters[index + 1];
     const navItem = readingNavItems[index + 1];
     chapter.querySelector("h3").textContent = card.name;
+    populateCardTag(
+      chapter.querySelector(".reading-card-suit"),
+      chapter.querySelector(".reading-card-suit-label"),
+      chapter.querySelector(".daily-result-suit-icon"),
+      card,
+    );
     const paragraphs = chapter.querySelectorAll("p");
     paragraphs[0].textContent = cardReading.meaning;
     paragraphs[1].textContent = cardReading.context;
@@ -1961,9 +1968,20 @@ function populateReading(reading, cards, source = "fallback") {
     const image = stage.querySelector(`[data-card="${index}"] img`);
     image.src = card.image;
     image.alt = card.name;
+    const positionImage = chapter.querySelector(".reading-position-card img");
+    positionImage.src = card.image;
+    positionImage.alt = card.name;
+    const summaryImage = chapters[4].querySelector(`[data-summary-card="${index}"] img`);
+    summaryImage.src = card.image;
+    summaryImage.alt = card.name;
+    const overviewCard = chapters[0].querySelector(`[data-overview-card="${index}"]`);
+    const overviewImage = overviewCard.querySelector("img");
+    overviewImage.src = card.image;
+    overviewImage.alt = card.name;
+    overviewCard.querySelector(".reading-overview-card-name").textContent = card.name;
+    stage.querySelector(`[data-card="${index}"] .stage-card-name`).textContent = card.name;
   });
 
-  chapters[4].querySelector("h3").textContent = reading.conclusion.title;
   chapters[4].querySelector("p").textContent = reading.conclusion.text;
 }
 
@@ -2000,6 +2018,9 @@ function setActiveChapter(index) {
   readingNavItems.forEach((item, itemIndex) => item.classList.toggle("is-active", itemIndex === navChapter));
   stage.dataset.active = chapter.dataset.active;
   reading.classList.toggle("is-at-end", activeChapter === chapters.length - 1);
+  reading.classList.toggle("is-overview", activeChapter === 0);
+  reading.classList.toggle("is-card-chapter", activeChapter > 0 && activeChapter < 4);
+  reading.classList.toggle("is-summary", activeChapter === 4);
 }
 
 function goToChapter(index) {
@@ -2114,6 +2135,11 @@ readingNavItems.forEach((item) => {
 readingBoundaryButton.addEventListener("click", () => {
   if (activeChapter === chapters.length - 1) closeReadingToSaved(activeChapter);
 });
+
+readingCloseButton.addEventListener("click", () => closeReadingToSaved(activeChapter));
+readingPrevButton.addEventListener("click", () => goToChapter(activeChapter - 1));
+readingNextButton.addEventListener("click", () => goToChapter(activeChapter + 1));
+readingSummaryHomeButton.addEventListener("click", () => closeReadingToSaved(activeChapter));
 
 readingCopy.addEventListener("scroll", () => {
   if (!document.body.classList.contains("reading-ready")) return;

@@ -61,9 +61,18 @@ North Star остаётся прежней: AI-таролог, который д
 
 ## Последний рабочий цикл
 
-Дата обновления: 2026-08-16.
+Дата обновления: 2026-08-18.
 
 В последних чатах:
+
+- Завершён первый desktop-проход новой деталки расклада по Figma: пять горизонтальных табов `Общий взгляд → Прошлое → Настоящее → Будущее → Итог`, фиксированные close/prev/next, header скрыт во всём reading-flow. Все главы находятся в одном `reading-copy`, поэтому первая секция теперь прокручивается вниз той же smooth-scroll анимацией, что остальные.
+- «Общий взгляд» показывает три карты `192×320px` с именами и тегами позиций, динамический заголовок `Расклад на тему {тема}` и provider overview body. Геометрия сохраняет равные промежутки от табов до карт и от body до низа; cards → copy gap `36px`.
+- «Прошлое / Настоящее / Будущее» используют один desktop layout: body-колонка `620px`, gap `68px`, буквальный компонент результата карты дня `376×619px`, динамический тег масти/Старшего аркана и два provider-абзаца. В каждой главе видна только её статичная карта; старый fade-stack отключён до отдельного motion-прохода.
+- «Итог» показывает три реальные карты `218×363px` веером: центральная поверх боковых, боковые `−12° / +12°`; frame fills непрозрачны (`#212020` в центре, зеркальные градиенты на базе `#21201F` по бокам). Между веером и conclusion body `40px`, затем secondary `На главную` и primary `Поделиться` по `216px` с gap `12px`.
+- `moratest@bk.ru` получил тот же unlimited spread режим, что `iliushka00@bk.ru`; live Supabase Edge Function обновлена и изменение закоммичено отдельно как `9f782da`. Локальный `Ещё расклад` для unlimited QA больше не делает необязательный clear-запрос и не откатывается визуально к старому snapshot при его ошибке.
+- В prompt/provider contract уже выпущена позиционная логика `Прошлое / Настоящее / Возможное будущее` (`01d7a47`, production deployment `dpl_EF3UmdBtDjPoSYZj2iCskwJd33jN`). Текущий desktop UI/API package после этого release остаётся dirty, не закоммичен и не задеплоен.
+- Последние проверки текущего dirty tree: `npm run lint` и `npm run build` проходят; есть только upstream warning о будущем прекращении поддержки Node 20 в `@supabase/supabase-js`. `git diff --check` чистый. Проверенный локальный сервер этого прохода запущен на `http://localhost:3002/prototypes/spread/index.html`; порты `3000/3001` заняты другими Mora-процессами.
+- Финальный desktop QA исправил двусторонний переход `Общий взгляд ↔ Прошлое`: все пять глав сохраняют физическую высоту в одном scroll-flow, но содержимое соседней главы скрыто вне активного overview viewport. Автор подтвердил UI и явно разрешил commit + production deploy всего desktop reading-пакета; release обязан исключить stripface/GLB experiment и stale-daily reset fix.
 
 - state-specific UI fix `4225bb6` выпущен из точного clean archive в production deployment `dpl_H4hadZndiNNMTYHJS9UQaqjvoTMd`: активные «Ещё расклад» и «Читать расклад» остаются по `216px`, а disabled «Новый расклад через…» получает `width:auto` и обнимает длинный cooldown-текст. Alias `https://mora-vnkt.vercel.app` Ready; production smoke подтвердил cache-version `savedactionstates1` и оба CSS-состояния. Archive не содержал stripface и использовал исходные GLB `487500 / 459944`; защищённый эксперимент остался только unstaged в dirty worktree.
 - production release `6ddebc2` выпущен из точного clean archive в deployment `dpl_BY1ycVVYAJkiZtt3hUGJqm4S7yEv`; alias `https://mora-vnkt.vercel.app` обновлён. Archive не содержал stripface-строк и использовал исходные GLB `487500 / 459944`; lint/build прошли. Production smoke подтвердил welcome-лендинг, guest-state без замка, полноэкранный login с focus и обе saved-spread кнопки `216px`. Защищённый stripface/GLB experiment остаётся только unstaged в рабочем дереве.
@@ -157,7 +166,7 @@ North Star остаётся прежней: AI-таролог, который д
 
 Текущий локальный прототип доступен по адресу:
 
-`http://localhost:3001/prototypes/spread/index.html?resetDaily=always`
+`http://localhost:3002/prototypes/spread/index.html`
 
 Порт может измениться, если он занят. Для прототипа используй точный путь с `index.html`.
 
@@ -165,20 +174,21 @@ North Star остаётся прежней: AI-таролог, который д
 
 До обсуждения новой задачи:
 
-1. Проверить, работает ли локальный сервер на `3001`.
-2. Если сервер не работает — поднять его через `npm run dev -- --port 3001`; если порт занят другим Mora-процессом, переиспользовать его, а не запускать дубль.
-3. Сразу прислать автору кликабельную QA-ссылку `http://localhost:3001/prototypes/spread/index.html?resetDaily=always`.
-4. Ничего не менять до новой задачи автора: предыдущий визуальный проход закончен, следующую линию автор назначит сам.
-5. Считать утверждённой текущую базу Mora Next: новый фон, общую тёмную рубашку, осветлённый корпус 3D-карт, стабильный веер с дополнительным Z-запасом `2.5 px`, исправленное мерцание стопки карты дня и исходную тень этой стопки.
+1. Работать только в `/Users/moose/.codex/worktrees/6487/mora` на `codex/mora-next-closed-test`; не трогать Desktop-копию и не создавать новый worktree.
+2. Сначала read-only сверить branch/status/log и защищённый dirty scope. Не потерять stripface/GLB experiment (два GLB плюс `app.js`, `daily-3d.js`, `index.html`, `spread-deck-3d.js`), stale daily cooldown fix, текущий desktop reading redesign и незакоммиченный handoff.
+3. Проверить сервер `http://localhost:3002/prototypes/spread/index.html`. Если он недоступен, сначала выяснить, какие Mora-процессы уже занимают `3000–3002`; не запускать новые дубли без необходимости. Локальную auth-ссылку передавать только после проверки login/session endpoints.
+4. Первый следующий шаг — ручной desktop QA автора: новый расклад через `Ещё расклад`, затем `Общий взгляд → Прошлое → Настоящее → Будущее → Итог`, tab/arrow/scroll/close/back, длинные provider-тексты и восстановление сохранённого расклада. Найденные UI-баги фиксить по одному, не начинать mobile.
+5. Не коммитить и не деплоить текущий dirty UI/API package без отдельного явного подтверждения автора. Production deploy возможен только из clean archive точного commit и без защищённого stripface/GLB experiment.
 
 ## Следующие шаги
 
-### 0. Спроектировать гостевой вход в расклады
+### 0. Завершить точечный desktop QA деталки
 
-1. Дождаться от автора ссылки на конкретный Figma-фрейм unauthenticated-state таба раскладов.
-2. До кода разобрать состояния desktop/mobile и точный переход: гостевой таб доступен для нажатия, внутри объясняется ценность регистрации, затем запускается существующая авторизация без дублирования auth-механики.
-3. Не начинать реализацию по устному описанию и не смешивать её с незавершённым stripface/GLB performance experiment или повторным deploy CSS-fix.
-4. После получения макета реализовать минимальным отдельным UI-пакетом и остановиться на локальном визуальном QA автора до deploy.
+1. Автор должен проверить реальный новый расклад на `moratest@bk.ru`: `Ещё расклад` открывает topic-step, новый Gemini/GigaChat response заполняет все пять глав, unlimited timer не запускается.
+2. Проверить одинаковую вертикальную scroll-анимацию всех переходов, прямые клики по табам, обе стрелки, close и «На главную»; стрелки всегда остаются на `50%` viewport, контент центрируется между зоной табов и низом.
+3. Проверить длинные названия и реальные длинные `meaning/context/conclusion`: текст не пересекает карту, не выходит за viewport и не показывает содержимое соседней главы. У позиционных глав text width `620px`, card gap `68px`; summary cards → text `40px`.
+4. После аппрува desktop отдельно решить поведение кнопки «Поделиться» и motion переходов карт. Затем получить полные mobile-макеты; mobile не выводить из desktop автоматически.
+5. Только после полного desktop QA провести diff-аудит и разложить release на изолированные commits, не включая GLB/stripface experiment и отдельный daily cooldown fix.
 
 ### 1. Подготовить Mora Next к закрытому production-тесту
 
@@ -342,6 +352,12 @@ Release commits `76fc34a`, `8c188d3`, `26f2126` и docs commit `37df8fb` вып�
 Новый positional prompt для реального `/api/prototypes/spread-reading` выпущен в production из чистого commit `01d7a47` как deployment `dpl_EF3UmdBtDjPoSYZj2iCskwJd33jN`: пять секций теперь «Общий взгляд → Прошлое → Настоящее → Будущее → Итог», при сохранении `reading.version=1` и snapshot version `2`. `npm run lint`, clean-archive build, production page `200`, новые HTML-подписи и auth guard AI-маршрута `401` подтверждены. Отдельный `scripts/spread-text-lab.mjs` удалён по решению автора; следующий шаг — ручной production-расклад автора и оценка текста Gemini/GigaChat. Если новый контент отклонён, rollback target — предыдущий commit `b9d49fb`.
 
 Dirty worktree дополнительно содержит отдельный root-cause fix stale daily 3D result после 12h cooldown/background tab. Он не вошёл в commit `01d7a47` и production deployment; QA полного flow и отдельный release ожидаются.
+
+После аппрува текстов начат отдельный незавершённый desktop-редизайн деталки. Все пять глав теперь находятся в одном вертикальном `reading-copy`: «Общий взгляд» прокручивается к «Прошлому» той же smooth-scroll анимацией, что остальные секции. Первая глава получила горизонтальные табы, три карты с позиционными тегами и заголовок `Расклад на тему {тема}`. Для «Прошлое / Настоящее / Будущее» добавлен общий layout: текст `620px`, gap `68px`, буквальный компонент карты дня `376×619px`, тег масти/Старшего аркана и обе стрелки. «Итог» показывает непрозрачный веер трёх реальных карт `218×363px`, conclusion body и кнопки «На главную»/«Поделиться». Unlimited QA-аккаунт начинает «Ещё расклад» без rollback из-за необязательного clear-запроса. Изменены `index.html`, `styles.css`, `app.js`, provider title contract и добавлены SVG автора; lint/build проходят. Desktop требует точечного визуального QA; mobile, commit и deploy ещё не выполнялись. Этот UI scope не смешивать с защищённым stripface/GLB experiment и отдельным daily cooldown bugfix.
+
+Локальный auth сначала был передан сломанным: `.env.local` отсутствовал, затем `vercel env pull` вернул Sensitive Supabase values пустыми. Исправлено без записи секретов в git: public Supabase URL/publishable key восстановлены из собственного production client bundle в gitignored `.env.local`. Проверено локально: tester-session guest `200`, account-state guest `401`, password-login first step `200 requiresPassword`. Постоянное правило добавлено в `directives/00-start-every-task.md`: локальная ссылка на auth-flow считается готовой только после проверки входа.
+
+По запросу автора `moratest@bk.ru` добавлен в server-side unlimited spread allowlist вместе с `iliushka00@bk.ru`; daily cooldown не менялся. Production `prototype-tester-session` Edge Function обновлена через Supabase dashboard и принимает reserve/complete/clear без spread cooldown для обоих QA-email. Web/API-часть локально также нормализует `isAdmin/nextSpreadAt`, а localhost при пустых Sensitive provider env проксирует только AI-запрос в собственный production route с текущей auth cookie. В деталке глобальный header скрыт во всех reading transition/ready состояниях и возвращается после закрытия. Vercel UI/API ещё не деплоились.
 
 1. Сверь этот файл с фактическим состоянием кода.
 2. Обнови дату и краткий список в «Последнем рабочем цикле».

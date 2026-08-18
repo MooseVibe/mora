@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { prototypeAccountRequest } from '@/lib/prototype-testers'
+import { isUnlimitedPrototypeAccount, prototypeAccountRequest } from '@/lib/prototype-testers'
 import { TAROT_CARD_LIST, getTarotCardDefinition } from '@/lib/tarot'
 
 function response(body: Record<string, unknown>, status = 200) {
@@ -51,13 +51,14 @@ export async function GET() {
 
   const daily = validDaily(data.daily)
   if (!daily) return response({ error: 'Invalid daily account state' }, 502)
+  const isUnlimited = isUnlimitedPrototypeAccount(data.email)
   return response({
     accountId: data.accountId,
     email: data.email,
-    isAdmin: data.isAdmin === true,
+    isAdmin: isUnlimited,
     daily,
     spread: data.spread ?? null,
-    nextSpreadAt: data.nextSpreadAt ?? null,
+    nextSpreadAt: isUnlimited ? null : data.nextSpreadAt ?? null,
   })
 }
 

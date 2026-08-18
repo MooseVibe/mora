@@ -1,7 +1,7 @@
 import { getTarotCardDefinition } from '@/lib/tarot'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import {
-  PROTOTYPE_ADMIN_EMAIL,
+  isUnlimitedPrototypeAccount,
   prototypeAccountRequest,
 } from '@/lib/prototype-testers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -311,7 +311,7 @@ export async function POST(request: NextRequest) {
   if (!session?.access_token) {
     return NextResponse.json({ error: 'Authenticated account required' }, { status: 401 })
   }
-  const isAdmin = user?.email?.toLowerCase() === PROTOTYPE_ADMIN_EMAIL
+  const isAdmin = isUnlimitedPrototypeAccount(user.email)
   const accessToken = session.access_token
   let reservationId: string | null = null
 
@@ -359,6 +359,7 @@ export async function POST(request: NextRequest) {
       ].join(' ')
     )),
     'Структура ответа состоит из пяти последовательных секций: Общий взгляд, Прошлое, Настоящее, Будущее, Итог.',
+    `overview.title должен дословно равняться «Расклад на тему ${topic}». Не добавляй другие слова или знаки препинания.`,
     'Overview — это «Общий взгляд». Сначала назови один действительно заметный паттерн трёх карт: общую масть, повтор чисел, долю Старших арканов, сильный контраст или движение смыслов слева направо. Если общего паттерна нет, скажи, как меняется тема от первой карты к третьей. Простыми словами объясни общую линию и роли прошлого, настоящего и возможного будущего. Не выдавай итог заранее.',
     'Для каждой карты верни два отдельных абзаца.',
     'Первый абзац, поле meaning: в 2–3 коротких предложениях назови карту, свяжи её смысл с движением расклада и укажи 2–3 видимые детали с их обычным смыслом. Используй только переданные факты. Не добавляй предметы, действия или чувства персонажей, которых нет в данных.',
@@ -407,6 +408,7 @@ export async function POST(request: NextRequest) {
     )),
     `Проверенные факты для общего взгляда: Старших арканов ${majorCount} из 3; масти — ${suits.length ? suits.map(({ suit, count }) => `${suit}: ${count}`).join(', ') : 'у Старших арканов мастей нет'}; повтор ранга — ${repeatedRanks.length ? repeatedRanks.join(', ') : 'нет'}; движение смыслов — ${cards.map((card) => card!.archetype).join(' → ')}.`,
     'Заполни пять экранов через поля JSON:',
+    `overview.title: дословно «Расклад на тему ${topic}», без других слов и знаков препинания.`,
     'overview.text: 2–4 коротких предложения. Начни с одного проверенного факта выше. Если нет общей масти, повторов и большинства Старших арканов, используй движение смыслов. Объясни его именно в выбранной теме. Не пересказывай назначение расклада и не подводи итог заранее.',
     'У каждой карты два разных по задаче абзаца. context не пересказывает meaning другими словами.',
     'cards[0].meaning: 2–3 предложения. Объясни, что изображено на карте по переданной сцене RWS и видимым деталям Mora, что это канонически значит и какой релевантный опыт или паттерн это может обозначать в теме. Не утверждай конкретное прошлое событие как факт. Назови минимум две переданные видимые детали. cards[0].context: 2–3 новых предложения. Покажи, как этот опыт сформировал нынешнюю ситуацию, не выдумывая биографию человека.',
@@ -439,6 +441,21 @@ export async function POST(request: NextRequest) {
     })
   }
   if (providers.length === 0) {
+    if (request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1') {
+      const cookie = request.headers.get('cookie')
+      if (cookie) {
+        const upstream = await fetch('https://mora-vnkt.vercel.app/api/prototypes/spread-reading', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: cookie },
+          body: JSON.stringify({ topic, cardIds }),
+          cache: 'no-store',
+        })
+        return new NextResponse(upstream.body, {
+          status: upstream.status,
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' },
+        })
+      }
+    }
     await releaseReservation()
     return NextResponse.json({ error: 'Reading providers are not configured' }, { status: 503 })
   }
@@ -459,6 +476,10 @@ export async function POST(request: NextRequest) {
     const { reading: providerReading, source } = selected
     const reading = {
       ...providerReading,
+      overview: {
+        ...providerReading.overview,
+        title: `Расклад на тему ${topic}`,
+      },
       cards: providerReading.cards.map((card, index) => ({
         ...card,
         title: cards[index]!.name,

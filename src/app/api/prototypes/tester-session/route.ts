@@ -4,6 +4,7 @@ import {
   PROTOTYPE_ADMIN_EMAIL,
   PROTOTYPE_PASSWORD_TESTER_EMAIL,
   PROTOTYPE_TESTER_COOKIE,
+  isUnlimitedPrototypeAccount,
 } from '@/lib/prototype-testers'
 
 function sessionResponse(body: Record<string, unknown>, init?: ResponseInit) {
@@ -28,9 +29,7 @@ export async function GET() {
   const { data: { user } } = await auth.auth.getUser()
   const email = user?.email?.toLowerCase()
   if (!email) return sessionResponse({ authenticated: false })
-  if (email === PROTOTYPE_ADMIN_EMAIL) return createVerifiedTesterSession(email, true)
-
-  return createVerifiedTesterSession(email)
+  return createVerifiedTesterSession(email, isUnlimitedPrototypeAccount(email))
 }
 
 export async function POST(request: NextRequest) {
@@ -40,7 +39,7 @@ export async function POST(request: NextRequest) {
   const auth = await createServerClient()
   const { data: { user } } = await auth.auth.getUser()
   if (user?.email?.toLowerCase() === email) {
-    return createVerifiedTesterSession(email, email === PROTOTYPE_ADMIN_EMAIL)
+    return createVerifiedTesterSession(email, isUnlimitedPrototypeAccount(email))
   }
 
   if (email === PROTOTYPE_PASSWORD_TESTER_EMAIL) {
@@ -51,7 +50,7 @@ export async function POST(request: NextRequest) {
     if (error || data.user?.email?.toLowerCase() !== email) {
       return sessionResponse({ error: 'Invalid password' }, { status: 401 })
     }
-    return createVerifiedTesterSession(email)
+    return createVerifiedTesterSession(email, true)
   }
 
   const otp = typeof body?.otp === 'string' ? body.otp.replace(/\D/g, '').slice(0, 8) : ''
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (error || data.user?.email?.toLowerCase() !== email) {
       return sessionResponse({ error: 'Invalid OTP' }, { status: 401 })
     }
-    return createVerifiedTesterSession(email, email === PROTOTYPE_ADMIN_EMAIL)
+    return createVerifiedTesterSession(email, isUnlimitedPrototypeAccount(email))
   }
 
   const { error } = await auth.auth.signInWithOtp({
