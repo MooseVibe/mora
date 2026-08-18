@@ -504,7 +504,19 @@ export async function POST(request: NextRequest) {
       if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 200))
     }
     if (!completion?.ok || completion.data?.completed !== true) {
-      throw new Error(`Unable to complete spread: ${completion?.data?.reason ?? completion?.status ?? 'failed'}`)
+      console.error('[spread-reading]', {
+        status: completion?.status ?? null,
+        reason: completion?.data?.reason ?? completion?.data?.error ?? null,
+        stage: 'complete-account-spread',
+      })
+      await releaseReservation()
+      return NextResponse.json({
+        reading,
+        source,
+        nextSpreadAt: null,
+        snapshot,
+        persisted: false,
+      })
     }
     const nextSpreadAt = completion.data.nextSpreadAt ?? null
     reservationId = null
