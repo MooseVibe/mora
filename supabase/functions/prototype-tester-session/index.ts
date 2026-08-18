@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+const ADMIN_EMAIL = "iliushka00@bk.ru";
 const UNLIMITED_SPREAD_EMAILS = new Set(["iliushka00@bk.ru", "moratest@bk.ru"]);
 const COOLDOWN_MS = 12 * 60 * 60 * 1000;
 

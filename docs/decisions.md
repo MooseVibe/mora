@@ -3007,3 +3007,7 @@ Hotfix выпущен точным commit `50488ef` в production deployment `dp
 Повторный production E2E подтвердил, что `apikey` не устранил Edge `503`. Успешная генерация больше не подменяется fallback из-за независимого сбоя persistence: маршрут возвращает валидный reading и snapshot клиенту, освобождает reservation и помечает ответ `persisted:false`. Это восстанавливает текущий reading-flow, но не считается починкой серверного сохранения после reload.
 
 Защитное разделение generation/persistence выпущено commit `fe414a1` в production deployment `dpl_79WwDCBTzN95m86swA6xe1ZknyLc`; точная причина Edge `503` требует отдельной диагностики deployed Supabase Function.
+
+## 2026-08-18 — Edge `503` был boot-error склеенного dashboard bundle
+
+Supabase Function logs показали точную причину общего отказа сохранения: deployed `prototype-tester-session` содержал второе объявление `createClient` на строке 260 и падал до запуска handler. Dashboard bundle полностью заменён чистым одиночным `supabase/functions/prototype-tester-session/index.ts`; прямой Edge smoke после deploy вернул `200`. В исходнике также восстановлена `ADMIN_EMAIL`, потому что unlimited-allowlist commit `9f782da` переименовал объявление, но оставил старую ссылку в guest-create action.
