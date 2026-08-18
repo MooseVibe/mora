@@ -1890,7 +1890,7 @@ function buildFallbackReading(topic, cards) {
       cardId: card.id,
       title: card.name,
       meaning: `На карте видно: ${card.visualHint}.`,
-      context: `${["Сейчас", "Что мешает", "Что делать"][index]}: ${card.description}`,
+      context: `${["Прошлое", "Настоящее", "Будущее"][index]}: ${card.description}`,
     })),
     conclusion: {
       title: "Это техническая заглушка",
@@ -1943,7 +1943,7 @@ async function generateReading() {
 
 function populateReading(reading, cards, source = "fallback") {
   const sourceLabel = { gemini: "Gemini", gigachat: "GigaChat", fallback: "Fallback", ai: "AI" }[source] || source;
-  readingTopic.textContent = `1 из 5 · Общий рисунок · ${currentTopic || "тема"} · ${sourceLabel}`;
+  readingTopic.textContent = `1 из 5 · Общий взгляд · ${currentTopic || "тема"} · ${sourceLabel}`;
   chapters[0].querySelector("h2").textContent = reading.overview.title;
   chapters[0].querySelector("p").textContent = reading.overview.text;
 
@@ -1955,7 +1955,7 @@ function populateReading(reading, cards, source = "fallback") {
     const paragraphs = chapter.querySelectorAll("p");
     paragraphs[0].textContent = cardReading.meaning;
     paragraphs[1].textContent = cardReading.context;
-    const position = ["Сейчас", "Что мешает", "Что делать"][index];
+    const position = ["Прошлое", "Настоящее", "Будущее"][index];
     navItem.dataset.label = `${position} · ${card.name}`;
     navItem.setAttribute("aria-label", `${position}: ${card.name}`);
     const image = stage.querySelector(`[data-card="${index}"] img`);
