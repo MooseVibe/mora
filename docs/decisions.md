@@ -3001,3 +3001,5 @@ Desktop reading package выпущен commit `8ccc645` в production deployment
 ## 2026-08-18 — Account writes передают JWT и Supabase apikey отдельно
 
 Server-to-Edge вызовы `prototype-tester-session` отправляют user access token в `Authorization` и project publishable key в `apikey`. Без второго заголовка обновлённый Supabase gateway возвращал `503` после уже успешной генерации Gemini, поэтому готовое чтение не сохранялось и клиент показывал fallback. Секретный service-role key в Vercel и браузер не передаётся.
+
+Hotfix выпущен точным commit `50488ef` в production deployment `dpl_8o15ej77SznUCeGBx7V4JYoowP49`; старый экран сохранённого расклада также скрывается без transition сразу при входе в деталку, чтобы его фон не появлялся в промежуточном кадре.
