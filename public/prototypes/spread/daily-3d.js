@@ -7,6 +7,8 @@ const restingDeckTilt = isMobile() ? 0.48 : 0.4;
 const restingDeckPositionZ = 1.15;
 const hoverFanRadius = 1.85;
 const hoverFanSpan = 0.045;
+const fanGroupScale = 1.2947;
+const fanDesktopSideGutter = 48;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 const easeInOut = (value) => {
@@ -216,7 +218,10 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   scene.add(resultShadow);
 
   const deckGroup = new THREE.Group();
-  const embeddedDeckScale = isMobile() ? 1 : 1.12;
+  let deckViewportScale = 1;
+  let fanViewportScale = 1;
+  let fanGroupPositionX = -0.35;
+  let embeddedDeckScale = isMobile() ? 1 : 1.12;
   deckGroup.rotation.set(restingDeckTilt, 0, 0);
   deckGroup.position.set(0, 0, restingDeckPositionZ);
   deckGroup.scale.setScalar(embeddedDeckScale);
@@ -238,12 +243,17 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   template.scale.setScalar(3.55 / Math.max(size.x, size.z));
   template.updateMatrixWorld(true);
   let resultTemplatePromise;
+  let resultTemplateMetrics;
   function loadResultTemplate() {
     resultTemplatePromise ||= loader.loadAsync("../3d-daily/assets/mora-card-result.glb").then((resultGltf) => {
       const resultTemplate = resultGltf.scene;
       applyMaterials(resultTemplate, materials);
       const resultBounds = new THREE.Box3().setFromObject(resultTemplate);
       const resultSize = resultBounds.getSize(new THREE.Vector3());
+      resultTemplateMetrics = {
+        center: resultBounds.getCenter(new THREE.Vector3()),
+        size: resultSize.clone(),
+      };
       resultTemplate.scale.setScalar(3.55 / Math.max(resultSize.x, resultSize.z));
       resultTemplate.updateMatrixWorld(true);
       return resultTemplate;
@@ -295,15 +305,41 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     renderer.setSize(rect.width, rect.height, false);
     camera.aspect = rect.width / rect.height;
     if (isMobile()) {
+      deckViewportScale = 1;
+      fanViewportScale = 1;
+      fanGroupPositionX = -0.35;
+      embeddedDeckScale = 1;
       camera.position.set(0, 7.6, 10.6);
       camera.fov = 38;
       camera.lookAt(0, 0.2, 0.6);
     } else {
+      deckViewportScale = THREE.MathUtils.clamp(rect.width / 1440, 0.76, 1);
+      fanViewportScale = THREE.MathUtils.clamp(
+        (rect.width - fanDesktopSideGutter * 2) / (1440 - fanDesktopSideGutter * 2),
+        0.68,
+        1,
+      );
+      fanGroupPositionX = -0.35 * clamp01((rect.width - 1024) / (1440 - 1024));
+      embeddedDeckScale = 1.12 * deckViewportScale;
       camera.position.set(0, 7.1, 10.2);
       camera.fov = 34;
       camera.lookAt(0, 0.35, 0.45);
     }
     camera.updateProjectionMatrix();
+    if (ritualState === "idle") deckGroup.scale.setScalar(embeddedDeckScale);
+    if (ritualState === "fan") {
+      deckGroup.position.x = fanGroupPositionX;
+      deckGroup.scale.setScalar(fanGroupScale * fanViewportScale);
+    }
+    if (ritualState === "result" && resultCard) {
+      const target = resultTarget();
+      resultCard.position.copy(target.position);
+      resultCard.quaternion.copy(target.quaternion);
+      resultCard.scale.copy(target.scale);
+      resultCard.userData.resultTarget = target;
+      placeResultShadow(target);
+    }
+    ensureRendering();
   }
 
   function render() {
@@ -573,9 +609,9 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     }));
     const fan = fanTargets();
     const groupTarget = [{
-      position: new THREE.Vector3(-0.35, 0, 0.6),
+      position: new THREE.Vector3(fanGroupPositionX, 0, 0.6),
       quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.025, 0, 0)),
-      scale: new THREE.Vector3(1.2947, 1.2947, 1.2947),
+      scale: new THREE.Vector3().setScalar(fanGroupScale * fanViewportScale),
     }];
     await Promise.all([
       moveObjects(cards, fan, reducedMotion ? 1 : 720),
@@ -607,6 +643,45 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     };
   }
 
+  function resultTarget() {
+    const pose = resultPose();
+    const fallbackScale = isMobile()
+      ? new THREE.Vector3(0.78, 0.78, 0.811)
+      : new THREE.Vector3(1.026, 1.026, 1.06685);
+    if (isMobile() || !resultTemplateMetrics) return { ...pose, scale: fallbackScale };
+
+    const slot = document.querySelector(".daily-result-card")?.getBoundingClientRect();
+    const viewport = host.getBoundingClientRect();
+    if (!slot?.width || !slot.height || !viewport.width || !viewport.height) {
+      return { ...pose, scale: fallbackScale };
+    }
+
+    const depth = 8.2;
+    const halfWorldHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * depth;
+    const pixelsPerWorldUnit = viewport.height / (halfWorldHeight * 2);
+    const slotCenterX = slot.left - viewport.left + slot.width / 2;
+    const slotCenterY = slot.top - viewport.top + slot.height / 2;
+    const ndcX = slotCenterX / viewport.width * 2 - 1;
+    const ndcY = 1 - slotCenterY / viewport.height * 2;
+    const scaleX = slot.width / resultTemplateMetrics.size.x / pixelsPerWorldUnit;
+    const scaleZ = slot.height / resultTemplateMetrics.size.z / pixelsPerWorldUnit;
+    const scale = new THREE.Vector3(scaleX, scaleX, scaleZ);
+    const centerPosition = camera.localToWorld(new THREE.Vector3(
+      ndcX * halfWorldHeight * camera.aspect,
+      ndcY * halfWorldHeight,
+      -depth,
+    ));
+    const centerOffset = resultTemplateMetrics.center.clone()
+      .multiply(scale)
+      .applyQuaternion(pose.quaternion);
+
+    return {
+      position: centerPosition.sub(centerOffset),
+      quaternion: pose.quaternion,
+      scale,
+    };
+  }
+
   function placeResultShadow(target) {
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
@@ -615,7 +690,11 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       .addScaledVector(right, 0.08)
       .addScaledVector(up, -0.1)
       .addScaledVector(intoScene, 0.14);
-    resultShadow.scale.set(isMobile() ? 2.25 : 2.85, isMobile() ? 3.45 : 4.3225, 1);
+    resultShadow.scale.set(
+      isMobile() ? 2.25 : 2.85 * (target.scale.x / 1.026),
+      isMobile() ? 3.45 : 4.3225 * (target.scale.z / 1.06685),
+      1,
+    );
     resultShadow.visible = true;
   }
 
@@ -680,14 +759,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     const groupExitTarget = groupExitStart.clone()
       .addScaledVector(fanPullWorldDirection, -1.8)
       .addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 0.9);
-    const pose = resultPose();
-    const finalTarget = {
-      position: pose.position,
-      quaternion: pose.quaternion,
-      scale: isMobile()
-        ? new THREE.Vector3(0.78, 0.78, 0.811)
-        : new THREE.Vector3(1.026, 1.026, 1.06685),
-    };
+    const finalTarget = resultTarget();
     const chosenStart = {
       position: card.position.clone(),
       quaternion: card.quaternion.clone(),
@@ -800,14 +872,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     scene.attach(card);
     deckGroup.visible = false;
     floor.visible = false;
-    const pose = resultPose();
-    const target = {
-      position: pose.position.clone(),
-      quaternion: pose.quaternion.clone(),
-      scale: isMobile()
-        ? new THREE.Vector3(0.78, 0.78, 0.811)
-        : new THREE.Vector3(1.026, 1.026, 1.06685),
-    };
+    const target = resultTarget();
     card.position.copy(target.position);
     card.quaternion.copy(target.quaternion);
     card.scale.copy(target.scale);

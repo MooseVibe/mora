@@ -1,5 +1,5 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260813-deckhit1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260821-fanresponsive4";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260812-spreadflight1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
@@ -39,6 +39,7 @@ const loginButton = document.querySelector(".login");
 const profileControl = document.querySelector(".profile-control");
 const profileTrigger = document.querySelector(".profile-trigger");
 const profileMenu = document.querySelector("#profile-menu");
+const profileEmail = document.querySelector(".profile-email");
 const profileLogout = document.querySelector(".profile-logout");
 const loginScreen = document.querySelector("#login-screen");
 const loginScreenBrand = document.querySelector(".login-screen-brand");
@@ -56,6 +57,7 @@ const dailyResultSuit = document.querySelector("#daily-result-suit");
 const dailyResultSuitIcon = document.querySelector("#daily-result-suit-icon");
 const dailyResultSuitLabel = document.querySelector("#daily-result-suit-label");
 const dailyResultText = document.querySelector("#daily-result-text");
+const dailyResultCopy = document.querySelector(".daily-result-copy");
 const dailyResultImage = document.querySelector("#daily-result-image");
 const dailyCooldownButton = document.querySelector("#daily-cooldown");
 const dailyResultCard = document.querySelector(".daily-result-card");
@@ -267,7 +269,7 @@ async function restorePrototypeTesterSession() {
   const params = new URLSearchParams(window.location.search);
   const localPreview = isLocalPrototype && params.get("testerPreview") === "1";
   if (localPreview) {
-    setPrototypeTesterAuthenticated(true, true);
+    setPrototypeTesterAuthenticated(true, true, null, "moratest@bk.ru");
     testerSessionResolved = true;
     document.documentElement.classList.remove("tester-session-pending");
     return;
@@ -282,7 +284,7 @@ async function restorePrototypeTesterSession() {
     }
     if (!response.ok) throw new Error("Unable to load account state");
     const payload = await response.json();
-    setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt);
+    setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt, payload.email);
     let clearGuestDaily = true;
     if (payload.daily?.status !== "drawn" && guestDailyCard) {
       const adoptionResponse = await fetch("/api/prototypes/account-state", {
@@ -428,10 +430,11 @@ function resetTesterLoginForm(form, input) {
   input.setAttribute("aria-label", "Электронная почта");
 }
 
-function setPrototypeTesterAuthenticated(authenticated, isAdmin = false, nextSpreadAt = null) {
+function setPrototypeTesterAuthenticated(authenticated, isAdmin = false, nextSpreadAt = null, email = "") {
   prototypeTesterAuthenticated = authenticated;
   prototypeTesterIsAdmin = authenticated && isAdmin;
   prototypeNextSpreadAt = authenticated && !isAdmin ? Date.parse(nextSpreadAt || "") || 0 : 0;
+  profileEmail.textContent = authenticated ? email : "";
   document.body.classList.toggle("prototype-tester", authenticated);
   updateNewSpreadButton();
   if (!authenticated) closeProfileMenu();
@@ -548,6 +551,7 @@ function showDailyMode() {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
     document.documentElement.classList.remove("daily-saved-pending");
     document.body.classList.add("daily-result-ready");
+    scheduleDailyResultScrollUpdate();
     if (daily3DResultActive) {
       dailyDeck.disabled = false;
       document.body.classList.add("daily-3d-result");
@@ -605,6 +609,20 @@ function showSpreadMode() {
 function showDaily3DError() {
   document.body.classList.remove("daily-3d-restoring");
   document.body.classList.add("daily-3d-error");
+}
+
+function updateDailyResultScrollState() {
+  const maxScrollTop = Math.max(0, dailyResultCopy.scrollHeight - dailyResultCopy.clientHeight);
+  const isScrollable = maxScrollTop > 2;
+  dailyResultCopy.classList.toggle("can-scroll-up", isScrollable && dailyResultCopy.scrollTop > 2);
+  dailyResultCopy.classList.toggle(
+    "can-scroll-down",
+    isScrollable && dailyResultCopy.scrollTop < maxScrollTop - 2,
+  );
+}
+
+function scheduleDailyResultScrollUpdate() {
+  window.requestAnimationFrame(updateDailyResultScrollState);
 }
 
 function applyDailyResultTilt() {
@@ -726,6 +744,7 @@ function populateDailyResult(card, variantIndex) {
   dailyResultTitleMeta.textContent = titleMeta;
   populateCardTag(dailyResultSuit, dailyResultSuitLabel, dailyResultSuitIcon, card);
   dailyResultText.replaceChildren();
+  dailyResultCopy.scrollTop = 0;
   paragraphs.forEach((paragraph) => {
     const item = document.createElement("p");
     item.textContent = paragraph;
@@ -733,6 +752,7 @@ function populateDailyResult(card, variantIndex) {
   });
   dailyResultImage.src = `/${card.image.replace(/^\/+/, "")}`;
   dailyResultImage.alt = card.name;
+  scheduleDailyResultScrollUpdate();
 }
 
 function populateCardTag(container, label, icon, card) {
@@ -917,6 +937,7 @@ function showDaily3DResult() {
   document.documentElement.classList.remove("daily-saved-pending");
   document.body.classList.remove("daily-3d-ritual", "daily-3d-animating", "daily-3d-restoring", "daily-3d-error");
   document.body.classList.add("daily-3d-result");
+  scheduleDailyResultScrollUpdate();
   updateDailyCooldownButton();
   if (!restoring) document.body.classList.add("daily-3d-result-entering");
   window.requestAnimationFrame(() => {
@@ -970,6 +991,7 @@ async function drawDailyCard() {
   flight.classList.add("is-flipped");
   await new Promise((resolve) => window.setTimeout(resolve, reducedMotion ? 1 : 680));
   document.body.classList.add("daily-result-ready", "daily-result-entering");
+  scheduleDailyResultScrollUpdate();
 
   const targetRect = document.querySelector(".daily-result-card").getBoundingClientRect();
   const scale = targetRect.width / sourceRect.width;
@@ -2140,6 +2162,9 @@ readingCloseButton.addEventListener("click", () => closeReadingToSaved(activeCha
 readingPrevButton.addEventListener("click", () => goToChapter(activeChapter - 1));
 readingNextButton.addEventListener("click", () => goToChapter(activeChapter + 1));
 readingSummaryHomeButton.addEventListener("click", () => closeReadingToSaved(activeChapter));
+
+dailyResultCopy.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
+window.addEventListener("resize", scheduleDailyResultScrollUpdate, { passive: true });
 
 readingCopy.addEventListener("scroll", () => {
   if (!document.body.classList.contains("reading-ready")) return;

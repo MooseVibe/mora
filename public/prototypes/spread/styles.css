@@ -8,6 +8,8 @@
   --card-border: #3a2e1e;
   --prototype-surface: #141312;
   --prototype-text-secondary: #a8a8a8;
+  --profile-surface: #262626;
+  --profile-border: #5a5a5a;
   --result-card-frame-border: rgba(255, 255, 255, 0.12);
   --result-card-frame-start: rgba(255, 255, 255, 0.12);
   --result-card-frame-end: rgba(255, 255, 255, 0.04);
@@ -171,25 +173,34 @@ html.tester-session-pending main {
 }
 
 .profile-trigger {
+  position: relative;
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   place-items: center;
-  padding: 0;
+  padding: 2px;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(40, 40, 40, 0.5);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.24);
   transition:
     background-color 180ms var(--ease),
     scale 150ms ease-out;
 }
 
+.profile-trigger::before {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--profile-surface);
+  content: "";
+}
+
 .profile-trigger:hover,
 .profile-trigger:focus-visible,
 .profile-trigger[aria-expanded="true"] {
   outline: 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(90, 90, 90, 0.7);
 }
 
 .profile-trigger:active,
@@ -198,6 +209,8 @@ html.tester-session-pending main {
 }
 
 .profile-trigger img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 24px;
   height: 24px;
@@ -207,11 +220,15 @@ html.tester-session-pending main {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 200px;
-  height: 64px;
-  padding: 10px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  width: 170px;
+  padding: 4px 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  background: var(--profile-surface);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.32);
   opacity: 1;
   transform: translateY(0);
@@ -226,20 +243,34 @@ html.tester-session-pending main {
   transform: translateY(-6px);
 }
 
+.profile-email {
+  width: 100%;
+  padding: 6px 8px 10px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--prototype-text-secondary);
+  font-family: "Inter Display", Inter, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .profile-logout {
   display: flex;
-  width: 100%;
-  height: 44px;
+  width: 152px;
+  min-height: 36px;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 6px 8px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   font-family: "Inter Display", Inter, Arial, sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 28px;
+  line-height: 24px;
   transition:
     background-color 180ms var(--ease),
     scale 150ms ease-out;
@@ -253,8 +284,8 @@ html.tester-session-pending main {
 
 .profile-logout img {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .topic:active,
@@ -728,22 +759,37 @@ body.daily-drawing .daily-deck {
 }
 
 body.daily-mode.daily-result-ready .daily-result,
-body.daily-mode.daily-3d-result .daily-result {
+body.daily-mode.daily-3d-result .daily-result,
+body.daily-mode.daily-3d-animating .daily-result {
+  --daily-result-copy-width: clamp(480px, 40.556vw, 584px);
+  --daily-result-card-width: min(clamp(300px, 26.111vw, 376px), calc(60.743dvh - 74px));
+  --daily-result-card-height: min(clamp(494px, 42.986vw, 619px), calc(100dvh - 122px));
+  --daily-result-column-gap: clamp(32px, 4.722vw, 68px);
   position: fixed;
   z-index: 5;
   inset: 74px 0 0;
   display: grid;
-  grid-template-columns: minmax(0, 584px) 376px;
+  grid-template-columns: minmax(0, var(--daily-result-copy-width)) var(--daily-result-card-width);
   align-items: center;
   justify-content: center;
-  gap: 68px;
-  padding: 0 200px;
+  gap: var(--daily-result-column-gap);
+  padding: 0 clamp(32px, 7.5vw, 108px);
   background:
     radial-gradient(circle at 78% 48%, rgba(255, 255, 255, 0.045), transparent 34%);
 }
 
+body.daily-mode.daily-3d-animating .daily-result {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 body.daily-mode.daily-3d-result .daily-result {
   pointer-events: none;
+}
+
+body.daily-mode.daily-result-ready .mode-nav,
+body.daily-mode.daily-3d-result .mode-nav {
+  left: clamp(24px, calc(100vw - 1068px), 80px);
 }
 
 body.daily-mode.daily-3d-result .daily-result-copy {
@@ -806,8 +852,11 @@ body.daily-3d-result-entering .daily-result-copy {
 
 .daily-result-copy {
   display: flex;
-  max-height: 619px;
+  min-height: 0;
+  max-height: var(--daily-result-card-height, 619px);
+  padding-bottom: 24px;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -822,6 +871,23 @@ body.daily-3d-result-entering .daily-result-copy {
   display: none;
 }
 
+.daily-result-copy.can-scroll-down:not(.can-scroll-up) {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 87px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 87px), transparent 100%);
+}
+
+.daily-result-copy.can-scroll-up.can-scroll-down {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0, #000 109px, #000 calc(100% - 87px), transparent 100%);
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 109px, #000 calc(100% - 87px), transparent 100%);
+}
+
+.daily-result-copy.can-scroll-up:not(.can-scroll-down) {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 109px, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 109px, #000 100%);
+}
+
 body.daily-result-entering .daily-result-copy {
   opacity: 0;
   transform: translateY(14px);
@@ -832,9 +898,9 @@ body.daily-result-entering .daily-result-copy {
   flex: 0 0 auto;
   color: var(--prototype-text-secondary);
   font-family: "Spectral SC", serif;
-  font-size: 28px;
+  font-size: clamp(24px, 1.944vw, 28px);
   font-weight: 300;
-  line-height: 36px;
+  line-height: clamp(32px, 2.5vw, 36px);
 }
 
 .daily-result-content {
@@ -850,7 +916,7 @@ body.daily-result-entering .daily-result-copy {
   width: 100%;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: clamp(8px, 0.833vw, 12px);
 }
 
 .daily-result-suit {
@@ -908,28 +974,30 @@ body.daily-result-entering .daily-result-copy {
   font-size: 0;
   font-weight: 300;
   letter-spacing: 0;
-  text-wrap: pretty;
+  text-wrap: balance;
 }
 
 #daily-result-title-main {
-  font-size: 48px;
+  font-size: clamp(36px, 3.333vw, 48px);
   font-weight: 400;
-  line-height: 56px;
+  line-height: clamp(44px, 3.889vw, 56px);
+  white-space: nowrap;
 }
 
 #daily-result-title-meta {
+  display: block;
   color: var(--prototype-text-secondary);
-  font-size: 32px;
-  line-height: 44px;
+  font-size: clamp(26px, 2.222vw, 32px);
+  line-height: clamp(36px, 3.056vw, 44px);
 }
 
 .daily-result-section h3 {
   margin: 0 0 8px;
   color: #fff;
   font-family: "Spectral SC", serif;
-  font-size: 20px;
+  font-size: clamp(18px, 1.389vw, 20px);
   font-weight: 500;
-  line-height: 28px;
+  line-height: clamp(26px, 1.944vw, 28px);
   text-transform: uppercase;
 }
 
@@ -937,26 +1005,29 @@ body.daily-result-entering .daily-result-copy {
   width: 100%;
   margin: 0 0 8px;
   color: var(--prototype-text-secondary);
-  font-size: 20px;
+  font-size: clamp(16px, 1.389vw, 20px);
   font-weight: 300;
-  line-height: 28px;
+  line-height: clamp(24px, 1.944vw, 28px);
   text-wrap: pretty;
 }
 
 .daily-result-actions {
   display: flex;
+  width: 100%;
   flex: 0 0 auto;
   align-items: center;
-  gap: 12px;
+  gap: clamp(8px, 0.833vw, 12px);
 }
 
-.daily-result-share,
-.daily-result-cooldown {
-  width: 216px;
+.daily-result-share {
+  width: min(216px, 45%);
 }
 
 .daily-result-cooldown {
-  width: 260px;
+  width: auto;
+  max-width: 260px;
+  min-width: 0;
+  flex: 1 1 260px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -976,8 +1047,8 @@ body.daily-result-entering .daily-result-copy {
   --daily-result-card-inner-radius: 9px;
   --daily-result-card-outer-radius: 20px;
   position: relative;
-  width: 376px;
-  height: 619px;
+  width: var(--daily-result-card-width, 376px);
+  height: var(--daily-result-card-height, 619px);
   perspective: 900px;
 }
 
@@ -3019,9 +3090,12 @@ body.reading-to-saved.reading-saved-entering .reading {
     order: 1;
     width: 100%;
     height: auto;
+    max-height: none;
     overflow: visible;
     justify-content: flex-start;
     padding-bottom: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .daily-result-copy h2 {

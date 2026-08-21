@@ -36,6 +36,8 @@
 | `--tab-active-bg` _(Mora Next prototype)_ | `rgba(255,255,255,0.06)` | фон активного таба |
 | `--prototype-surface` _(Mora Next prototype)_ | `#141312` | единая поверхность карты дня, выбора темы, сохранённого расклада и результата |
 | `--prototype-text-secondary` _(Mora Next prototype)_ | `#a8a8a8` | вторичный текст result-экрана карты дня |
+| `--profile-surface` _(Mora Next prototype)_ | `#262626` | внутренняя поверхность profile trigger и account-menu |
+| `--profile-border` _(Mora Next prototype)_ | `#5a5a5a` | внешняя граница account-menu |
 | `--result-card-frame-start/end` _(Mora Next prototype)_ | `rgba(255,255,255,0.12) → rgba(255,255,255,0.04)` | диагональная стеклянная плоскость раскрытой карты |
 | `--result-card-frame-border` _(Mora Next prototype)_ | `rgba(255,255,255,0.12)` | внешняя и внутренняя рамка раскрытой карты |
 | `--daily-result-card-inner-gap` _(Mora Next prototype)_ | `12px` | симметричный отступ изображения и внутренней рамки от внешнего края карты дня |
@@ -76,6 +78,10 @@ SVG-маркеры старших арканов не содержат само�
 ### Primary action Mora Next
 
 Один `.primary-action` используется для основных текстовых действий «Войти», «Поделиться» на карте дня, «Ещё расклад» и «Поделиться» в итоге расклада. Высота `44px`, padding `10px 24px`, radius `8px`, Inter Display `16/24` 400. Default — `white/10%` с мягкой внутренней подсветкой; hover/focus — усиленный glow и внутренняя рамка; pressed — `scale(0.96)`. Ширина остаётся контекстной и не входит в общий компонент.
+
+### Profile control Mora Next
+
+Desktop profile trigger имеет размер `48×48px`: внешний слой `2px`, внутренняя поверхность `44×44px`, glyph `24×24px`. Account-menu располагается на `8px` ниже trigger, имеет ширину `170px`, radius `12px`, padding `4px 8px`; сверху показывает email текущей Supabase-сессии, снизу — action «Выйти» размером `152×36px` с glyph `20×20px`.
 
 ## Типографика
 
