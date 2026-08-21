@@ -3037,3 +3037,7 @@ Desktop profile trigger Mora Next увеличен до утверждённых
 ## 2026-08-21 — Старый Vercel project удалён, production закреплён за `mora`
 
 Устаревший проект `mora-vnkt` (`prj_gRte0bLWitSlo418krLJ1ImuXYb6`) удалён целиком по решению автора: его приложение и deployments больше не должны быть доступны, а прежний alias возвращает `404`. Канонический production target — Vercel project `mora` (`prj_iNES6q89fIyBt1acJ2j7OfMY1ygB`) с alias `mora-kappa.vercel.app`. Локальная `.vercel`-привязка и актуальные project docs обновлены, чтобы следующие deploy-проходы не могли снова попасть в старое окружение.
+
+## 2026-08-21 — Mora Next стала единственным production-входом
+
+Корневой маршрут `mora-kappa.vercel.app/` больше не рендерит прежний React-лендинг: он переводит пользователя в новый одноразовый welcome, который ведёт в Mora Next. Старые компоненты не удаляются механически, потому что auth, API и Supabase-инфраструктура остаются общей частью текущего продукта. В production environment проекта `mora` восстановлены sensitive credentials Gemini и GigaChat, а localhost provider-proxy переведён с удалённого `mora-vnkt` на канонический alias.

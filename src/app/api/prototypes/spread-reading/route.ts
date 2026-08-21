@@ -444,7 +444,7 @@ export async function POST(request: NextRequest) {
     if (request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1') {
       const cookie = request.headers.get('cookie')
       if (cookie) {
-        const upstream = await fetch('https://mora-vnkt.vercel.app/api/prototypes/spread-reading', {
+        const upstream = await fetch('https://mora-kappa.vercel.app/api/prototypes/spread-reading', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Cookie: cookie },
           body: JSON.stringify({ topic, cardIds }),

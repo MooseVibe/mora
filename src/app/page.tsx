@@ -1,5 +1,5 @@
-import TaroApp from '@/components/TaroApp'
+import { redirect } from 'next/navigation'
 
 export default function Home() {
-  return <TaroApp />
+  redirect('/prototypes/landing/index.html')
 }
