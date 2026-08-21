@@ -19,6 +19,15 @@ const nextConfig = {
       '/api/prototypes/spread-reading': ['./certs/russian_trusted_root_ca_pem.crt'],
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/prototypes/landing/index.html',
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
