@@ -314,13 +314,14 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       camera.lookAt(0, 0.2, 0.6);
     } else {
       deckViewportScale = THREE.MathUtils.clamp(rect.width / 1440, 0.76, 1);
+      const deckHeightScale = THREE.MathUtils.clamp(rect.height / 500, 0.86, 1);
       fanViewportScale = THREE.MathUtils.clamp(
         (rect.width - fanDesktopSideGutter * 2) / (1440 - fanDesktopSideGutter * 2),
         0.68,
         1,
       );
       fanGroupPositionX = -0.35 * clamp01((rect.width - 1024) / (1440 - 1024));
-      embeddedDeckScale = 1.12 * deckViewportScale;
+      embeddedDeckScale = 1.12 * deckViewportScale * deckHeightScale;
       camera.position.set(0, 7.1, 10.2);
       camera.fov = 34;
       camera.lookAt(0, 0.35, 0.45);

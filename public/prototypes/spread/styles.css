@@ -609,6 +609,22 @@ body.daily-result-ready:not(.daily-3d-result) .daily-card-screen {
   }
 }
 
+@media (min-width: 721px) and (max-height: 700px) {
+  .daily-card-heading {
+    top: clamp(104px, 20vh, 132px);
+  }
+
+  .daily-card-heading h1 {
+    font-size: clamp(40px, 7vh, 48px);
+    line-height: 1.2;
+  }
+
+  .daily-card-heading p {
+    font-size: clamp(16px, 2.8vh, 20px);
+    line-height: 22px;
+  }
+}
+
 body.daily-3d-ritual .mode-nav {
   opacity: 0;
   pointer-events: none;
