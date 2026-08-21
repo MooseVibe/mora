@@ -3041,3 +3041,7 @@ Desktop profile trigger Mora Next увеличен до утверждённых
 ## 2026-08-21 — Mora Next стала единственным production-входом
 
 Корневой маршрут `mora-kappa.vercel.app/` больше не рендерит прежний React-лендинг: он переводит пользователя в новый одноразовый welcome, который ведёт в Mora Next. Старые компоненты не удаляются механически, потому что auth, API и Supabase-инфраструктура остаются общей частью текущего продукта. В production environment проекта `mora` восстановлены sensitive credentials Gemini и GigaChat, а localhost provider-proxy переведён с удалённого `mora-vnkt` на канонический alias.
+
+## 2026-08-21 — Production-расклад использует цепочку Gemini → GigaChat
+
+Gemini остаётся основным генератором расклада и получает один запрос с общим таймаутом `60s`. Любая ошибка, таймаут или невалидный structured response сразу передаёт попытку GigaChat; прежние три последовательные Gemini-попытки удалены, потому что могли задерживать резервный провайдер почти на три минуты. Если оба провайдера недоступны, попытка не считается завершённым раскладом: reservation освобождается, а клиент показывает существующий несохраняемый fallback/error. Оба sensitive credential хранятся только в Production environment Vercel project `mora`.
