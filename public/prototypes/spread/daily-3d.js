@@ -229,7 +229,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
 
   const initialSelection = onPrepare?.() || null;
   const loader = new GLTFLoader();
-  const deckTemplatePromise = loader.loadAsync("../3d-daily/assets/mora-card.glb");
+  const deckTemplatePromise = loader.loadAsync("../3d-daily/assets/mora-card.glb?v=20260821-stripface1");
   const backTexturePromise = loadBackTexture(renderer);
   const initialFaceTexturePromise = initialSelection?.imageUrl
     ? loadFaceTexture(renderer, initialSelection.imageUrl)
@@ -245,7 +245,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   let resultTemplatePromise;
   let resultTemplateMetrics;
   function loadResultTemplate() {
-    resultTemplatePromise ||= loader.loadAsync("../3d-daily/assets/mora-card-result.glb").then((resultGltf) => {
+    resultTemplatePromise ||= loader.loadAsync("../3d-daily/assets/mora-card-result.glb?v=20260821-stripface1").then((resultGltf) => {
       const resultTemplate = resultGltf.scene;
       applyMaterials(resultTemplate, materials);
       const resultBounds = new THREE.Box3().setFromObject(resultTemplate);

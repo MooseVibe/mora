@@ -130,7 +130,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   rim.position.set(5, 4, 6);
   scene.add(rim);
 
-  const deckGltf = await new GLTFLoader().loadAsync("../3d-daily/assets/mora-card.glb");
+  const deckGltf = await new GLTFLoader().loadAsync("../3d-daily/assets/mora-card.glb?v=20260821-stripface1");
   const template = deckGltf.scene;
   applyMaterials(template, renderer);
   const size = new THREE.Box3().setFromObject(template).getSize(new THREE.Vector3());

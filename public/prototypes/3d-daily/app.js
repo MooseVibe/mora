@@ -781,7 +781,7 @@ async function init() {
     populateResult();
 
     const [gltf, faceTexture, backTexture] = await Promise.all([
-      new GLTFLoader().loadAsync("./assets/mora-card.glb"),
+      new GLTFLoader().loadAsync("./assets/mora-card.glb?v=20260821-stripface1"),
       loadTexture(`/${worldCard.image.replace(/^\/+/, "")}`),
       loadTexture("./assets/mora-card-back-v3.webp"),
     ]);
