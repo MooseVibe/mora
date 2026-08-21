@@ -7,7 +7,7 @@
 - **Стили:** Vanilla CSS — единый файл `public/assets/styles.css` + отдельные CSS-файлы для страниц (`dashboard.css`, `journal.css`). Никаких CSS Modules, Tailwind, styled-components или UI-библиотек.
 - **Авторизация:** Google OAuth + обычная авторизация
 - **БД / хранилище:** Supabase (PostgreSQL). Таблица `card_draws` хранит `user_id`, `card_id`, `drawn_at`, а для новых вытягиваний также `variant_idx` и `reading_snapshot` с fallback-совместимостью для старой схемы. Клиент для браузера — `@supabase/ssr` createBrowserClient; для Server Components/Route Handlers — createServerClient.
-- **Деплой:** Vercel, прод на `mora-vnkt.vercel.app`
+- **Деплой:** Vercel project `mora` (`prj_iNES6q89fIyBt1acJ2j7OfMY1ygB`), прод на `mora-kappa.vercel.app`
 
 > Если что-то из списка `[нужно уточнить]` — открой код и заполни этот файл. Не работай со слепыми догадками.
 
@@ -109,7 +109,7 @@ mora/
 ## Окружения
 
 - **dev:** локально на `localhost:3000`
-- **prod:** `mora-vnkt.vercel.app`
+- **prod:** `mora-kappa.vercel.app`
 
 ## Команды разработки
 

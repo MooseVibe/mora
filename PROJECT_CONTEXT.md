@@ -16,7 +16,8 @@ North Star: an AI tarot reader in chat. The daily card and journal are retention
 - Auth and database: Supabase
 - Path alias: `@/*` -> `./src/*`
 - Local dev URL: `http://localhost:3000`
-- Production: `mora-vnkt.vercel.app`
+- Production: `mora-kappa.vercel.app`
+- Vercel project: `mora` (`prj_iNES6q89fIyBt1acJ2j7OfMY1ygB`); the retired `mora-vnkt` project must never be used
 
 ## Start The App
 

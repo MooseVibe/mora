@@ -3033,3 +3033,7 @@ Desktop profile trigger Mora Next увеличен до утверждённых
 ## 2026-08-21 — Неиспользуемая face-текстура удалена из GLB
 
 `mora-card.glb` и `mora-card-result.glb` больше не содержат встроенное изображение карты «Мир», потому что runtime всегда назначает фактическую face-текстуру до её показа. Вес моделей уменьшен с `487500 → 48272` и `459944 → 20716` байт без изменения геометрии и анимаций. Все preload/import URL используют одну versioned-ссылку, чтобы браузер не смешивал старые и новые модели.
+
+## 2026-08-21 — Старый Vercel project удалён, production закреплён за `mora`
+
+Устаревший проект `mora-vnkt` (`prj_gRte0bLWitSlo418krLJ1ImuXYb6`) удалён целиком по решению автора: его приложение и deployments больше не должны быть доступны, а прежний alias возвращает `404`. Канонический production target — Vercel project `mora` (`prj_iNES6q89fIyBt1acJ2j7OfMY1ygB`) с alias `mora-kappa.vercel.app`. Локальная `.vercel`-привязка и актуальные project docs обновлены, чтобы следующие deploy-проходы не могли снова попасть в старое окружение.
