@@ -4377,6 +4377,7 @@ body.reading-to-saved.reading-saved-entering .reading {
   }
 
   body.prototype-tester .reading .reading-copy .chapter.intro .reading-overview-copy h2 {
+    width: 100%;
     max-width: none;
     font-size: 40px;
     font-weight: 500;
