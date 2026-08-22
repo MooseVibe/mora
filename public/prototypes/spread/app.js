@@ -98,7 +98,6 @@ let stateTransitionInFlight = false;
 let touchStartY = 0;
 let touchStartedOnFirstChapter = false;
 let touchStartedOnLastChapter = false;
-let savedTouchStartY = 0;
 let wheelNeedsRelease = false;
 let blockedWheelDirection = 0;
 let loginDestination = "daily";
@@ -2369,26 +2368,6 @@ reading.addEventListener("touchend", (event) => {
   if (touchStartedOnFirstChapter && distance < -48) closeReadingToSaved();
 }, { passive: true });
 
-savedSpread.addEventListener("wheel", (event) => {
-  if (!document.body.classList.contains("saved-home") || Math.abs(event.deltaY) <= 12) return;
-  const direction = Math.sign(event.deltaY);
-  const returnChapter = direction < 0 ? savedReturnChapter : 0;
-  if (returnChapter === null) return;
-  event.preventDefault();
-  if (absorbCurrentWheelGesture(direction)) return;
-  openSavedReading(returnChapter, direction);
-}, { passive: false });
-
-savedSpread.addEventListener("touchstart", (event) => {
-  savedTouchStartY = event.touches[0].clientY;
-}, { passive: true });
-
-savedSpread.addEventListener("touchend", (event) => {
-  const distance = savedTouchStartY - event.changedTouches[0].clientY;
-  if (distance > 48) openSavedReading();
-  if (distance < -48 && savedReturnChapter !== null) openSavedReading(savedReturnChapter);
-}, { passive: true });
-
 readingNavItems.forEach((item) => {
   item.addEventListener("click", () => {
     goToChapter(Number(item.dataset.chapter));
@@ -2441,14 +2420,4 @@ window.addEventListener("keydown", (event) => {
   }
   if (event.key === "Home") goToChapter(0);
   if (event.key === "End") goToChapter(chapters.length - 1);
-});
-
-window.addEventListener("keydown", (event) => {
-  if (!document.body.classList.contains("saved-home")) return;
-  if (event.target.closest?.("button")) return;
-  const opensFromStart = ["ArrowDown", "PageDown", " ", "Enter"].includes(event.key);
-  const returnsToChapter = ["ArrowUp", "PageUp"].includes(event.key) && savedReturnChapter !== null;
-  if (!opensFromStart && !returnsToChapter) return;
-  event.preventDefault();
-  openSavedReading(returnsToChapter ? savedReturnChapter : 0);
 });
