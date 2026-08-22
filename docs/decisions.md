@@ -3122,7 +3122,7 @@ Mobile reading chapters явно используют `overflow-x: hidden`, по
 
 Mobile Mora Next не получает отдельные auth/draw/save/navigation механики: burger вызывает существующий `switchMode`, daily использует общий WebGL-controller и account contract, spread — тот же selection/generation/snapshot flow. Локальный `testerPreview=1` остаётся только QA-инструментом: он создаёт временную pending-карту в памяти и не отправляет account mutation без настоящей Supabase-сессии. Production cooldown и ownership не ослабляются.
 
-На ширине меньше Figma baseline `402px` reading-контент использует `min(354px, 100vw - 48px)`, а три overview-карты пропорционально делят доступную ширину. Это сохраняет исходную геометрию на `402px`, но устраняет внутренний horizontal scroll на обязательных `375px`. По истечении daily cooldown активный timer и `visibilitychange` маршрутизируются через общий `showDailyMode()`, поэтому DOM и WebGL-result сбрасываются атомарно.
+На ширине меньше Figma baseline `402px` reading-контент использует полную доступную ширину `100vw - 48px`, а три overview-карты пропорционально делят доступную ширину. Это сохраняет исходную геометрию на `402px`, но на более широком iPhone не оставляет искусственные боковые поля. По истечении daily cooldown активный timer и `visibilitychange` маршрутизируются через общий `showDailyMode()`, поэтому DOM и WebGL-result сбрасываются атомарно.
 
 ## 2026-08-22 — Result visibility и spread readiness проверяются по фактическим ресурсам
 
