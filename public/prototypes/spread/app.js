@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260821-mobileritual21";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260822-mobilefanexit2";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260822-prodhotfix1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS

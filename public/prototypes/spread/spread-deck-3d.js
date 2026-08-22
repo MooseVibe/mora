@@ -21,13 +21,14 @@ function tween(duration, update) {
   });
 }
 
-function loadBackTexture(renderer) {
-  const texture = new THREE.TextureLoader().load(
+async function loadBackTexture(renderer) {
+  const texture = await new THREE.TextureLoader().loadAsync(
     new URL("../3d-daily/assets/mora-card-back-v3.webp", import.meta.url).href,
   );
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.flipY = false;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  renderer.initTexture(texture);
   return texture;
 }
 
@@ -49,7 +50,7 @@ function createFacePlaceholderTexture() {
   return texture;
 }
 
-function applyMaterials(root, renderer) {
+function applyMaterials(root, backTexture) {
   const materials = {
     face: new THREE.MeshBasicMaterial({
       color: 0x242323,
@@ -58,7 +59,7 @@ function applyMaterials(root, renderer) {
       toneMapped: false,
     }),
     back: new THREE.MeshBasicMaterial({
-      map: loadBackTexture(renderer),
+      map: backTexture,
       side: THREE.DoubleSide,
       toneMapped: false,
       polygonOffset: true,
@@ -130,9 +131,12 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   rim.position.set(5, 4, 6);
   scene.add(rim);
 
-  const deckGltf = await new GLTFLoader().loadAsync("../3d-daily/assets/mora-card.glb?v=20260821-stripface1");
+  const [deckGltf, backTexture] = await Promise.all([
+    new GLTFLoader().loadAsync("../3d-daily/assets/mora-card.glb?v=20260821-stripface1"),
+    loadBackTexture(renderer),
+  ]);
   const template = deckGltf.scene;
-  applyMaterials(template, renderer);
+  applyMaterials(template, backTexture);
   const size = new THREE.Box3().setFromObject(template).getSize(new THREE.Vector3());
   const cardCount = cardElements.length;
   const cards = Array(cardCount).fill(null);

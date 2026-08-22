@@ -3567,6 +3567,11 @@ body.reading-to-saved.reading-saved-entering .reading {
     pointer-events: none;
   }
 
+  body.daily-mode.daily-result-ready.daily-3d-result .daily-result-card {
+    opacity: 1;
+    visibility: visible;
+  }
+
   body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) .daily-result-card-tilt {
     transform: none;
   }

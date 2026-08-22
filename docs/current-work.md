@@ -415,3 +415,9 @@ Dirty worktree дополнительно содержит отдельный ro
 - `directives/00-start-every-task.md`;
 - подходящую рабочую директиву;
 - необходимые продуктовые документы из `docs/`.
+
+## Production hotfix — 2026-08-22
+
+После mobile release production Safari выявил два независимых бага. При возврате из расклада к уже вытянутой daily-карте сочетание `daily-result-ready + daily-3d-result` позволяло более специфичному desktop CSS скрыть mobile DOM-card; mobile result теперь явно сохраняет её видимой. Spread WebGL раньше объявлял `is-ready` после GLB, не дожидаясь WebP-рубашки; модель и текстура теперь загружаются параллельно, texture decode/GPU init завершаются до handoff с 2D fan.
+
+Локальный mobile regression `402×821` подтвердил карту `210×350px` после daily → spread → logo → daily, готовый spread canvas и отсутствие console errors. JS syntax, `git diff --check`, lint и production build чистые. Следующий шаг — отдельный hotfix commit/deploy в `mora-kappa.vercel.app`, затем реальная Safari-проверка возврата к daily-result и первого входа в spread.
