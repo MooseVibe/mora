@@ -8,7 +8,10 @@
       (() => {
         try {
           const params = new URLSearchParams(window.location.search);
-          const isLocal = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+          const isLocal = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+            || /^192\.168\./.test(window.location.hostname)
+            || /^10\./.test(window.location.hostname)
+            || /^172\.(1[6-9]|2\d|3[01])\./.test(window.location.hostname);
           if (isLocal && ["1", "always"].includes(params.get("resetDaily"))) return;
           const snapshot = JSON.parse(window.localStorage.getItem("mora:prototype:dailyCard") || "null");
           const now = new Date();
@@ -34,12 +37,12 @@
     <link rel="stylesheet" href="/assets/fonts.css" />
     <link rel="preload" as="image" href="../3d-daily/assets/mora-card-back-v3.webp" fetchpriority="high" />
     <link rel="preload" as="fetch" href="../3d-daily/assets/mora-card.glb?v=20260821-stripface1" type="model/gltf-binary" crossorigin fetchpriority="high" />
-    <link rel="modulepreload" href="./app.js?v=20260821-stripface1" />
+    <link rel="modulepreload" href="./app.js?v=20260822-mobileflow2" />
     <link rel="modulepreload" href="/assets/cards.js" />
-    <link rel="modulepreload" href="./daily-3d.js?v=20260821-heightresponsive1" />
+    <link rel="modulepreload" href="./daily-3d.js?v=20260821-mobileritual21" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/build/three.module.js" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/examples/jsm/loaders/GLTFLoader.js" />
-    <link rel="stylesheet" href="./styles.css?v=20260821-heightresponsive1" />
+    <link rel="stylesheet" href="./styles.css?v=20260822-mobileflow2" />
   </head>
   <body class="daily-mode">
     <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
@@ -48,6 +51,38 @@
       <a class="brand" href="./index.html" aria-label="Mora — на главную">
         <img src="./icons/logo.svg" alt="Mora" />
       </a>
+      <div class="mobile-menu-control">
+        <div class="mobile-menu-backdrop" aria-hidden="true"></div>
+        <button class="mobile-menu-trigger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="mobile-menu">
+          <img src="./icons/list.svg" alt="" />
+        </button>
+        <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+          <div class="mobile-menu-account">
+            <div class="mobile-menu-email"></div>
+            <span class="mobile-menu-divider" aria-hidden="true"></span>
+          </div>
+          <div class="mobile-menu-modes">
+            <button class="mobile-menu-item mobile-menu-daily" type="button">
+              <span class="mobile-menu-icon"><img src="./icons/one-card.svg" alt="" /></span>
+              <span>Карта дня</span>
+            </button>
+            <button class="mobile-menu-item mobile-menu-spread" type="button">
+              <span class="mobile-menu-icon"><img src="./icons/two-card.svg" alt="" /></span>
+              <span>Расклад</span>
+            </button>
+          </div>
+          <span class="mobile-menu-divider mobile-menu-guest-divider" aria-hidden="true"></span>
+          <button class="mobile-menu-item mobile-menu-login" type="button">
+            <span class="mobile-menu-icon"><img src="./icons/sign-in.svg" alt="" /></span>
+            <span>Войти</span>
+          </button>
+          <span class="mobile-menu-divider mobile-menu-auth-divider" aria-hidden="true"></span>
+          <button class="mobile-menu-item mobile-menu-logout" type="button">
+            <span class="mobile-menu-icon"><img src="./icons/sign-out.svg" alt="" /></span>
+            <span>Выйти</span>
+          </button>
+        </div>
+      </div>
       <button class="login primary-action" type="button">Войти</button>
       <div class="profile-control">
         <button class="profile-trigger" type="button" aria-label="Профиль" aria-expanded="false" aria-controls="profile-menu">
@@ -107,7 +142,10 @@
             </div>
           </div>
           <div class="daily-result-actions">
-            <button class="daily-result-share primary-action secondary-action" type="button">Поделиться</button>
+            <button class="daily-result-share primary-action secondary-action" type="button" aria-label="Поделиться">
+              <img src="./icons/share-fat.svg" alt="" />
+              <span>Поделиться</span>
+            </button>
             <button class="daily-result-cooldown primary-action" id="daily-cooldown" type="button" disabled>
               Новая карта через 12:00:00
             </button>
@@ -131,7 +169,10 @@
             <button class="guest-spread-login primary-action" type="button">Войти</button>
           </div>
           <div class="spread-authenticated-controls">
-            <p id="ritual-subtitle">На что хочешь посмотреть?</p>
+            <p id="ritual-subtitle">
+              <span class="ritual-subtitle-desktop">На что хочешь посмотреть?</span>
+              <span class="ritual-subtitle-mobile">Выбери тему</span>
+            </p>
             <div class="topics" aria-label="Тема расклада">
               <button class="topic" data-topic="Внутреннее состояние" type="button">
                 <img src="./icons/star-four.svg" alt="" />
@@ -330,7 +371,10 @@
               <p>Здесь будет короткий человеческий ответ по выбранной теме.</p>
               <div class="reading-summary-actions">
                 <button class="reading-summary-home primary-action secondary-action" type="button">На главную</button>
-                <button class="share primary-action" type="button">Поделиться</button>
+                <button class="share primary-action" type="button" aria-label="Поделиться">
+                  <img src="./icons/share-fat.svg" alt="" />
+                  <span class="visually-hidden">Поделиться</span>
+                </button>
               </div>
             </div>
           </article>
@@ -394,6 +438,6 @@
       </div>
     </section>
 
-    <script type="module" src="./app.js?v=20260821-stripface1"></script>
+    <script type="module" src="./app.js?v=20260822-mobileflow2"></script>
   </body>
 </html>

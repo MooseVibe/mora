@@ -27,7 +27,7 @@ function loadBackTexture(renderer) {
   );
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.flipY = false;
-  texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return texture;
 }
 
@@ -117,11 +117,11 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !isMobile(),
+    antialias: true,
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.2 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 3 : 1.5));
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.7));
   const key = new THREE.DirectionalLight(0xffe7d2, 2.8);
   key.position.set(-4, 8, 8);
@@ -164,7 +164,14 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   function ensureCard(index) {
     if (cards[index]) return cards[index];
     const card = template.clone(true);
-    const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
+    card.userData.fadeMaterials = [];
+    card.traverse((object) => {
+      if (!object.isMesh) return;
+      object.material = object.material.clone();
+      object.material.transparent = true;
+      card.userData.fadeMaterials.push(object.material);
+    });
+    const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial.clone());
     scene.add(card, shadow);
     cards[index] = card;
     shadows[index] = shadow;
@@ -177,6 +184,8 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   const parkedResults = new Map();
   let layoutSyncUntil = 0;
   let fanVisible = true;
+  let fanExitAmount = 0;
+  let fanExitToken = 0;
   let draggedIndex = null;
   let dragStartScale = null;
   let dragScaleAmount = 0;
@@ -235,18 +244,23 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       const hoverAmount = hoverAmounts[index];
       const hoverX = Math.sin(outwardAngle) * hoverAmount * 12;
       const hoverY = Math.cos(outwardAngle) * hoverAmount * 12;
+      const fanOpacity = 1 - fanExitAmount;
       const x = rect.left + rect.width / 2 - viewport.width / 2 + hoverX;
       const y = viewport.height / 2 - rect.top - rect.height / 2 + hoverY;
       const z = (index - middleIndex) * layerStep;
       card.position.set(x, y, z);
       card.quaternion.setFromAxisAngle(cardTurnAxis, rotation).multiply(faceCamera);
       card.scale.set(xScale, xScale, zScale);
+      card.userData.fadeMaterials.forEach((material) => {
+        material.opacity = fanOpacity;
+      });
       card.visible = true;
 
       const shadow = shadows[index];
       shadow.position.set(x, y - 6, z - layerStep * 0.55);
       shadow.quaternion.setFromAxisAngle(cardTurnAxis, rotation);
       shadow.scale.set(rect.width * 1.12, rect.height * 1.08, 1);
+      shadow.material.opacity = 0.32 * fanOpacity;
       shadow.visible = true;
     });
 
@@ -308,16 +322,29 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       layoutSyncUntil = performance.now() + duration;
       renderDeck();
     },
-    hideFan() {
-      fanVisible = false;
+    hideFan(duration = 560) {
       hoveredIndex = null;
-      renderDeck();
+      const token = ++fanExitToken;
+      if (duration <= 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        fanExitAmount = 1;
+        fanVisible = false;
+        renderDeck();
+        return;
+      }
+      tween(duration, (progress) => {
+        if (token !== fanExitToken) return;
+        fanExitAmount = easeInOut(progress);
+        renderDeck();
+        if (progress === 1) fanVisible = false;
+      });
     },
     reset() {
       window.cancelAnimationFrame(animationFrame);
+      fanExitToken += 1;
       selectedIndices.clear();
       parkedResults.clear();
       fanVisible = true;
+      fanExitAmount = 0;
       hoveredIndex = null;
       draggedIndex = null;
       dragStartScale = null;
@@ -325,7 +352,11 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       hoverAmounts.fill(0);
       cards.forEach((card, index) => {
         if (!card) return;
+        card.userData.fadeMaterials.forEach((material) => {
+          material.opacity = 1;
+        });
         card.visible = visibleIndices.has(index);
+        shadows[index].material.opacity = 0.32;
         shadows[index].visible = visibleIndices.has(index);
       });
       renderDeck();

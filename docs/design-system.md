@@ -83,6 +83,10 @@ SVG-маркеры старших арканов не содержат само�
 
 Desktop profile trigger имеет размер `48×48px`: внешний слой `2px`, внутренняя поверхность `44×44px`, glyph `24×24px`. Account-menu располагается на `8px` ниже trigger, имеет ширину `170px`, radius `12px`, padding `4px 8px`; сверху показывает email текущей Supabase-сессии, снизу — action «Выйти» размером `152×36px` с glyph `20×20px`.
 
+### Mobile reading navigation Mora Next
+
+Навигация секций готового расклада фиксируется на `bottom: 0` внутри `100dvh`, поэтому в Safari располагается непосредственно над browser bar. Поверхность использует `--prototype-surface`, верхний fade — `34px`; row имеет высоту `64px` и симметричные вертикальные padding `8px` (справа контент резервирует место для controls). Слева показывается только активная секция Spectral SC Medium `24/32`, справа — круглая кнопка `48×48px`; их оптические центры совпадают.
+
 ## Типографика
 
 Шрифты лежат локально в `public/assets/fonts/` и подключаются через `public/assets/fonts.css`.
@@ -105,6 +109,8 @@ Desktop profile trigger имеет размер `48×48px`: внешний сл�
 | Card title | Spectral SC 400 | `31px` | `.db-card-title` |
 | Daily result card name | Spectral SC 400 | `48px / 56px` | основное название карты до длинного тире в Mora Next |
 | Daily result title meta | Spectral SC 300 | `32px / 44px` | описание карты после длинного тире в Mora Next |
+| Mora Next mobile body | Inter Display 400 | `20px / 28px` | idle-подсказка, гостевой расклад, авторизация и текст результата |
+| Mobile selected spread card | Inter Display 400 | `18px / 26px` | подпись на `12px` ниже выбранной карты; ширина равна слоту, длинный текст заканчивается многоточием |
 | Body | Inter Display 300 | `14px` / `13px` | описания, `.landing-panel-desc` |
 | UI / кнопки | Inter Display 300–600 | `11px`, letter-spacing 0.35em, uppercase | `.btn` |
 | Caption / nav | Inter Display 400 | `13px` | `.db-nav-link` |

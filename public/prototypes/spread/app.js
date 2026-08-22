@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260821-heightresponsive1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260821-stripface1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260821-mobileritual21";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260822-mobilefanexit2";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS
@@ -36,6 +36,15 @@ const dailyModeButton = document.querySelector("#daily-mode-button");
 const spreadModeButton = document.querySelector("#spread-mode-button");
 const brand = document.querySelector(".brand");
 const loginButton = document.querySelector(".login");
+const mobileMenuControl = document.querySelector(".mobile-menu-control");
+const mobileMenuBackdrop = document.querySelector(".mobile-menu-backdrop");
+const mobileMenuTrigger = document.querySelector(".mobile-menu-trigger");
+const mobileMenu = document.querySelector("#mobile-menu");
+const mobileMenuDaily = document.querySelector(".mobile-menu-daily");
+const mobileMenuSpread = document.querySelector(".mobile-menu-spread");
+const mobileMenuLogin = document.querySelector(".mobile-menu-login");
+const mobileMenuEmail = document.querySelector(".mobile-menu-email");
+const mobileMenuLogout = document.querySelector(".mobile-menu-logout");
 const profileControl = document.querySelector(".profile-control");
 const profileTrigger = document.querySelector(".profile-trigger");
 const profileMenu = document.querySelector("#profile-menu");
@@ -61,6 +70,7 @@ const dailyResultCopy = document.querySelector(".daily-result-copy");
 const dailyResultImage = document.querySelector("#daily-result-image");
 const dailyCooldownButton = document.querySelector("#daily-cooldown");
 const dailyResultCard = document.querySelector(".daily-result-card");
+const dailyResult = document.querySelector("#daily-result");
 const dailyResultCardTilt = document.querySelector(".daily-result-card-tilt");
 const readingStatusCopy = document.querySelector(".status-copy");
 let picked = 0;
@@ -103,6 +113,7 @@ let spreadDeck3DController;
 let spreadDeck3DPromise;
 let prototypeTesterAuthenticated = false;
 let prototypeTesterIsAdmin = false;
+let prototypeTesterPreview = false;
 let testerSessionResolved = false;
 let accountDailyState = null;
 let accountSpreadSnapshot = null;
@@ -118,7 +129,7 @@ const clientEventTrace = crypto.randomUUID?.() || String(Date.now());
 const sentClientEvents = new Set();
 
 function reportClientEvent(event, once = true) {
-  if (!testerSessionResolved || !prototypeTesterAuthenticated) return;
+  if (!testerSessionResolved || !prototypeTesterAuthenticated || prototypeTesterPreview) return;
   if (once && sentClientEvents.has(event)) return;
   sentClientEvents.add(event);
   fetch("/api/prototypes/account-state", {
@@ -158,7 +169,12 @@ dailyDeck3D.then((controller) => {
 const savedSpreadKey = "mora:prototype:lastSpread";
 const savedDailyCardKey = "mora:prototype:dailyCard";
 const pendingDailyCardKey = "mora:prototype:pendingDailyCard";
-const isLocalPrototype = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+const isLocalPrototype = (
+  ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+  || /^192\.168\./.test(window.location.hostname)
+  || /^10\./.test(window.location.hostname)
+  || /^172\.(1[6-9]|2\d|3[01])\./.test(window.location.hostname)
+);
 const spreadCooldownMs = 12 * 60 * 60 * 1000;
 const suitTags = {
   "Пентакли": "./icons/suit-pentacles.svg",
@@ -246,6 +262,28 @@ brand.addEventListener("click", (event) => {
 });
 spreadModeButton.addEventListener("click", () => switchMode("spread"));
 loginButton.addEventListener("click", () => openLoginScreen("daily"));
+mobileMenuTrigger.addEventListener("click", () => {
+  const open = mobileMenuTrigger.getAttribute("aria-expanded") !== "true";
+  mobileMenuTrigger.setAttribute("aria-expanded", String(open));
+  mobileMenu.setAttribute("aria-hidden", String(!open));
+  mobileMenuBackdrop.setAttribute("aria-hidden", String(!open));
+});
+mobileMenuBackdrop.addEventListener("click", closeMobileMenu);
+mobileMenuDaily.addEventListener("click", () => {
+  closeMobileMenu();
+  if (document.body.classList.contains("login-screen-open")) closeLoginScreen();
+  switchMode("daily");
+});
+mobileMenuSpread.addEventListener("click", () => {
+  closeMobileMenu();
+  if (document.body.classList.contains("login-screen-open")) closeLoginScreen();
+  switchMode("spread");
+});
+mobileMenuLogin.addEventListener("click", () => {
+  closeMobileMenu();
+  openLoginScreen(document.body.classList.contains("guest-spread-mode") ? "spread" : "daily");
+});
+mobileMenuLogout.addEventListener("click", logoutPrototypeTester);
 guestSpreadLogin.addEventListener("click", () => openLoginScreen("spread"));
 profileTrigger.addEventListener("click", () => {
   const open = profileTrigger.getAttribute("aria-expanded") !== "true";
@@ -255,6 +293,7 @@ profileTrigger.addEventListener("click", () => {
 profileLogout.addEventListener("click", logoutPrototypeTester);
 document.addEventListener("click", (event) => {
   if (!profileControl.contains(event.target)) closeProfileMenu();
+  if (!mobileMenuControl.contains(event.target)) closeMobileMenu();
 });
 loginScreenBrand.addEventListener("click", (event) => {
   event.preventDefault();
@@ -267,8 +306,17 @@ dailyDeck.addEventListener("pointerdown", () => reportClientEvent("daily-deck-po
 
 async function restorePrototypeTesterSession() {
   const params = new URLSearchParams(window.location.search);
+  const guestPreview = isLocalPrototype && params.get("guestPreview") === "1";
+  if (guestPreview) {
+    setPrototypeTesterAuthenticated(false);
+    testerSessionResolved = true;
+    document.documentElement.classList.remove("tester-session-pending");
+    return;
+  }
+
   const localPreview = isLocalPrototype && params.get("testerPreview") === "1";
   if (localPreview) {
+    prototypeTesterPreview = true;
     setPrototypeTesterAuthenticated(true, true, null, "moratest@bk.ru");
     testerSessionResolved = true;
     document.documentElement.classList.remove("tester-session-pending");
@@ -435,7 +483,12 @@ function setPrototypeTesterAuthenticated(authenticated, isAdmin = false, nextSpr
   prototypeTesterIsAdmin = authenticated && isAdmin;
   prototypeNextSpreadAt = authenticated && !isAdmin ? Date.parse(nextSpreadAt || "") || 0 : 0;
   profileEmail.textContent = authenticated ? email : "";
+  mobileMenuEmail.textContent = authenticated ? email : "";
   document.body.classList.toggle("prototype-tester", authenticated);
+  document.body.classList.toggle(
+    "guest-spread-mode",
+    !authenticated && !document.body.classList.contains("daily-mode"),
+  );
   updateNewSpreadButton();
   if (!authenticated) closeProfileMenu();
 }
@@ -443,6 +496,12 @@ function setPrototypeTesterAuthenticated(authenticated, isAdmin = false, nextSpr
 function closeProfileMenu() {
   profileTrigger.setAttribute("aria-expanded", "false");
   profileMenu.setAttribute("aria-hidden", "true");
+}
+
+function closeMobileMenu() {
+  mobileMenuTrigger.setAttribute("aria-expanded", "false");
+  mobileMenu.setAttribute("aria-hidden", "true");
+  mobileMenuBackdrop.setAttribute("aria-hidden", "true");
 }
 
 async function logoutPrototypeTester() {
@@ -541,12 +600,14 @@ function showDailyMode() {
     "daily-3d-ritual",
     "daily-3d-animating",
   );
+  document.body.classList.remove("guest-spread-mode");
   document.body.classList.add("daily-mode");
   dailyModeButton.classList.add("active");
   spreadModeButton.classList.remove("active");
 
   const savedDailyCard = readSavedDailyCard();
   dailyDeck.disabled = Boolean(savedDailyCard);
+  daily3DResultActive = Boolean(savedDailyCard && daily3DResultActive);
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
     document.documentElement.classList.remove("daily-saved-pending");
@@ -581,6 +642,10 @@ function showDailyMode() {
     }
   } else {
     document.documentElement.classList.remove("daily-saved-pending");
+    daily3DResultActive = false;
+    dailyDeck3D.then((controller) => {
+      controller?.resetResultToIdle();
+    });
   }
 }
 
@@ -598,6 +663,7 @@ function showSpreadMode() {
     "daily-3d-ritual",
     "daily-3d-animating",
   );
+  document.body.classList.toggle("guest-spread-mode", !prototypeTesterAuthenticated);
   dailyModeButton.classList.remove("active");
   spreadModeButton.classList.add("active");
 
@@ -612,13 +678,16 @@ function showDaily3DError() {
 }
 
 function updateDailyResultScrollState() {
-  const maxScrollTop = Math.max(0, dailyResultCopy.scrollHeight - dailyResultCopy.clientHeight);
+  const scroller = window.matchMedia("(max-width: 720px)").matches ? dailyResult : dailyResultCopy;
+  const maxScrollTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
   const isScrollable = maxScrollTop > 2;
-  dailyResultCopy.classList.toggle("can-scroll-up", isScrollable && dailyResultCopy.scrollTop > 2);
-  dailyResultCopy.classList.toggle(
-    "can-scroll-down",
-    isScrollable && dailyResultCopy.scrollTop < maxScrollTop - 2,
-  );
+  [dailyResult, dailyResultCopy].forEach((element) => {
+    element.classList.toggle("can-scroll-up", element === scroller && isScrollable && scroller.scrollTop > 2);
+    element.classList.toggle(
+      "can-scroll-down",
+      element === scroller && isScrollable && scroller.scrollTop < maxScrollTop - 2,
+    );
+  });
 }
 
 function scheduleDailyResultScrollUpdate() {
@@ -740,11 +809,13 @@ function populateDailyResult(card, variantIndex) {
   ).slice(0, 2);
   const title = card.result.title || card.name;
   const titleMeta = card.result.titleMeta || "";
-  dailyResultTitleMain.textContent = titleMeta ? `${title} — ` : title;
+  dailyResultTitleMain.textContent = title;
+  dailyResultTitleMain.classList.toggle("has-title-meta", Boolean(titleMeta));
   dailyResultTitleMeta.textContent = titleMeta;
   populateCardTag(dailyResultSuit, dailyResultSuitLabel, dailyResultSuitIcon, card);
   dailyResultText.replaceChildren();
   dailyResultCopy.scrollTop = 0;
+  dailyResult.scrollTop = 0;
   paragraphs.forEach((paragraph) => {
     const item = document.createElement("p");
     item.textContent = paragraph;
@@ -856,7 +927,7 @@ function prepareDailyCardCandidate() {
     pendingDailySelection = storedCandidate;
     return pendingDailySelection;
   }
-  if (prototypeTesterAuthenticated) return;
+  if (prototypeTesterAuthenticated && !prototypeTesterPreview) return;
   const card = getDailyCard();
   if (!card) return;
   const variantIndex = Math.floor(Math.random() * card.result.dayVariants.length);
@@ -898,17 +969,19 @@ function prepareDailyCardSelection() {
       drawnAt: completedAt,
       nextDailyAt: new Date(prototypeNextDailyAt).toISOString(),
     };
-    fetch("/api/prototypes/account-state", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "complete-daily" }),
-      keepalive: true,
-    }).then(async (response) => {
-      if (!response.ok) throw new Error("Unable to save daily card");
-      const payload = await response.json();
-      accountDailyState = payload.daily;
-      prototypeNextDailyAt = Date.parse(payload.daily?.nextDailyAt || "") || prototypeNextDailyAt;
-    }).catch((error) => console.error("Mora daily account save failed", error));
+    if (!prototypeTesterPreview) {
+      fetch("/api/prototypes/account-state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "complete-daily" }),
+        keepalive: true,
+      }).then(async (response) => {
+        if (!response.ok) throw new Error("Unable to save daily card");
+        const payload = await response.json();
+        accountDailyState = payload.daily;
+        prototypeNextDailyAt = Date.parse(payload.daily?.nextDailyAt || "") || prototypeNextDailyAt;
+      }).catch((error) => console.error("Mora daily account save failed", error));
+    }
   } else {
     try {
       window.localStorage.setItem(
@@ -1128,6 +1201,8 @@ function initStarfield() {
 const deckCardCount = spreadDeck.length;
 const visibleDeckCards = Math.min(10, spreadDeck.length);
 const deckCards = [];
+const spreadDeckSpacing = () => (window.innerWidth <= 720 ? 70 : 98);
+const spreadDeckCurve = () => (window.innerWidth <= 720 ? 1.38 : 2);
 
 for (let index = 0; index < deckCardCount; index += 1) {
   const tarotCard = spreadDeck[index];
@@ -1145,10 +1220,12 @@ for (let index = 0; index < deckCardCount; index += 1) {
   card.addEventListener("pointerenter", () => {
     const currentCard = spreadDeck.find((item) => item.id === card.dataset.cardId);
     if (currentCard) spreadDeck3DController?.preloadFace(currentCard.image);
-    spreadDeck3DController?.setHovered(index);
+    if (window.innerWidth > 720) spreadDeck3DController?.setHovered(index);
   });
   card.addEventListener("pointerleave", () => spreadDeck3DController?.setHovered(null));
-  card.addEventListener("focus", () => spreadDeck3DController?.setHovered(index));
+  card.addEventListener("focus", () => {
+    if (window.innerWidth > 720) spreadDeck3DController?.setHovered(index);
+  });
   card.addEventListener("blur", () => spreadDeck3DController?.setHovered(null));
   deck.append(card);
   deckCards.push(card);
@@ -1186,18 +1263,19 @@ function ensureSpreadDeck3D() {
 }
 
 function renderDeck() {
+  const spacing = spreadDeckSpacing();
   const visibleCardIndices = [];
   const visibleLimit = window.innerWidth / 2 + 320;
   deckCards.forEach((card, index) => {
-    const offset = index - (deckCardCount - 1) / 2 + deckScroll / 98;
-    card.style.top = `${offset ** 2 * 2}px`;
-    card.style.transform = `translateX(calc(-50% + ${offset * 98}px)) rotate(${offset * 1.88}deg)`;
+    const offset = index - (deckCardCount - 1) / 2 + deckScroll / spacing;
+    card.style.top = `${offset ** 2 * spreadDeckCurve()}px`;
+    card.style.transform = `translateX(calc(-50% + ${offset * spacing}px)) rotate(${offset * 1.88}deg)`;
     card.style.zIndex = String(index);
-    if (Math.abs(offset * 98) <= visibleLimit) visibleCardIndices.push(index);
+    if (Math.abs(offset * spacing) <= visibleLimit) visibleCardIndices.push(index);
   });
   visibleCardIndices.sort((left, right) => (
-    Math.abs(left - (deckCardCount - 1) / 2 + deckScroll / 98)
-    - Math.abs(right - (deckCardCount - 1) / 2 + deckScroll / 98)
+    Math.abs(left - (deckCardCount - 1) / 2 + deckScroll / spacing)
+    - Math.abs(right - (deckCardCount - 1) / 2 + deckScroll / spacing)
   ));
   visibleSpreadCardIndices = visibleCardIndices;
   spreadDeck3DController?.setVisibleIndices(visibleCardIndices);
@@ -1216,7 +1294,8 @@ function playDeckDiscoveryMotion() {
 
   deck.classList.add("is-discovering");
   const startedAt = performance.now();
-  const target = -Math.min(((deckCardCount - visibleDeckCards) * 98) / 2, 5 * 98);
+  const spacing = spreadDeckSpacing();
+  const target = -Math.min(((deckCardCount - visibleDeckCards) * spacing) / 2, 5 * spacing);
   const duration = 1050;
 
   function moveDeck(now) {
@@ -1245,13 +1324,115 @@ ritual.addEventListener(
     event.preventDefault();
     stopDeckDiscoveryMotion();
     const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-    const limit = ((deckCardCount - visibleDeckCards) * 98) / 2;
+    const limit = ((deckCardCount - visibleDeckCards) * spreadDeckSpacing()) / 2;
     deckScroll = Math.max(-limit, Math.min(limit, deckScroll - delta));
     renderDeck();
     scheduleVisibleSpreadFaces();
   },
   { passive: false },
 );
+
+let mobileFanSwipe = null;
+let suppressMobileFanClick = false;
+let mobileFanInertiaFrame;
+
+deck.addEventListener("pointerdown", (event) => {
+  if (window.innerWidth > 720 || ritual.dataset.step !== "choose" || event.button !== 0) return;
+  stopDeckDiscoveryMotion();
+  stopMobileFanInertia();
+  spreadDeck3DController?.setHovered(null);
+  mobileFanSwipe = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    startScroll: deckScroll,
+    moved: false,
+    horizontal: false,
+    lastX: event.clientX,
+    lastTime: performance.now(),
+    velocity: 0,
+  };
+  event.stopPropagation();
+  window.addEventListener("pointermove", moveMobileFan);
+  window.addEventListener("pointerup", endMobileFanSwipe);
+  window.addEventListener("pointercancel", endMobileFanSwipe);
+}, true);
+
+deck.addEventListener("click", (event) => {
+  if (!suppressMobileFanClick) return;
+  suppressMobileFanClick = false;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}, true);
+
+function moveMobileFan(event) {
+  if (!mobileFanSwipe || event.pointerId !== mobileFanSwipe.pointerId) return;
+  const deltaX = event.clientX - mobileFanSwipe.startX;
+  const deltaY = event.clientY - mobileFanSwipe.startY;
+  if (Math.hypot(deltaX, deltaY) > 6) mobileFanSwipe.moved = true;
+  if (!mobileFanSwipe.moved || Math.abs(deltaX) < Math.abs(deltaY)) return;
+  event.preventDefault();
+  mobileFanSwipe.horizontal = true;
+  const now = performance.now();
+  const elapsed = Math.max(1, now - mobileFanSwipe.lastTime);
+  const instantVelocity = (event.clientX - mobileFanSwipe.lastX) / elapsed;
+  mobileFanSwipe.velocity = mobileFanSwipe.velocity * 0.55 + instantVelocity * 0.45;
+  mobileFanSwipe.lastX = event.clientX;
+  mobileFanSwipe.lastTime = now;
+  const limit = ((deckCardCount - visibleDeckCards) * spreadDeckSpacing()) / 2;
+  deckScroll = Math.max(-limit, Math.min(limit, mobileFanSwipe.startScroll + deltaX));
+  renderDeck();
+}
+
+function endMobileFanSwipe(event) {
+  if (!mobileFanSwipe || event.pointerId !== mobileFanSwipe.pointerId) return;
+  const { moved, horizontal, velocity } = mobileFanSwipe;
+  suppressMobileFanClick = moved;
+  mobileFanSwipe = null;
+  window.removeEventListener("pointermove", moveMobileFan);
+  window.removeEventListener("pointerup", endMobileFanSwipe);
+  window.removeEventListener("pointercancel", endMobileFanSwipe);
+  if (horizontal && event.type !== "pointercancel") startMobileFanInertia(velocity);
+  else scheduleVisibleSpreadFaces();
+}
+
+function stopMobileFanInertia() {
+  window.cancelAnimationFrame(mobileFanInertiaFrame);
+  mobileFanInertiaFrame = undefined;
+}
+
+function startMobileFanInertia(initialVelocity) {
+  stopMobileFanInertia();
+  if (
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    || Math.abs(initialVelocity) < 0.04
+  ) {
+    scheduleVisibleSpreadFaces();
+    return;
+  }
+
+  let velocity = Math.max(-2.4, Math.min(2.4, initialVelocity));
+  let previousTime = performance.now();
+  const limit = ((deckCardCount - visibleDeckCards) * spreadDeckSpacing()) / 2;
+
+  function coast(now) {
+    const elapsed = Math.min(32, now - previousTime);
+    previousTime = now;
+    const nextScroll = Math.max(-limit, Math.min(limit, deckScroll + velocity * elapsed));
+    const reachedEdge = nextScroll === deckScroll;
+    deckScroll = nextScroll;
+    velocity *= 0.95 ** (elapsed / 16.67);
+    renderDeck();
+    if (!reachedEdge && Math.abs(velocity) >= 0.015) {
+      mobileFanInertiaFrame = window.requestAnimationFrame(coast);
+      return;
+    }
+    mobileFanInertiaFrame = undefined;
+    scheduleVisibleSpreadFaces();
+  }
+
+  mobileFanInertiaFrame = window.requestAnimationFrame(coast);
+}
 
 topics.forEach((topic) => {
   topic.addEventListener("click", () => {
@@ -1454,11 +1635,24 @@ function commitCard(
   updateNextSlot();
 
   if (picked === spreadSize) {
-    ritual.dataset.step = "loading";
-    spreadDeck3DController?.hideFan();
-    spreadDeck3DController?.syncResults(800);
-    generateReading();
+    if (window.innerWidth <= 720 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.setTimeout(beginReadingGeneration, 120);
+      return;
+    }
+    beginReadingGeneration();
   }
+}
+
+function beginReadingGeneration() {
+  if (picked !== spreadSize) return;
+  const animateMobileLoading = (
+    window.innerWidth <= 720
+    && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  ritual.dataset.step = "loading";
+  spreadDeck3DController?.hideFan(animateMobileLoading ? 560 : 0);
+  spreadDeck3DController?.syncResults(animateMobileLoading ? 650 : 800);
+  generateReading();
 }
 
 function createSlotName(text) {
@@ -1471,9 +1665,26 @@ function createSlotName(text) {
 function revealSlotName(slot, text) {
   if (slot.querySelector(".slot-name.is-visible")) return;
   const name = slot.querySelector(".slot-name") || createSlotName(text);
-  name.textContent = text;
+  name.textContent = window.innerWidth <= 720 ? compactMobileCardName(text) : text;
   if (!name.isConnected) slot.append(name);
   window.requestAnimationFrame(() => name.classList.add("is-visible"));
+}
+
+function compactMobileCardName(text) {
+  const ranks = {
+    "Двойка": "2-ка",
+    "Тройка": "3-ка",
+    "Четвёрка": "4-ка",
+    "Пятёрка": "5-ка",
+    "Шестёрка": "6-ка",
+    "Семёрка": "7-ка",
+    "Восьмёрка": "8-ка",
+    "Девятка": "9-ка",
+    "Десятка": "10-ка",
+  };
+  return text.replace(/^(\S+)(.*)$/, (_, rank, rest) => (
+    `${ranks[rank] || rank}${rest.toLowerCase()}`
+  ));
 }
 
 function saveLastSpread(reading, source, persistedSnapshot = null) {
@@ -1554,7 +1765,8 @@ function renderSavedSpread(snapshot) {
     cardShell.className = "tarot-card-shell saved-card-shell";
     image.src = card.image;
     image.alt = card.name;
-    caption.textContent = card.name;
+    caption.textContent = window.innerWidth <= 720 ? compactMobileCardName(card.name) : card.name;
+    caption.title = card.name;
     cardShell.append(image);
     figure.append(cardShell, caption);
     savedCards.append(figure);
@@ -1590,11 +1802,22 @@ function updateDailyCooldownButton() {
     if (remaining <= 0) {
       window.clearInterval(dailyCooldownTimer);
       dailyCooldownTimer = undefined;
+      if (document.body.classList.contains("daily-mode")) showDailyMode();
     }
   };
 
   render();
   if (cooldownEndsAt > Date.now()) dailyCooldownTimer = window.setInterval(render, 1000);
+}
+
+function refreshDailyStateAfterBackground() {
+  if (
+    document.visibilityState !== "visible"
+    || !testerSessionResolved
+    || !document.body.classList.contains("daily-mode")
+  ) return;
+  if (readSavedDailyCard()) updateDailyCooldownButton();
+  else showDailyMode();
 }
 
 function updateNewSpreadButton(snapshot = readLastSpread()) {
@@ -2000,8 +2223,9 @@ function populateReading(reading, cards) {
     const overviewImage = overviewCard.querySelector("img");
     overviewImage.src = card.image;
     overviewImage.alt = card.name;
-    overviewCard.querySelector(".reading-overview-card-name").textContent = card.name;
-    stage.querySelector(`[data-card="${index}"] .stage-card-name`).textContent = card.name;
+    const displayName = window.innerWidth <= 720 ? compactMobileCardName(card.name) : card.name;
+    overviewCard.querySelector(".reading-overview-card-name").textContent = displayName;
+    stage.querySelector(`[data-card="${index}"] .stage-card-name`).textContent = displayName;
   });
 
   chapters[4].querySelector("p").textContent = reading.conclusion.text;
@@ -2043,6 +2267,14 @@ function setActiveChapter(index) {
   reading.classList.toggle("is-overview", activeChapter === 0);
   reading.classList.toggle("is-card-chapter", activeChapter > 0 && activeChapter < 4);
   reading.classList.toggle("is-summary", activeChapter === 4);
+  updateReadingTopFade();
+}
+
+function updateReadingTopFade() {
+  reading.classList.toggle(
+    "has-top-fade",
+    window.innerWidth <= 720 && chapters[activeChapter].scrollTop > 2,
+  );
 }
 
 function goToChapter(index) {
@@ -2050,6 +2282,12 @@ function goToChapter(index) {
   if (target === activeChapter) return false;
 
   setActiveChapter(target);
+  if (window.innerWidth <= 720) {
+    readingCopy.scrollTop = 0;
+    chapters[target].scrollTop = 0;
+    updateReadingTopFade();
+    return true;
+  }
   readingCopy.scrollTo({
     top: activeChapter * readingCopy.clientHeight,
     behavior: "smooth",
@@ -2061,6 +2299,7 @@ reading.addEventListener(
   "wheel",
   (event) => {
     if (!document.body.classList.contains("reading-ready")) return;
+    if (window.innerWidth <= 720) return;
     event.preventDefault();
 
     const direction = Math.sign(event.deltaY);
@@ -2117,12 +2356,14 @@ reading.addEventListener(
 );
 
 reading.addEventListener("touchstart", (event) => {
+  if (window.innerWidth <= 720) return;
   touchStartY = event.touches[0].clientY;
   touchStartedOnFirstChapter = activeChapter === 0;
   touchStartedOnLastChapter = activeChapter === chapters.length - 1;
 }, { passive: true });
 
 reading.addEventListener("touchend", (event) => {
+  if (window.innerWidth <= 720) return;
   const distance = touchStartY - event.changedTouches[0].clientY;
   if (touchStartedOnLastChapter && distance > 48) closeReadingToSaved(activeChapter);
   if (touchStartedOnFirstChapter && distance < -48) closeReadingToSaved();
@@ -2164,10 +2405,16 @@ readingNextButton.addEventListener("click", () => goToChapter(activeChapter + 1)
 readingSummaryHomeButton.addEventListener("click", () => closeReadingToSaved(activeChapter));
 
 dailyResultCopy.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
+dailyResult.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
 window.addEventListener("resize", scheduleDailyResultScrollUpdate, { passive: true });
+document.addEventListener("visibilitychange", refreshDailyStateAfterBackground);
+chapters.forEach((chapter) => {
+  chapter.addEventListener("scroll", updateReadingTopFade, { passive: true });
+});
 
 readingCopy.addEventListener("scroll", () => {
   if (!document.body.classList.contains("reading-ready")) return;
+  if (window.innerWidth <= 720) return;
 
   window.clearTimeout(scrollSettleTimer);
   scrollSettleTimer = window.setTimeout(() => {

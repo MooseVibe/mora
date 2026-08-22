@@ -3,8 +3,9 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const isMobile = () => window.innerWidth <= 720;
 const cardGap = 0.023;
-const restingDeckTilt = isMobile() ? 0.48 : 0.4;
+const restingDeckTilt = isMobile() ? 0.32 : 0.4;
 const restingDeckPositionZ = 1.15;
+const restingDeckPositionY = 0;
 const hoverFanRadius = 1.85;
 const hoverFanSpan = 0.045;
 const fanGroupScale = 1.2947;
@@ -108,6 +109,37 @@ function applyFaceTexture(card, texture) {
   });
 }
 
+function fitTextureCover(card, texture, targetAspect) {
+  const sourceWidth = texture.image?.naturalWidth || texture.image?.width;
+  const sourceHeight = texture.image?.naturalHeight || texture.image?.height;
+  if (!sourceWidth || !sourceHeight || !targetAspect) return;
+
+  const uvMin = new THREE.Vector2(1, 1);
+  const uvMax = new THREE.Vector2(0, 0);
+  card.traverse((object) => {
+    if (!object.isMesh || !object.name.toLowerCase().endsWith("_front")) return;
+    const uv = object.geometry.attributes.uv;
+    for (let index = 0; index < uv.count; index += 1) {
+      uvMin.min(new THREE.Vector2(uv.getX(index), uv.getY(index)));
+      uvMax.max(new THREE.Vector2(uv.getX(index), uv.getY(index)));
+    }
+  });
+
+  const sourceAspect = sourceWidth / sourceHeight;
+  texture.repeat.set(1, 1);
+  texture.offset.set(0, 0);
+  if (sourceAspect > targetAspect) {
+    const visibleSpan = targetAspect / sourceAspect;
+    texture.repeat.x = visibleSpan / (uvMax.x - uvMin.x);
+    texture.offset.x = (1 - visibleSpan) / 2 - uvMin.x * texture.repeat.x;
+  } else {
+    const visibleSpan = sourceAspect / targetAspect;
+    texture.repeat.y = visibleSpan / (uvMax.y - uvMin.y);
+    texture.offset.y = (1 - visibleSpan) / 2 - uvMin.y * texture.repeat.y;
+  }
+  texture.needsUpdate = true;
+}
+
 function applyMaterials(root, materials) {
   root.traverse((object) => {
     if (!object.isMesh) return;
@@ -177,13 +209,13 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: !isMobile(),
+    antialias: true,
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.2 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 2 : 1.5));
 
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.55));
 
@@ -218,13 +250,19 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   scene.add(resultShadow);
 
   const deckGroup = new THREE.Group();
+  const idleDeckPosition = new THREE.Vector3(0, restingDeckPositionY, restingDeckPositionZ);
   let deckViewportScale = 1;
   let fanViewportScale = 1;
   let fanGroupPositionX = -0.35;
-  let embeddedDeckScale = isMobile() ? 1 : 1.12;
+  let embeddedDeckScale = isMobile() ? 1.2 : 1.12;
+  const setIdleDeckScale = (factor = 1) => {
+    const scale = embeddedDeckScale * factor;
+    if (isMobile()) deckGroup.scale.set(scale * 0.9, scale, scale);
+    else deckGroup.scale.setScalar(scale);
+  };
   deckGroup.rotation.set(restingDeckTilt, 0, 0);
-  deckGroup.position.set(0, 0, restingDeckPositionZ);
-  deckGroup.scale.setScalar(embeddedDeckScale);
+  deckGroup.position.copy(idleDeckPosition);
+  setIdleDeckScale();
   scene.add(deckGroup);
 
   const initialSelection = onPrepare?.() || null;
@@ -299,6 +337,49 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   const resultPressPoint = new THREE.Vector2();
   const idleDeckHitBox = new THREE.Box3();
 
+  function alignMobileIdleDeck(rect) {
+    if (!isMobile() || ritualState !== "idle") return;
+    const heading = host.closest(".daily-card-screen")?.querySelector(".daily-card-heading");
+    if (!heading) return;
+    const header = document.querySelector(".header");
+    heading.style.setProperty("--daily-idle-balance-shift", "0px");
+
+    deckGroup.position.set(0, restingDeckPositionY, restingDeckPositionZ);
+    deckGroup.updateWorldMatrix(true, true);
+    camera.updateMatrixWorld(true);
+
+    const bounds = new THREE.Box3().setFromObject(deckGroup);
+    const corners = [
+      new THREE.Vector3(bounds.min.x, bounds.min.y, bounds.min.z),
+      new THREE.Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+      new THREE.Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+      new THREE.Vector3(bounds.min.x, bounds.max.y, bounds.max.z),
+      new THREE.Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+      new THREE.Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+      new THREE.Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+      new THREE.Vector3(bounds.max.x, bounds.max.y, bounds.max.z),
+    ];
+    const projectedY = corners.map((corner) => {
+      corner.project(camera);
+      return rect.top + (1 - corner.y) * rect.height / 2;
+    });
+    const actualTop = Math.min(...projectedY);
+    const deckHeight = Math.max(...projectedY) - actualTop;
+    const headingRect = heading.getBoundingClientRect();
+    const availableTop = header?.getBoundingClientRect().bottom || rect.top;
+    const compositionHeight = headingRect.height + 32 + deckHeight;
+    const balanceShift = Math.max(0, (rect.bottom - availableTop - compositionHeight) / 2)
+      + availableTop - headingRect.top;
+    heading.style.setProperty("--daily-idle-balance-shift", `${balanceShift}px`);
+    const desiredTop = heading.getBoundingClientRect().bottom + 32;
+    const depth = deckGroup.position.distanceTo(camera.position);
+    const visibleWorldHeight = 2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const pixelsPerWorldUnit = rect.height / visibleWorldHeight;
+    const cameraUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion).normalize();
+    deckGroup.position.addScaledVector(cameraUp, -(desiredTop - actualTop) / pixelsPerWorldUnit);
+    idleDeckPosition.copy(deckGroup.position);
+  }
+
   function resize() {
     const rect = host.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
@@ -308,7 +389,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       deckViewportScale = 1;
       fanViewportScale = 1;
       fanGroupPositionX = -0.35;
-      embeddedDeckScale = 1;
+      embeddedDeckScale = 1.2 * THREE.MathUtils.clamp(821 / rect.height, 0.9, 1.15);
       camera.position.set(0, 7.6, 10.6);
       camera.fov = 38;
       camera.lookAt(0, 0.2, 0.6);
@@ -327,7 +408,11 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       camera.lookAt(0, 0.35, 0.45);
     }
     camera.updateProjectionMatrix();
-    if (ritualState === "idle") deckGroup.scale.setScalar(embeddedDeckScale);
+    if (ritualState === "idle") {
+      setIdleDeckScale();
+      deckGroup.rotation.set(restingDeckTilt, 0, 0);
+      alignMobileIdleDeck(rect);
+    }
     if (ritualState === "fan") {
       deckGroup.position.x = fanGroupPositionX;
       deckGroup.scale.setScalar(fanGroupScale * fanViewportScale);
@@ -350,9 +435,10 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     }
     if (ritualState === "idle") {
       hoverAmount += ((hovered ? 1 : 0) - hoverAmount) * 0.14;
-      deckGroup.position.y = hoverAmount * 0.05;
-      deckGroup.position.z = restingDeckPositionZ + hoverAmount * 0.02;
-      deckGroup.scale.setScalar(embeddedDeckScale * (1 + hoverAmount * 0.006));
+      deckGroup.position.copy(idleDeckPosition);
+      deckGroup.position.y += hoverAmount * 0.05;
+      deckGroup.position.z += hoverAmount * 0.02;
+      setIdleDeckScale(1 + hoverAmount * 0.006);
 
       cards.forEach((card, index) => {
         const target = targets[index];
@@ -421,6 +507,11 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   }
 
   function handlePointerMove(event) {
+    if (isMobile()) {
+      hovered = false;
+      hoveredCard = null;
+      return;
+    }
     const rect = canvas.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -595,9 +686,190 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     return result;
   }
 
+  async function beginMobileRitual() {
+    ritualState = "mobile-drawing";
+    ensureRendering();
+    hovered = false;
+    floor.visible = false;
+    document.body.classList.add("daily-3d-ritual", "daily-3d-animating");
+
+    const selection = onSelect?.() || preparedSelection;
+    if (!selection?.imageUrl) {
+      ritualState = "idle";
+      document.body.classList.remove("daily-3d-ritual", "daily-3d-animating");
+      return;
+    }
+    const chosenCard = cards.at(-1);
+    const remainingCards = cards.slice(0, -1);
+    const resultTemplatePromise = loadResultTemplate();
+    const faceTexturePromise = (preparedFaceTexture || loadFaceTexture(renderer, selection.imageUrl));
+    const groupStart = {
+      position: deckGroup.position.clone(),
+      quaternion: deckGroup.quaternion.clone(),
+      scale: deckGroup.scale.clone(),
+    };
+    const frontQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(1, 0, 0));
+    const compactPositions = cards.map((card, index) => ({
+      start: card.position.clone(),
+      end: new THREE.Vector3(card.position.x, 0.08 + index * 0.0015, card.position.z),
+    }));
+
+    await tween(reducedMotion ? 1 : 440, (rawProgress) => {
+      const progress = easeInOut(rawProgress);
+      deckGroup.quaternion.slerpQuaternions(groupStart.quaternion, frontQuaternion, progress);
+      deckGroup.position.lerpVectors(
+        groupStart.position,
+        groupStart.position.clone().add(new THREE.Vector3(0, -0.04, -0.1)),
+        progress,
+      );
+      cards.forEach((card, index) => {
+        card.position.lerpVectors(compactPositions[index].start, compactPositions[index].end, progress);
+      });
+    });
+
+    deckGroup.updateWorldMatrix(true, true);
+    scene.attach(chosenCard);
+    const fadeMaterials = prepareFadeMaterials(remainingCards);
+    const screenUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion).normalize();
+    const chosenStart = chosenCard.position.clone();
+    const chosenClear = chosenStart.clone().addScaledVector(screenUp, 2.9);
+    const deckStart = deckGroup.position.clone();
+    const deckExit = deckStart.clone().addScaledVector(screenUp, -3.4);
+
+    await tween(reducedMotion ? 1 : 720, (rawProgress) => {
+      const movement = easeInOut(rawProgress);
+      const fade = easeInOut(clamp01((rawProgress - 0.18) / 0.82));
+      chosenCard.position.lerpVectors(chosenStart, chosenClear, movement);
+      deckGroup.position.lerpVectors(deckStart, deckExit, movement);
+      fadeMaterials.forEach((material) => {
+        if (fade > 0 && !material.transparent) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.needsUpdate = true;
+        }
+        material.opacity = 1 - fade;
+      });
+    });
+    deckGroup.visible = false;
+
+    const resultTemplate = await resultTemplatePromise;
+    const resultModel = resultTemplate.clone(true);
+    resultModel.visible = false;
+    scene.add(resultModel);
+    const faceTexture = await faceTexturePromise;
+    applyFaceTexture(resultModel, faceTexture);
+    preparedSelection = null;
+    preparedFaceTexture = null;
+    preparedImageUrl = "";
+
+    document.body.classList.add("daily-3d-handoff");
+    const finalTarget = resultTarget();
+    const faceSlot = document.querySelector("#daily-result-image")?.getBoundingClientRect();
+    if (faceSlot?.width && faceSlot?.height) {
+      fitTextureCover(resultModel, faceTexture, faceSlot.width / faceSlot.height);
+    }
+    const viewportCenter = camera.localToWorld(new THREE.Vector3(0, -0.17, -8.2));
+    const centerScale = finalTarget.scale.clone().multiplyScalar(1.08);
+    const centerStart = {
+      position: chosenCard.position.clone(),
+      quaternion: chosenCard.quaternion.clone(),
+      scale: chosenCard.scale.clone(),
+    };
+    chosenCard.position.copy(viewportCenter);
+    chosenCard.scale.copy(centerScale);
+    chosenCard.updateWorldMatrix(true, true);
+    const centerPosition = viewportCenter.clone().add(
+      viewportCenter.clone().sub(new THREE.Box3().setFromObject(chosenCard).getCenter(new THREE.Vector3())),
+    );
+    chosenCard.position.copy(centerStart.position);
+    chosenCard.scale.copy(centerStart.scale);
+
+    await tween(reducedMotion ? 1 : 520, (rawProgress) => {
+      const progress = easeInOut(rawProgress);
+      chosenCard.position.lerpVectors(centerStart.position, centerPosition, progress);
+      chosenCard.quaternion.copy(centerStart.quaternion);
+      chosenCard.scale.lerpVectors(centerStart.scale, centerScale, progress);
+    });
+
+    const flipStartQuaternion = chosenCard.quaternion.clone();
+    const keepVisuallyCentered = (object) => {
+      object.updateWorldMatrix(true, true);
+      const visualCenter = new THREE.Box3().setFromObject(object).getCenter(new THREE.Vector3());
+      object.position.add(viewportCenter.clone().sub(visualCenter));
+    };
+    await tween(reducedMotion ? 1 : 640, (rawProgress) => {
+      const progress = easeInOut(rawProgress);
+      const quaternion = new THREE.Quaternion().slerpQuaternions(
+        flipStartQuaternion,
+        finalTarget.quaternion,
+        progress,
+      );
+      if (rawProgress < 0.5) {
+        chosenCard.quaternion.copy(quaternion);
+        keepVisuallyCentered(chosenCard);
+      } else {
+        if (!resultModel.visible) {
+          chosenCard.visible = false;
+          resultModel.visible = true;
+          resultModel.position.copy(viewportCenter);
+          resultModel.scale.copy(centerScale);
+        }
+        resultModel.quaternion.copy(quaternion);
+        keepVisuallyCentered(resultModel);
+      }
+    });
+
+    resultModel.quaternion.copy(finalTarget.quaternion);
+    keepVisuallyCentered(resultModel);
+    const resultStart = {
+      position: resultModel.position.clone(),
+      quaternion: resultModel.quaternion.clone(),
+      scale: resultModel.scale.clone(),
+    };
+    const resultPath = new THREE.CatmullRomCurve3([
+      resultStart.position,
+      resultStart.position.clone().lerp(finalTarget.position, 0.58)
+        .addScaledVector(screenUp, 0.16),
+      finalTarget.position,
+    ], false, "centripetal");
+
+    await tween(reducedMotion ? 1 : 520, (rawProgress) => {
+      const movement = easeOut(rawProgress);
+      const settle = easeInOut(rawProgress);
+      resultModel.position.copy(resultPath.getPointAt(movement));
+      resultModel.quaternion.slerpQuaternions(
+        resultStart.quaternion,
+        finalTarget.quaternion,
+        settle,
+      );
+      resultModel.scale.lerpVectors(resultStart.scale, finalTarget.scale, settle);
+    });
+
+    resultModel.position.copy(finalTarget.position);
+    resultModel.quaternion.copy(finalTarget.quaternion);
+    resultModel.scale.copy(finalTarget.scale);
+    placeResultShadow(finalTarget);
+    renderer.render(scene, camera);
+    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
+    resultModel.userData.resultTarget = {
+      position: finalTarget.position.clone(),
+      quaternion: finalTarget.quaternion.clone(),
+      scale: finalTarget.scale.clone(),
+    };
+    resultCard = resultModel;
+    ritualState = "result";
+    document.body.classList.remove("daily-3d-handoff");
+    onResult?.(selection);
+  }
+
   async function beginRitual() {
     if (ritualState !== "idle") return;
     prepareResultAssets();
+    if (isMobile()) {
+      await beginMobileRitual();
+      return;
+    }
     ritualState = "cutting";
     ensureRendering();
     hovered = false;
@@ -634,7 +906,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   function resultPose() {
     camera.updateMatrixWorld(true);
     const localPosition = isMobile()
-      ? new THREE.Vector3(0, 1.08, -8.2)
+      ? new THREE.Vector3(0, 0.84, -8.2)
       : new THREE.Vector3(2.28, 0.05, -8.2);
     const position = camera.localToWorld(localPosition);
     const faceCamera = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
@@ -647,9 +919,9 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   function resultTarget() {
     const pose = resultPose();
     const fallbackScale = isMobile()
-      ? new THREE.Vector3(0.78, 0.78, 0.811)
+      ? new THREE.Vector3(0.67, 0.67, 0.74)
       : new THREE.Vector3(1.026, 1.026, 1.06685);
-    if (isMobile() || !resultTemplateMetrics) return { ...pose, scale: fallbackScale };
+    if (!resultTemplateMetrics) return { ...pose, scale: fallbackScale };
 
     const slot = document.querySelector(".daily-result-card")?.getBoundingClientRect();
     const viewport = host.getBoundingClientRect();
@@ -884,6 +1156,50 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     renderer.render(scene, camera);
   }
 
+  function resetResultToIdle() {
+    if (ritualState === "idle") return;
+    if (resultCard) {
+      scene.remove(resultCard);
+      resultCard = null;
+    }
+    resultShadow.visible = false;
+    cards.forEach((card, index) => {
+      if (card.parent !== deckGroup) deckGroup.add(card);
+      card.visible = true;
+      card.userData.fanTarget = null;
+      card.userData.hoverAmount = 0;
+      card.position.copy(targets[index].position);
+      card.quaternion.copy(targets[index].quaternion);
+      card.scale.copy(targets[index].scale);
+      applyMaterials(card, materials);
+      card.traverse((object) => {
+        if (object.isMesh) object.castShadow = false;
+      });
+    });
+    cards.at(-1)?.traverse((object) => {
+      if (object.isMesh) object.castShadow = true;
+    });
+    deckGroup.visible = true;
+    deckGroup.position.copy(idleDeckPosition);
+    deckGroup.rotation.set(restingDeckTilt, 0, 0);
+    setIdleDeckScale();
+    floor.visible = true;
+    hovered = false;
+    hoveredCard = null;
+    resultHovered = false;
+    host.classList.remove("is-result-card-hovered");
+    preparedSelection = null;
+    preparedFaceTexture = null;
+    preparedImageUrl = "";
+    ritualState = "idle";
+    const heading = host.closest(".daily-card-screen")?.querySelector(".daily-card-heading");
+    if (heading) {
+      heading.querySelector("h1").textContent = "Карта дня";
+      heading.querySelector("p").textContent = "Нажми на колоду и узнай, что приготовил тебе день";
+    }
+    ensureRendering();
+  }
+
   function activate({ keyboard = false } = {}) {
     if (ritualState === "idle") {
       beginRitual();
@@ -899,6 +1215,16 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   }
 
   function hitTest(clientX, clientY) {
+    if (isMobile() && ritualState === "idle") {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      if (raycaster.intersectObjects(cards, true).length > 0) return true;
+      deckGroup.updateWorldMatrix(true, true);
+      idleDeckHitBox.setFromObject(cards.at(-1));
+      return raycaster.ray.intersectsBox(idleDeckHitBox);
+    }
     if (ritualState === "result") handleResultPointerMove({ clientX, clientY });
     else handlePointerMove({ clientX, clientY });
     return ritualState === "result"
@@ -928,6 +1254,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     activate,
     hitTest,
     restoreResult,
+    resetResultToIdle,
     isResultActive: () => ritualState === "result",
     setActive(active) {
       renderingActive = active;
