@@ -3655,6 +3655,7 @@ body.reading-to-saved.reading-saved-entering .reading {
   body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) .daily-result-cooldown {
     order: 0;
     width: auto;
+    max-width: none;
     flex: 1 1 0;
     padding-inline: 16px;
     font-size: 16px;
