@@ -3608,7 +3608,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     display: block;
     font-size: 48px;
     font-weight: 500;
-    line-height: 54px;
+    line-height: 1.125;
     text-align: center;
     white-space: normal;
   }
@@ -4383,6 +4383,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     font-weight: 500;
     line-height: 44px;
     text-transform: uppercase;
+    text-wrap: wrap;
   }
 
   body.prototype-tester .reading .reading-copy .chapter.intro .reading-overview-copy p {

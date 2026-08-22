@@ -689,8 +689,21 @@ function updateDailyResultScrollState() {
   });
 }
 
+function fitDailyResultTitle() {
+  dailyResultTitleMain.style.removeProperty("font-size");
+  if (window.innerWidth > 720 || !dailyResultTitleMain.clientWidth) return;
+  if (dailyResultTitleMain.scrollWidth <= dailyResultTitleMain.clientWidth) return;
+
+  const fontSize = parseFloat(window.getComputedStyle(dailyResultTitleMain).fontSize);
+  const fittedSize = Math.floor(fontSize * dailyResultTitleMain.clientWidth / dailyResultTitleMain.scrollWidth);
+  dailyResultTitleMain.style.fontSize = `${fittedSize}px`;
+}
+
 function scheduleDailyResultScrollUpdate() {
-  window.requestAnimationFrame(updateDailyResultScrollState);
+  window.requestAnimationFrame(() => {
+    fitDailyResultTitle();
+    updateDailyResultScrollState();
+  });
 }
 
 function applyDailyResultTilt() {
