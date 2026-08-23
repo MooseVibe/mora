@@ -252,6 +252,10 @@ if (isLocalPrototype && (resetDailyMode === "1" || resetDailyMode === "always"))
 const startInSpreadMode = urlParams.get("mode") === "spread";
 const startInLogin = urlParams.get("login") === "1";
 
+window.MoraAnalytics.capture("ritual_viewed", {
+  entry: startInLogin ? "login" : startInSpreadMode ? "spread" : "daily",
+});
+
 dailyModeButton.addEventListener("click", () => switchMode("daily"));
 brand.addEventListener("click", (event) => {
   event.preventDefault();
@@ -446,6 +450,7 @@ async function handleTesterLogin(event, destination) {
     }
 
     setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt);
+    window.MoraAnalytics.capture("login_completed", { destination });
     resetTesterLoginForm(form, emailInput);
     const destinationUrl = destination === "spread"
       ? `${window.location.pathname}?mode=spread`
@@ -524,6 +529,7 @@ async function logoutPrototypeTester() {
 }
 
 function openLoginScreen(destination = "daily") {
+  window.MoraAnalytics.capture("login_opened", { destination });
   loginDestination = destination;
   loginScreen.setAttribute("aria-hidden", "false");
   document.body.classList.add("login-screen-open");
@@ -647,6 +653,9 @@ function showDailyMode() {
 }
 
 function showSpreadMode() {
+  window.MoraAnalytics.capture("spread_opened", {
+    authenticated: prototypeTesterAuthenticated,
+  });
   if (prototypeTesterAuthenticated) ensureSpreadDeck3D();
   dailyDeck3D.then((controller) => controller?.setActive(false));
   resetDailyResultTilt();
@@ -965,6 +974,9 @@ function prepareDailyCardCandidate() {
 function prepareDailyCardSelection() {
   const selection = pendingDailySelection || prepareDailyCardCandidate();
   if (!selection || dailyDrawInFlight) return;
+  window.MoraAnalytics.capture("daily_started", {
+    authenticated: prototypeTesterAuthenticated,
+  });
   const { card, variantIndex } = selection;
   dailyDrawInFlight = true;
   dailyDeck.disabled = true;
@@ -1022,6 +1034,11 @@ function showDaily3DResult() {
   document.body.classList.add("daily-3d-result");
   scheduleDailyResultScrollUpdate();
   updateDailyCooldownButton();
+  if (!restoring) {
+    window.MoraAnalytics.capture("daily_completed", {
+      authenticated: prototypeTesterAuthenticated,
+    });
+  }
   if (!restoring) document.body.classList.add("daily-3d-result-entering");
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
@@ -1335,6 +1352,7 @@ function startMobileFanInertia(initialVelocity) {
 topics.forEach((topic) => {
   topic.addEventListener("click", () => {
     currentTopic = topic.dataset.topic;
+    window.MoraAnalytics.capture("spread_topic_selected");
     selectedTopic.innerHTML = topic.innerHTML;
     ritual.dataset.step = "choose";
     showDeckHint();
@@ -1530,6 +1548,7 @@ function commitCard(
   if (!threeD) revealSlotName(slot, card.name);
   selectedCards.push(card);
   picked += 1;
+  window.MoraAnalytics.capture("spread_card_selected", { position: picked });
   updateNextSlot();
 
   if (picked === spreadSize) {
@@ -1543,6 +1562,7 @@ function commitCard(
 
 function beginReadingGeneration() {
   if (picked !== spreadSize) return;
+  window.MoraAnalytics.capture("spread_generation_started");
   const animateMobileLoading = (
     window.innerWidth <= 720
     && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -1778,6 +1798,8 @@ function openSavedReading(chapterIndex = 0, wheelDirection = 0) {
   if (stateTransitionInFlight || document.body.classList.contains("daily-mode")) return;
   const snapshot = readLastSpread();
   if (!snapshot) return;
+
+  window.MoraAnalytics.capture("spread_reading_opened", { source: "saved" });
 
   resetSavedCardTilt();
   const targetChapter = Math.max(0, Math.min(chapters.length - 1, chapterIndex));
@@ -2068,6 +2090,7 @@ async function generateReading() {
     prototypeNextSpreadAt = Date.parse(payload.nextSpreadAt || "") || prototypeNextSpreadAt;
     populateReading(reading, selectedCards);
     saveLastSpread(reading, source, payload.snapshot);
+    window.MoraAnalytics.capture("spread_generation_completed", { source });
   } catch {
     populateReading(fallback, selectedCards);
     volatileFailedSpread = {
@@ -2078,6 +2101,7 @@ async function generateReading() {
       source: "fallback",
       completed: false,
     };
+    window.MoraAnalytics.capture("spread_generation_failed");
   } finally {
     window.clearTimeout(longResponseTimer);
     readingStatusCopy.firstChild.textContent = "Раскладываем";
@@ -2131,6 +2155,7 @@ function populateReading(reading, cards) {
 
 function showReading() {
   if (document.body.classList.contains("daily-mode")) return;
+  window.MoraAnalytics.capture("spread_reading_opened", { source: "new" });
   readingCopy.scrollTop = 0;
   setActiveChapter(0);
   document.body.classList.add("reading-transition");

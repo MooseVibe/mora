@@ -92,7 +92,7 @@ Current work phase:
 - Mora Next in `public/ritual/` is canonical production, not a parallel laboratory
 - standalone 3D and legacy dashboard/journal/auth routes are archived outside the production tree
 - current cleanup keeps only the static landing/spread UI, three protected APIs, Supabase server adapter, QA cards and shared assets
-- after cleanup: paid Gemini observability, domain/SMTP/auth redirects, minimal product analytics and closed beta
+- cleanup и минимальная privacy-safe PostHog EU аналитика готовы; дальше домен/SMTP/auth redirects, metadata/SEO и закрытая бета
 - cards-first continues in parallel one card per pass; the latest pass updated `world`, while the previous passes updated `judgement` and added `ten-of-swords`; only `three-of-swords` remains missing and must be handled last in a separate pass after an explicit instruction, without changing IDs or draw/save/journal mechanics; 8 old cards remain to be updated by text
 - AI tarot chat is planned later, after the product feels presentable
 

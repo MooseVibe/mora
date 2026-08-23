@@ -3157,3 +3157,9 @@ Welcome и ritual физически перенесены из `public/prototype
 Для closed beta не вводится новая таблица, аналитический SDK или внешний monitoring-сервис. Каждая попытка Gemini/GigaChat пишет один обезличенный JSON-event с requestId, provider/model, success/failure, duration и официальными token-usage полями ответа. Этого достаточно, чтобы проверить стоимость и fallback после включения billing; prompt, email, cardIds и auth identifiers намеренно не логируются.
 
 Платный Gemini не является release-blocker: владелец проекта отложил billing из-за региональных ограничений оплаты. Инфраструктура и закрытый тест готовятся без него; последним provider-шагом станет Gemini, GigaChat, DeepSeek или другой доступный сервис после отдельной оценки качества, оплаты и privacy-условий. Текущую цепочку провайдеров не меняем заранее.
+
+## 2026-08-23 — Закрытая бета использует минимальную PostHog EU аналитику
+
+Для product funnel выбран бесплатный PostHog Cloud EU вместо платных Vercel Custom Events и самописной аналитической панели поверх Supabase. Mora подключает один маленький browser-wrapper только на `mora-kappa.vercel.app`; локальные, LAN и preview-сборки остаются no-op. SDK не собирает автоматические клики, pageviews, pageleave или session replay, не создаёт person profiles и хранит anonymous identity только в памяти вкладки.
+
+Явные события описывают только шаг продукта и безопасные технические свойства: entry/destination, authenticated, position и provider source. Email, user ID, выбранная тема, cardIds, prompt, название карты и reading-текст не передаются. До появления custom domain production-host allowlist остаётся одной строкой; домен добавляется отдельным release-шагом.

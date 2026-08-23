@@ -66,6 +66,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 - Legacy `/auth`, `/dashboard`, `/journal`, `/api/draws`, их React-компоненты, middleware и старый native draw-runtime удалены из основной ветки. Все 53 МБ карточных PNG-fallback, старые фоны, legacy stylesheet, лишние изображения и шрифты также удалены; `public/` уменьшен примерно со `103 МБ` до `31 МБ`.
 - Публичные UI-адреса очищены: `/` внутренне отдаёт `public/welcome/index.html`, `/ritual` — `public/ritual/index.html`, без browser redirect и без слова `prototypes`. Старые UI-пути удалены и должны возвращать `404`; внутренние API пока сохраняют прежние адреса.
 - AI release-readiness pass добавляет один обезличенный structured log на каждую Gemini/GigaChat-попытку: requestId, provider/model, status, latency и официальные token-usage поля. Prompt, email и выбранные карты не логируются; fallback, snapshot и UI не меняются. Платный Gemini отложен из-за региональных ограничений оплаты и не является release-blocker.
+- Создан бесплатный PostHog Cloud EU project `Mora` (`project 255852`). Product Analytics подключается одним production-only browser-wrapper без npm-зависимости: autocapture, automatic pageviews, pageleave, session replay и person profiles отключены; persistence остаётся только в памяти вкладки. Явные события покрывают welcome, login, daily и spread funnel, но не содержат email, prompt, cardIds, topic или reading-текст. Локальные/LAN/preview-сборки ничего не отправляют.
 
 - Финальный mobile integration pass переиспользует общую desktop-механику без второго flow: guest/auth daily проходят тот же 3D-controller, burger вызывает существующий `switchMode`, login использует настоящий tester-session, а расклад сохраняется и читается через прежний account/API contract. Локальный `testerPreview=1` теперь честно получает временную pending-карту только для визуального QA и не делает account POST без Supabase-сессии. Browser contract-tests прошли guest → login, authenticated daily pending → complete → result, полный расклад через пять секций и saved state, mobile `375×812` без horizontal overflow и desktop `1440×900` без регрессии.
 
@@ -205,14 +206,14 @@ Desktop-регрессия открытой вкладки карты дня п�
 2. Сначала read-only сверить branch/status/log. Не трогать `supabase/.temp`.
 3. Канонический UI: `/` → `public/welcome/`, `/ritual` → `public/ritual/`; старые UI `/prototypes/*` должны оставаться `404`.
 4. Текущий release-пакет уже прошёл syntax, lint, build и LAN HTTP smoke. После production deploy проверить welcome, guest/auth daily, spread, saved reading и пять секций.
-5. Следующий продуктовый этап после релиза — минимальная first-party аналитика. Затем домен/SMTP, metadata/SEO и closed beta. Платный AI provider — последним отдельным шагом.
+5. Минимальная PostHog EU аналитика подготовлена локально; после отдельного release-разрешения её нужно выпустить, получить первый production event и собрать одну воронку. Затем домен/SMTP, metadata/SEO и closed beta. Платный AI provider — последним отдельным шагом.
 
 ## Следующие шаги
 
-1. Закоммитить, запушить и задеплоить текущий cleanup только в Vercel project `mora` / `mora-kappa.vercel.app`.
-2. Проверить production URL `/` и `/ritual`, auth/account guards, карту дня и расклад на mobile/desktop.
-3. Спроектировать минимальные product events без записи prompt, cardIds, email или reading-текста.
-4. Подготовить домен, production SMTP и Supabase redirect URLs.
+1. После явного разрешения закоммитить, запушить и задеплоить PostHog analytics-pass только в Vercel project `mora` / `mora-kappa.vercel.app`.
+2. Открыть production welcome и ritual, подтвердить первый event в PostHog и собрать funnel `welcome → ritual → spread generation → reading`.
+3. Подготовить домен, production SMTP и Supabase redirect URLs.
+4. Добавить базовые metadata/SEO и провести closed beta.
 5. Подключить доступный платный AI provider перед масштабированием теста.
 
 ## Исторические планы ниже не активны
