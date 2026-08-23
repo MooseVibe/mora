@@ -6,7 +6,7 @@ const imageCacheHeaders = [
   },
 ];
 
-const prototypeCacheHeaders = [
+const staticCacheHeaders = [
   {
     key: 'Cache-Control',
     value: 'public, max-age=86400, stale-while-revalidate=604800',
@@ -19,14 +19,19 @@ const nextConfig = {
       '/api/prototypes/spread-reading': ['./certs/russian_trusted_root_ca_pem.crt'],
     },
   },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/prototypes/landing/index.html',
-        permanent: false,
-      },
-    ];
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/',
+          destination: '/welcome/index.html',
+        },
+        {
+          source: '/ritual',
+          destination: '/ritual/index.html',
+        },
+      ],
+    };
   },
   async headers() {
     return [
@@ -35,48 +40,36 @@ const nextConfig = {
         headers: imageCacheHeaders,
       },
       {
-        source: '/assets/day-deck-scene-bg.webp',
-        headers: imageCacheHeaders,
-      },
-      {
-        source: '/assets/day-panel-bg.webp',
-        headers: imageCacheHeaders,
-      },
-      {
-        source: '/assets/mora-door.webp',
-        headers: imageCacheHeaders,
-      },
-      {
         source: '/assets/fonts/:path*',
         headers: imageCacheHeaders,
       },
       {
         source: '/assets/cards.js',
-        headers: prototypeCacheHeaders,
+        headers: staticCacheHeaders,
       },
       {
-        source: '/prototypes/3d-daily/assets/:path*',
-        headers: prototypeCacheHeaders,
+        source: '/assets/3d/:path*',
+        headers: staticCacheHeaders,
       },
       {
-        source: '/prototypes/spread/app.js',
-        headers: prototypeCacheHeaders,
+        source: '/ritual/app.js',
+        headers: staticCacheHeaders,
       },
       {
-        source: '/prototypes/spread/daily-3d.js',
-        headers: prototypeCacheHeaders,
+        source: '/ritual/daily-3d.js',
+        headers: staticCacheHeaders,
       },
       {
-        source: '/prototypes/spread/spread-deck-3d.js',
-        headers: prototypeCacheHeaders,
+        source: '/ritual/spread-deck-3d.js',
+        headers: staticCacheHeaders,
       },
       {
-        source: '/prototypes/spread/styles.css',
-        headers: prototypeCacheHeaders,
+        source: '/ritual/styles.css',
+        headers: staticCacheHeaders,
       },
       {
         source: '/vendor/three/0.180.0/:path*',
-        headers: prototypeCacheHeaders,
+        headers: staticCacheHeaders,
       },
     ];
   },

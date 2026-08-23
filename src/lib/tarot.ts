@@ -112,7 +112,6 @@ export type TarotCardDefinition = {
   description: string
   visualHint: string
   image?: string
-  imageFallback?: string
   num: string
   result?: TarotCardResult
 }

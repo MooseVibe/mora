@@ -1,4 +1,4 @@
-/* глобальные стили Next.js — основные стили в /assets/styles.css */
+/* Минимальный reset для root redirect и служебного QA-интерфейса. */
 * {
   box-sizing: border-box;
   margin: 0;

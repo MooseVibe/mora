@@ -11,7 +11,6 @@ export const TAROT_CARDS = [
     streetText: 'Харе просчитывать всё наперёд — прыгай уже. Или так и будешь стоять на краю?',
     visualHint: 'персонаж на краю скалы, котомка, цветок, беззаботность',
     image: 'assets/cards/fool.webp',
-    imageFallback: 'assets/cards/fool.png',
     num: '0',
     symbol: '○',
     result: {
@@ -90,7 +89,6 @@ export const TAROT_CARDS = [
     streetText: 'Всё что надо — у тебя в руках. Хорош тупить, давай уже.',
     visualHint: 'стол с инструментами, поднятая рука, энергия сверху вниз',
     image: 'assets/cards/magician.webp',
-    imageFallback: 'assets/cards/magician.png',
     num: 'I',
     symbol: '🪄',
     result: {
@@ -169,7 +167,6 @@ export const TAROT_CARDS = [
     streetText: 'Заткнись и послушай себя. Ответ уже внутри — просто мешает шум.',
     visualHint: 'две колонны, луна, свиток, спокойствие',
     image: 'assets/cards/high-priestess.webp',
-    imageFallback: 'assets/cards/high-priestess.png',
     num: 'II',
     symbol: '☽',
     result: {
@@ -248,7 +245,6 @@ export const TAROT_CARDS = [
     streetText: 'Ты чё себя так насилуешь. Тормозни, выдохни — ты не на зоне.',
     visualHint: 'природа, плоды, мягкие формы, тепло и изобилие',
     image: 'assets/cards/empress.webp',
-    imageFallback: 'assets/cards/empress.png',
     num: 'III',
     symbol: '♕',
     result: {
@@ -327,7 +323,6 @@ export const TAROT_CARDS = [
     streetText: 'Хорош ждать, пока кто-то решит за тебя. Ты тут старший — ну так и действуй.',
     visualHint: 'трон, горы, доспехи, уверенная поза',
     image: 'assets/cards/emperor.webp',
-    imageFallback: 'assets/cards/emperor.png',
     num: 'IV',
     symbol: '♔',
     result: {
@@ -406,7 +401,6 @@ export const TAROT_CARDS = [
     streetText: 'Не надо изобретать велосипед. Кто-то это уже прошёл — иди спроси.',
     visualHint: 'два столпа, ключи, ученики, передача знания',
     image: 'assets/cards/hierophant.webp',
-    imageFallback: 'assets/cards/hierophant.png',
     num: 'V',
     symbol: '✛',
     result: {
@@ -482,7 +476,6 @@ export const TAROT_CARDS = [
     streetText: 'Ты уже знаешь что выбрать — просто боишься. Выбирай, не тяни.',
     visualHint: 'два пути, ангел сверху, момент выбора',
     image: 'assets/cards/lovers.webp',
-    imageFallback: 'assets/cards/lovers.png',
     num: 'VI',
     symbol: '♡',
     result: {
@@ -561,7 +554,6 @@ export const TAROT_CARDS = [
     streetText: 'Главное не останавливаться. Давишь — вот и продолжай давить.',
     visualHint: 'колесница, два сфинкса, город позади, путь вперёд',
     image: 'assets/cards/chariot.webp',
-    imageFallback: 'assets/cards/chariot.png',
     num: 'VII',
     symbol: '◈',
     result: {
@@ -640,7 +632,6 @@ export const TAROT_CARDS = [
     streetText: 'Хорош орать и давить. Самый сильный ход сейчас — выдохнуть и не нервничать.',
     visualHint: 'человек и лев, мягкость, бесконечность над головой',
     image: 'assets/cards/strength.webp',
-    imageFallback: 'assets/cards/strength.png',
     num: 'VIII',
     symbol: '∞',
     result: {
@@ -719,7 +710,6 @@ export const TAROT_CARDS = [
     streetText: 'Не лезь ни к кому сегодня. Сам с собой посиди, мозги в порядок приведи.',
     visualHint: 'одинокий силуэт, фонарь, тёмный горный путь',
     image: 'assets/cards/hermit.webp',
-    imageFallback: 'assets/cards/hermit.png',
     num: 'IX',
     symbol: '☾',
     result: {
@@ -798,7 +788,6 @@ export const TAROT_CARDS = [
     streetText: 'Харе всё контролить — ты не диспетчер. Отпусти, само вывезет.',
     visualHint: 'большое колесо, символы, фигуры на подъёме и спуске',
     image: 'assets/cards/wheel.webp',
-    imageFallback: 'assets/cards/wheel.png',
     num: 'X',
     symbol: '⊕',
     result: {
@@ -877,7 +866,6 @@ export const TAROT_CARDS = [
     streetText: 'Чё наделал — то и разгребай. Тут без сюрпризов, брат.',
     visualHint: 'весы, меч, трон, равновесие',
     image: 'assets/cards/justice.webp',
-    imageFallback: 'assets/cards/justice.png',
     num: 'XI',
     symbol: '⚖',
     result: {
@@ -956,7 +944,6 @@ export const TAROT_CARDS = [
     streetText: 'Хорош ломиться в закрытую дверь. Развернись, посмотри с другой стороны.',
     visualHint: 'фигура вниз головой, нимб, спокойное выражение',
     image: 'assets/cards/hanged-man.webp',
-    imageFallback: 'assets/cards/hanged-man.png',
     num: 'XII',
     symbol: '⊥',
     result: {
@@ -1035,7 +1022,6 @@ export const TAROT_CARDS = [
     streetText: 'Всё, эта глава закрыта. Не цепляйся — впереди норм, просто ещё не видно.',
     visualHint: 'белый конь, флаг с розой, восход за горизонтом',
     image: 'assets/cards/death.webp',
-    imageFallback: 'assets/cards/death.png',
     num: 'XIII',
     symbol: '†',
     result: {
@@ -1114,7 +1100,6 @@ export const TAROT_CARDS = [
     streetText: 'Не гони и не сдавай. Ровный темп сегодня лучше любых крайностей.',
     visualHint: 'ангел, два кубка, вода, путь вдали',
     image: 'assets/cards/temperance.webp',
-    imageFallback: 'assets/cards/temperance.png',
     num: 'XIV',
     symbol: '△',
     result: {
@@ -1193,7 +1178,6 @@ export const TAROT_CARDS = [
     streetText: 'Смотри что тебя держит. Это не клетка — ты сам её не открываешь.',
     visualHint: 'козёл, цепи, огонь, фигуры в плену',
     image: 'assets/cards/devil.webp',
-    imageFallback: 'assets/cards/devil.png',
     num: 'XV',
     symbol: '▼',
     result: {
@@ -1269,7 +1253,6 @@ export const TAROT_CARDS = [
     streetText: 'Щас всё посыпется, готовься. Не паникуй — соберёшь по кускам.',
     visualHint: 'молния, падающие фигуры, трещины, хаос',
     image: 'assets/cards/tower.webp',
-    imageFallback: 'assets/cards/tower.png',
     num: 'XVI',
     symbol: '⚡',
     result: {
@@ -1348,7 +1331,6 @@ export const TAROT_CARDS = [
     streetText: 'Выдохни. Всё реально норм — ты просто слишком накручиваешь.',
     visualHint: 'большая звезда, фигура у воды, спокойная ночь',
     image: 'assets/cards/star.webp?v=20260717',
-    imageFallback: 'assets/cards/star.png',
     num: 'XVII',
     symbol: '★',
     result: {
@@ -1427,7 +1409,6 @@ export const TAROT_CARDS = [
     streetText: 'Ты себе уже нарисовал страшную картину. Скорее всего всё проще — проверь.',
     visualHint: 'луна с человеческим профилем, две башни, дорога между ними, домашняя собака слева, дикий волк справа, один рак выходит из воды',
     image: 'assets/cards/moon.webp?v=20260720',
-    imageFallback: 'assets/cards/moon.png',
     num: 'XVIII',
     symbol: '◯',
     result: {
@@ -1506,7 +1487,6 @@ export const TAROT_CARDS = [
     streetText: 'Сегодня просто горишь. Не туши — действуй.',
     visualHint: 'яркое солнце, ребёнок, лошадь, подсолнухи',
     image: 'assets/cards/sun.webp?v=20260722',
-    imageFallback: 'assets/cards/sun.png',
     num: 'XIX',
     symbol: '☀',
     result: {
@@ -1585,7 +1565,6 @@ export const TAROT_CARDS = [
     streetText: 'Время подводить итоги. Без оправданий — что было, то было. Что дальше?',
     visualHint: 'трубящий ангел, пробуждение, свет сверху',
     image: 'assets/cards/judgement.webp?v=20260723',
-    imageFallback: 'assets/cards/judgement.png',
     num: 'XX',
     symbol: '◇',
     result: {
@@ -1664,7 +1643,6 @@ export const TAROT_CARDS = [
     streetText: 'Ну всё, финиш. Не обесценивай — ты реально дошёл. Прими это.',
     visualHint: 'лавровый венок, фигура в танце, четыре стихии по углам',
     image: 'assets/cards/world.webp?v=20260724',
-    imageFallback: 'assets/cards/world.png',
     num: 'XXI',
     symbol: '◎',
     result: {

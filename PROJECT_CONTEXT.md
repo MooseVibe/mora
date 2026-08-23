@@ -4,7 +4,7 @@ Read this file first in every new chat before making assumptions or asking setup
 
 ## What This Is
 
-Mora is an online tarot reader. The MVP already works; the current phase is polishing existing screens and UI, not rebuilding the product from scratch.
+Mora is an online tarot reader. Mora Next is the canonical production flow; the current phase is cleanup, release infrastructure and final UI/motion polish.
 
 North Star: an AI tarot reader in chat. The daily card and journal are retention mechanics that keep the product useful until the AI reader is ready.
 
@@ -37,12 +37,12 @@ Then try `3002` if needed.
 
 ## Main App Areas
 
-- `/` -> landing and unauthenticated daily card flow via `src/components/TaroApp.tsx`
-- `/auth` -> login and save-card auth flow
-- `/dashboard` -> authenticated daily card dashboard
-- `/journal` -> authenticated card journal
+- `/` -> canonical Mora welcome in `public/welcome/`
+- `/ritual` -> production daily-card and three-card spread UI in `public/ritual/`
+- `/api/prototypes/tester-session` -> Supabase email OTP session for Mora Next
+- `/api/prototypes/account-state` -> authenticated daily-card and last-spread state
+- `/api/prototypes/spread-reading` -> Gemini reading with GigaChat fallback
 - `/qa/cards` -> service QA preview of all tarot cards, images, and prepared daily-card texts. Local URL: `http://localhost:3000/qa/cards` (or the active dev port). Production/Vercel Preview requires `CARD_QA_TOKEN`.
-- `/api/draws` -> stores drawn cards in Supabase
 
 ## Important Files
 
@@ -68,13 +68,13 @@ Then try `3002` if needed.
 
 Working MVP:
 
-- Google auth and email auth
-- unauthenticated daily card draw
-- authenticated daily card draw, limited to once per day
-- automatic save to journal
-- dashboard with daily card and recent cards
-- dashboard recent cards open through the full-result reader with the saved/fallback reading text
-- journal with drawn card history, period filters, desktop table layout, and full-result reader for journal entries; visual outcome actions are still placeholders without saved state
+- guest daily-card ritual and result
+- Supabase email OTP auth inside the canonical mobile/desktop flow
+- authenticated daily card with server state and 12-hour cooldown
+- authenticated three-card spread with topic selection, WebGL fan and AI reading
+- last completed spread snapshot with five reading sections
+- Gemini provider with GigaChat fallback and reservation protection
+- responsive mobile and desktop layouts sharing one product flow
 - deck currently has 77 cards: 22 major arcana and 55 minor/court cards
 - share-ready cards currently (69): `fool`, `magician`, `high-priestess`, `empress`, `emperor`, `hierophant`, `lovers`, `chariot`, `strength`, `hermit`, `wheel`, `justice`, `hanged-man`, `death`, `temperance`, `devil`, `tower`, `star`, `moon`, `sun`, `judgement`, `world`, `two-of-cups`, `six-of-cups`, `ace-of-swords`, `page-of-cups`, `king-of-cups`, `queen-of-cups`, `knight-of-cups`, `king-of-wands`, `queen-of-wands`, `knight-of-wands`, `four-of-swords`, `five-of-swords`, `seven-of-swords`, `queen-of-swords`, `king-of-swords`, `knight-of-swords`, `three-of-cups`, `four-of-cups`, `five-of-cups`, `ace-of-pentacles`, `two-of-pentacles`, `six-of-pentacles`, `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `nine-of-pentacles`, `ten-of-pentacles`, `page-of-pentacles`, `king-of-pentacles`, `knight-of-pentacles`, `two-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands`, `seven-of-wands`, `eight-of-wands`, `nine-of-wands`, `page-of-wands`, `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups`, `ten-of-wands`, `nine-of-swords`, `eight-of-swords`, `ten-of-swords`
 - latest card addition: `ten-of-swords` / «Десятка Мечей»; approved dark aged-oil visual preserves one prone figure beneath exactly ten swords, a muted red cloth, calm water, distant mountains, black sky and a narrow golden dawn; the accepted integrated `X` marker uses the standard numbered-card helper, and the card has three approved `preview/full/share` readings about a stopped project, a relationship or agreement ending and recovery after overwork
@@ -85,16 +85,14 @@ Working MVP:
 - latest old-card update: `world` / «Мир» received an approved 1024x1536 muted aged-oil engraving visual with one central dancer, exactly two wands, one complete oval laurel wreath, a human/angel upper left, eagle upper right, bull lower left, lion lower right and the standard helper-rendered `XXI` marker; its three approved `preview/full/share` readings begin from the wreath, central figure with two wands and four corner creatures, explain their canonical meanings and only then suggest how the card may resonate today without predicting a specific event
 - previous old-card update: `judgement` / «Суд» received an approved 1024x1536 aged-oil visual with one robed angel, one trumpet, one white banner with one red cross, distinct men, women and children rising from open stone coffins, calm water, distant mountains and the standard helper-rendered `XX` marker; its three approved `preview/full/share` readings cover receiving a review of one's work, answering a returning opportunity and correcting an old action
 - previous old-card update: `sun` / «Солнце» received an approved 1024x1536 dark aged-oil visual with one clothed child on one white horse, one faced sun, one red banner, a flower wreath with one red feather, a low stone wall, exactly four sunflowers and the standard helper-rendered `XIX` marker; its three approved `preview/full/share` readings cover recognizing a good result, asking a direct question and returning to a manageable rhythm after exhaustion
-- dashboard share icon works for today's share-ready card and uses the same Telegram-first/Web Share fallback as the fresh result screen
-- recent-card reader on dashboard is already implemented via `RecentCardsWidget` + `DashboardCardReader`; do not list it as a future task
+- daily and spread result actions use the current Mora Next UI; legacy dashboard/journal screens were archived and removed from production tree on 2026-08-23
 
 Current work phase:
 
-- active design laboratory: Mora Next in `public/prototypes/spread/`; production MVP remains untouched
-- the daily-card scenario is an approved end-to-end 3D flow; the three-card spread has an experimental GLB fan and three-card click flow that still needs motion/loading QA, while drag remains 2D
-- author has prepared new first-entry mockups for unauthenticated users outside the current code; the next product pass must inspect those mockups before implementing one screen at a time
-- do not mix onboarding implementation with 3D spread stabilization in one pass; both use manual desktop approval in steps of at most 10 minutes
-- the older dashboard card-response MLP remains unfinished but is not the immediate active line unless the author explicitly returns to it
+- Mora Next in `public/ritual/` is canonical production, not a parallel laboratory
+- standalone 3D and legacy dashboard/journal/auth routes are archived outside the production tree
+- current cleanup keeps only the static landing/spread UI, three protected APIs, Supabase server adapter, QA cards and shared assets
+- after cleanup: paid Gemini observability, domain/SMTP/auth redirects, minimal product analytics and closed beta
 - cards-first continues in parallel one card per pass; the latest pass updated `world`, while the previous passes updated `judgement` and added `ten-of-swords`; only `three-of-swords` remains missing and must be handled last in a separate pass after an explicit instruction, without changing IDs or draw/save/journal mechanics; 8 old cards remain to be updated by text
 - AI tarot chat is planned later, after the product feels presentable
 
@@ -113,7 +111,7 @@ Use Ponytail mode by default: question whether the work is needed, prefer existi
 
 If a task is estimated to take more than 10 minutes, warn the author before starting and propose splitting it into steps. Never leave the author without a status update for more than 2 minutes; if a command or process stalls or exceeds its expected duration, stop it yourself and immediately report what happened.
 
-Do not rewrite working mechanics during UI work. Preserve auth, card draw, save, journal, and pending-draw sync behavior unless the user explicitly asks to change them.
+Do not rewrite working mechanics during UI work. Preserve current auth, daily card, spread reservation/generation and account snapshot behavior unless the user explicitly asks to change them.
 
 When the user asks for "QA preview", "страницу с картами и текстами", or wants to inspect added cards, send the `/qa/cards` link for the active environment. Locally this is usually `http://localhost:3000/qa/cards`; if the dev server is on another port, use that port.
 

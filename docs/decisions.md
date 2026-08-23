@@ -3131,3 +3131,29 @@ Mobile Mora Next не получает отдельные auth/draw/save/navigat
 ## 2026-08-22 — Чтение готового расклада открывается только явной кнопкой
 
 Экран сохранённого расклада больше не интерпретирует wheel, vertical swipe или глобальные клавиши как команду перехода. Единственный вход в reading — кнопка «Читать расклад», доступная и мышью, и клавиатурой через нативный button. Это одинаково для mobile и desktop; прокрутка и section-navigation после открытия reading остаются самостоятельной механикой.
+
+## 2026-08-23 — Standalone 3D-лаборатория архивирована вне production tree
+
+После утверждения и выпуска общего landing/spread flow отдельная `/prototypes/3d-daily/`-оболочка больше не несёт самостоятельной production-функции. Перед очисткой создана локальная архивная ветка `archive/legacy-mvp` и тег `archive/pre-cleanup-2026-08-23` на commit `eddd517`. Используемые spread-ассеты перенесены без изменения содержимого в `/assets/3d/`, landing переключён на существующий WebP-фон, а лабораторные HTML/JS/CSS и два PNG-дубля удалены. Неподключённые `snake-3d.js` и `mora-card-landing.glb` также удалены после проверки реального HTML-графа. Следующие legacy-экраны и карточные PNG очищаются отдельными проходами после smoke-test этого переноса.
+
+## 2026-08-23 — Production background остаётся статичным
+
+Процедурный WebGL-starfield удалён целиком: вместе с canvas, shader-кодом, resize-listener и постоянным render-loop. Авторский texture-background остаётся единственным фоновым слоем. Это сохраняет композицию и переходы, но убирает отвлекающее загорание/угасание точек и освобождает отдельный WebGL-контекст на каждой открытой странице.
+
+## 2026-08-23 — Mora Next становится единственным product UI
+
+После production-проверки старые `/auth`, `/dashboard`, `/journal`, `/api/draws`, их React-компоненты, browser Supabase adapter, middleware и прежний нативный draw-runtime удалены из основной ветки. Они не участвовали в каноническом `/ → landing → spread` flow, но продолжали собираться и оставались доступны по прямым URL. Архивная ветка и тег сохраняют весь код. Production build теперь содержит только root redirect, три Mora Next API и защищённый `/qa/cards`; отдельный Edge middleware bundle исчез.
+
+## 2026-08-23 — Production repository хранит только WebP-карты
+
+Все 22 legacy `imageFallback` удалены из `cards.js` и TypeScript-типа, после чего 26 карточных PNG и пять неподключённых WebP/preview-файлов удалены из `public`. Дополнительно удалены старые draw-фоны, auth door, legacy stylesheet/icons, Cormorant, Roboto Condensed и неиспользуемые Geist-файлы. QA получил собственный минимальный набор CSS-токенов. Проверка единого источника подтвердила 77 уникальных карт и наличие всех 77 WebP; размер `public/` уменьшился примерно `103 МБ → 31 МБ`.
+
+## 2026-08-23 — Production UI использует чистые публичные URL
+
+Welcome и ritual физически перенесены из `public/prototypes/` в `public/welcome/` и `public/ritual/`. Next.js делает внутренние rewrites `/ → /welcome/index.html` и `/ritual → /ritual/index.html`, поэтому адресная строка не показывает структуру файлов и не выполняет лишний redirect. Старые UI-пути `/prototypes/*` удалены. Внутренние `/api/prototypes/*` пока оставлены без изменений: их переименование затрагивает auth/data/AI контракт и требует отдельного серверного прохода.
+
+## 2026-08-23 — AI observability начинается со structured Vercel logs
+
+Для closed beta не вводится новая таблица, аналитический SDK или внешний monitoring-сервис. Каждая попытка Gemini/GigaChat пишет один обезличенный JSON-event с requestId, provider/model, success/failure, duration и официальными token-usage полями ответа. Этого достаточно, чтобы проверить стоимость и fallback после включения billing; prompt, email, cardIds и auth identifiers намеренно не логируются.
+
+Платный Gemini не является release-blocker: владелец проекта отложил billing из-за региональных ограничений оплаты. Инфраструктура и закрытый тест готовятся без него; последним provider-шагом станет Gemini, GigaChat, DeepSeek или другой доступный сервис после отдельной оценки качества, оплаты и privacy-условий. Текущую цепочку провайдеров не меняем заранее.

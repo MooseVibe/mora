@@ -1,3 +1,16 @@
+:root {
+  --bg: #090705;
+  --gold: #c9a96e;
+  --gold-dim: #7a6040;
+  --cream: #f0e6d3;
+  --cream-dim: #9a8a75;
+  --card-bg: #211a13;
+  --card-border: #3a2e1e;
+  --card-radius: 14px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-quick: 250ms;
+}
+
 html:has(.qa-cards-wrap),
 body:has(.qa-cards-wrap) {
   height: auto;

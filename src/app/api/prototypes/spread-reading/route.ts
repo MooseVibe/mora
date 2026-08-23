@@ -62,6 +62,19 @@ type Reading = {
 
 type ProviderSource = 'gemini' | 'gigachat'
 
+type ProviderUsage = {
+  inputTokens: number | null
+  outputTokens: number | null
+  totalTokens: number | null
+  cachedInputTokens: number | null
+}
+
+type ProviderResult = {
+  reading: Reading
+  model: string
+  usage: ProviderUsage
+}
+
 let gigaToken: { value: string; expiresAt: number } | null = null
 let gigaOauthAgent: Agent | null = null
 
@@ -162,7 +175,17 @@ async function generateWithGemini(apiKey: string, prompt: string, cardIds: strin
   }
 
   const payload = await response.json()
-  return parseReading(payload?.candidates?.[0]?.content?.parts?.[0]?.text, cardIds)
+  const usage = payload?.usageMetadata
+  return {
+    reading: parseReading(payload?.candidates?.[0]?.content?.parts?.[0]?.text, cardIds),
+    model: typeof payload?.modelVersion === 'string' ? payload.modelVersion : 'gemini-3.5-flash',
+    usage: {
+      inputTokens: typeof usage?.promptTokenCount === 'number' ? usage.promptTokenCount : null,
+      outputTokens: typeof usage?.candidatesTokenCount === 'number' ? usage.candidatesTokenCount : null,
+      totalTokens: typeof usage?.totalTokenCount === 'number' ? usage.totalTokenCount : null,
+      cachedInputTokens: typeof usage?.cachedContentTokenCount === 'number' ? usage.cachedContentTokenCount : null,
+    },
+  } satisfies ProviderResult
 }
 
 function gigaRequest(url: string, headers: Record<string, string>, body: string, timeout: number) {
@@ -265,7 +288,18 @@ async function generateWithGigaChat(
         throw error
       }
 
-      return parseReading(JSON.parse(response.text)?.choices?.[0]?.message?.content, cardIds)
+      const payload = JSON.parse(response.text)
+      const usage = payload?.usage
+      return {
+        reading: parseReading(payload?.choices?.[0]?.message?.content, cardIds),
+        model: typeof payload?.model === 'string' ? payload.model : 'GigaChat-2-Pro',
+        usage: {
+          inputTokens: typeof usage?.prompt_tokens === 'number' ? usage.prompt_tokens : null,
+          outputTokens: typeof usage?.completion_tokens === 'number' ? usage.completion_tokens : null,
+          totalTokens: typeof usage?.total_tokens === 'number' ? usage.total_tokens : null,
+          cachedInputTokens: typeof usage?.precached_prompt_tokens === 'number' ? usage.precached_prompt_tokens : null,
+        },
+      } satisfies ProviderResult
     } catch (error) {
       lastError = error
       if (attempt === 1) throw error
@@ -412,7 +446,7 @@ export async function POST(request: NextRequest) {
 
   const providers: Array<{
     source: ProviderSource
-    generate: () => Promise<Reading>
+    generate: () => Promise<ProviderResult>
   }> = []
   if (process.env.GEMINI_API_KEY) {
     providers.push({
@@ -451,20 +485,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Reading providers are not configured' }, { status: 503 })
   }
 
+  const requestId = crypto.randomUUID()
   try {
-    let selected: { reading: Reading; source: ProviderSource } | null = null
+    let selected: { result: ProviderResult; source: ProviderSource } | null = null
     for (const provider of providers) {
+      const startedAt = Date.now()
       try {
-        selected = { reading: await provider.generate(), source: provider.source }
-        console.info('[provider]', { source: provider.source, status: 'completed' })
+        const result = await provider.generate()
+        selected = { result, source: provider.source }
+        console.info('[ai-provider]', {
+          event: 'spread-generation',
+          requestId,
+          provider: provider.source,
+          model: result.model,
+          status: 'completed',
+          durationMs: Date.now() - startedAt,
+          ...result.usage,
+        })
         break
       } catch (error) {
-        console.error(`[${provider.source}]`, providerError(error))
+        console.error('[ai-provider]', {
+          event: 'spread-generation',
+          requestId,
+          provider: provider.source,
+          status: 'failed',
+          durationMs: Date.now() - startedAt,
+          error: providerError(error),
+        })
       }
     }
     if (!selected) throw new Error('All reading providers are unavailable')
 
-    const { reading: providerReading, source } = selected
+    const { result: { reading: providerReading }, source } = selected
     const reading = {
       ...providerReading,
       overview: {
@@ -496,6 +548,7 @@ export async function POST(request: NextRequest) {
     }
     if (!completion?.ok || completion.data?.completed !== true) {
       console.error('[spread-reading]', {
+        requestId,
         status: completion?.status ?? null,
         reason: completion?.data?.reason ?? completion?.data?.error ?? null,
         stage: 'complete-account-spread',
@@ -514,7 +567,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ reading, source, nextSpreadAt, snapshot })
   } catch (error) {
-    console.error('[spread-reading]', providerError(error))
+    console.error('[spread-reading]', { requestId, error: providerError(error) })
     await releaseReservation()
     return NextResponse.json({ error: 'Reading providers are unavailable' }, { status: 502 })
   }
