@@ -26,7 +26,7 @@
     capture_pageleave: false,
     disable_session_recording: true,
     person_profiles: "identified_only",
-    persistence: "memory",
+    persistence: "sessionStorage",
   });
 
   window.MoraAnalytics.capture = (event, properties = {}) => {

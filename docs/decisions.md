@@ -3160,6 +3160,6 @@ Welcome и ritual физически перенесены из `public/prototype
 
 ## 2026-08-23 — Закрытая бета использует минимальную PostHog EU аналитику
 
-Для product funnel выбран бесплатный PostHog Cloud EU вместо платных Vercel Custom Events и самописной аналитической панели поверх Supabase. Mora подключает один маленький browser-wrapper только на `mora-kappa.vercel.app`; локальные, LAN и preview-сборки остаются no-op. SDK не собирает автоматические клики, pageviews, pageleave или session replay, не создаёт person profiles и хранит anonymous identity только в памяти вкладки.
+Для product funnel выбран бесплатный PostHog Cloud EU вместо платных Vercel Custom Events и самописной аналитической панели поверх Supabase. Mora подключает один маленький browser-wrapper только на `mora-kappa.vercel.app`; локальные, LAN и preview-сборки остаются no-op. SDK не собирает автоматические клики, pageviews, pageleave, heatmaps, Web Vitals или session replay и не создаёт person profiles. Случайный anonymous ID хранится только в `sessionStorage` текущей вкладки: этого достаточно для воронки `/ → /ritual`, но идентификатор исчезает при закрытии вкладки и не становится постоянным профилем.
 
 Явные события описывают только шаг продукта и безопасные технические свойства: entry/destination, authenticated, position и provider source. Email, user ID, выбранная тема, cardIds, prompt, название карты и reading-текст не передаются. До появления custom domain production-host allowlist остаётся одной строкой; домен добавляется отдельным release-шагом.
