@@ -192,11 +192,11 @@ Desktop-регрессия открытой вкладки карты дня п�
 - loading-переход трёх выбранных 3D-карт всё ещё требует отдельного ручного QA; стабильные click/drag, рубашку и утверждённую карту дня при этом не переписывать.
 - автор подготовил новые макеты первого опыта неавторизованного пользователя вне текущего кода. В следующем чате сначала запросить/открыть эти макеты и составить точный список экранов и состояний; не угадывать их по старому landing.
 
-Текущий локальный прототип доступен по адресу:
+Текущий локальный product-flow доступен по адресам:
 
-`http://localhost:3002/prototypes/spread/index.html`
+`http://localhost:3002/` и `http://localhost:3002/ritual`
 
-Порт может измениться, если он занят. Для прототипа используй точный путь с `index.html`.
+Порт может измениться, если он занят. Старые `/prototypes/*` в production и локально должны оставаться `404`.
 
 ## Старт следующего чата
 
@@ -205,16 +205,15 @@ Desktop-регрессия открытой вкладки карты дня п�
 1. Работать только в `/Users/moose/.codex/worktrees/6487/mora` на `codex/mora-next-closed-test`; не трогать Desktop-копию и не создавать новый worktree.
 2. Сначала read-only сверить branch/status/log. Не трогать `supabase/.temp`.
 3. Канонический UI: `/` → `public/welcome/`, `/ritual` → `public/ritual/`; старые UI `/prototypes/*` должны оставаться `404`.
-4. Текущий release-пакет уже прошёл syntax, lint, build и LAN HTTP smoke. После production deploy проверить welcome, guest/auth daily, spread, saved reading и пять секций.
-5. Минимальная PostHog EU аналитика подготовлена локально; после отдельного release-разрешения её нужно выпустить, получить первый production event и собрать одну воронку. Затем домен/SMTP, metadata/SEO и closed beta. Платный AI provider — последним отдельным шагом.
+4. Analytics release `c4147b8` выпущен в production deployment `dpl_7ycReRZsgquinjJ8F4pKmwceDaUT`; syntax, lint, build и production HTTP smoke прошли.
+5. Бесплатный PostHog EU принимает production events; onboarding завершён на Free plan, автоматический сбор и Session Replay выключены, создан insight `Mora · Welcome → Ritual` (`BA22S65O`). Дальше домен/SMTP, metadata/SEO и closed beta. Платный AI provider — последним отдельным шагом.
 
 ## Следующие шаги
 
-1. После явного разрешения закоммитить, запушить и задеплоить PostHog analytics-pass только в Vercel project `mora` / `mora-kappa.vercel.app`.
-2. Открыть production welcome и ritual, подтвердить первый event в PostHog и собрать funnel `welcome → ritual → spread generation → reading`.
-3. Подготовить домен, production SMTP и Supabase redirect URLs.
-4. Добавить базовые metadata/SEO и провести closed beta.
-5. Подключить доступный платный AI provider перед масштабированием теста.
+1. После появления первых реальных тестеров дополнить PostHog отдельными daily- и spread-воронками из уже подключённых explicit events.
+2. Подготовить домен, production SMTP и Supabase redirect URLs.
+3. Добавить базовые metadata/SEO и провести closed beta.
+4. Подключить доступный платный AI provider перед масштабированием теста.
 
 ## Исторические планы ниже не активны
 
