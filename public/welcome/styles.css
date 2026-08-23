@@ -159,8 +159,7 @@ body::before {
 
 @media (max-width: 900px) {
   body {
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .header {

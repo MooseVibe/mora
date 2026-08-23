@@ -1242,11 +1242,14 @@ body.daily-result-entering .daily-result-copy {
 }
 
 .daily-result-cooldown {
+  display: grid;
   width: auto;
   max-width: 260px;
   min-width: 0;
   flex: 1 1 260px;
   font-variant-numeric: tabular-nums;
+  place-items: center;
+  text-align: center;
   white-space: nowrap;
 }
 
