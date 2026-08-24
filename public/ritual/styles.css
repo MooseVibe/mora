@@ -88,6 +88,11 @@ body.mode-switching main {
   transition-duration: 180ms;
 }
 
+body.mode-switching:is(.daily-result-ready, .daily-3d-result) .daily-card-heading {
+  opacity: 0;
+  transition: none;
+}
+
 .visually-hidden {
   position: absolute;
   overflow: hidden;

@@ -3163,3 +3163,9 @@ Welcome и ritual физически перенесены из `public/prototype
 Для product funnel выбран бесплатный PostHog Cloud EU вместо платных Vercel Custom Events и самописной аналитической панели поверх Supabase. Mora подключает один маленький browser-wrapper только на `mora-kappa.vercel.app`; локальные, LAN и preview-сборки остаются no-op. SDK не собирает автоматические клики, pageviews, pageleave, heatmaps, Web Vitals или session replay и не создаёт person profiles. Случайный anonymous ID хранится только в `sessionStorage` текущей вкладки: этого достаточно для воронки `/ → /ritual`, но идентификатор исчезает при закрытии вкладки и не становится постоянным профилем.
 
 Явные события описывают только шаг продукта и безопасные технические свойства: entry/destination, authenticated, position и provider source. Email, user ID, выбранная тема, cardIds, prompt, название карты и reading-текст не передаются. До появления custom domain production-host allowlist остаётся одной строкой; домен добавляется отдельным release-шагом.
+
+## 2026-08-24 — Daily-веер не открывается без актуальной server-pending карты
+
+Истёкший `nextDailyAt` в долго открытой авторизованной вкладке больше не превращает старое `drawn`-состояние в ложный интерактивный idle: перед возвратом в daily и перед кликом клиент одним deduplicated GET обновляет account-state, а сам activation дополнительно требует реального prepared candidate. Это сохраняет серверный выбор карты авторитетным и не вводит клиентский fallback, который мог бы разойтись с Supabase.
+
+При возврате к уже готовому daily-result result-классы устанавливаются до включения `daily-mode`. Пока общий экран скрыт переходом между табами, старый заголовок веера сразу получает `opacity: 0` без собственного `360ms` transition; обычная анимация первого ритуала не меняется.

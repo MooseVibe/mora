@@ -57,7 +57,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Последний рабочий цикл
 
-Дата обновления: 2026-08-23.
+Дата обновления: 2026-08-24.
 
 В последних чатах:
 
@@ -69,6 +69,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 - Создан бесплатный PostHog Cloud EU project `Mora` (`project 255852`). Product Analytics подключается одним production-only browser-wrapper без npm-зависимости: autocapture, automatic pageviews, pageleave, heatmaps, Web Vitals, session replay и person profiles отключены; случайный anonymous ID хранится только в `sessionStorage` текущей вкладки, чтобы честно считать переход `/ → /ritual`, и исчезает при закрытии вкладки. Явные события покрывают welcome, login, daily и spread funnel, но не содержат email, prompt, cardIds, topic или reading-текст. Локальные/LAN/preview-сборки ничего не отправляют.
 - Покупка домена поставлена автором на паузу. Рабочий кандидат — `moratarot.com`; на Beget подтверждена цена `.com` `1 490 ₽` за первый год (`1 790 ₽` продление), но аккаунт, заказ и оплата не создавались. При следующем вопросе о релизе продолжить с регистрации аккаунта Beget, затем оформить только домен без хостинга/допуслуг и остановиться перед оплатой.
 - Финальный micro-UI пакет фиксирует два mobile Safari кейса без изменения flow: welcome-screen больше не включает document-scroll и не двигает общий texture-background, а disabled countdown вытянутой карты явно центрирует строку «Новая карта через HH:MM:SS» внутри fill-container кнопки. Локальный CSS/DOM QA, `git diff --check` и lint прошли; `supabase/.temp` не входит в release.
+- Перед переходом в новый чат исправлены два связанных daily-state race: открытая авторизованная вкладка после истечения 12h cooldown обновляет account-state до раскрытия desktop-веера, поэтому веер больше не может открыться без server-pending карты; при возврате из расклада к уже вытянутой карте result-классы применяются до показа daily-screen, а старый заголовок веера скрывается без затяжного opacity-transition. Покадровый Browser QA подтвердил `opacity: 0` на всём обратном переходе; cache key обновлён до `dailystate1`. Автор подтвердил локальный LAN-flow и разрешил production release.
 
 - Финальный mobile integration pass переиспользует общую desktop-механику без второго flow: guest/auth daily проходят тот же 3D-controller, burger вызывает существующий `switchMode`, login использует настоящий tester-session, а расклад сохраняется и читается через прежний account/API contract. Локальный `testerPreview=1` теперь честно получает временную pending-карту только для визуального QA и не делает account POST без Supabase-сессии. Browser contract-tests прошли guest → login, authenticated daily pending → complete → result, полный расклад через пять секций и saved state, mobile `375×812` без horizontal overflow и desktop `1440×900` без регрессии.
 

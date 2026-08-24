@@ -123,6 +123,7 @@ let volatileFailedSpread = null;
 let pendingDailySelection = null;
 let visibleSpreadCardIndices = [];
 let dailyActivationInFlight = false;
+let dailyAccountRefreshPromise = null;
 const clientEventTrace = crypto.randomUUID?.() || String(Date.now());
 const sentClientEvents = new Set();
 
@@ -395,6 +396,38 @@ function restorePrototypeAccountState(payload, clearGuestDaily = true) {
   }
 }
 
+function dailyAccountStateExpired() {
+  return (
+    prototypeTesterAuthenticated
+    && !prototypeTesterPreview
+    && accountDailyState?.status === "drawn"
+    && prototypeNextDailyAt <= Date.now()
+  );
+}
+
+function refreshPrototypeAccountState() {
+  if (!dailyAccountStateExpired()) return Promise.resolve(true);
+  if (dailyAccountRefreshPromise) return dailyAccountRefreshPromise;
+
+  dailyAccountRefreshPromise = fetch("/api/prototypes/account-state", { cache: "no-store" })
+    .then(async (response) => {
+      if (!response.ok) throw new Error("Unable to refresh account state");
+      const payload = await response.json();
+      setPrototypeTesterAuthenticated(true, payload.isAdmin === true, payload.nextSpreadAt, payload.email);
+      restorePrototypeAccountState(payload);
+      return true;
+    })
+    .catch((error) => {
+      console.error("Mora daily account refresh failed", error);
+      return false;
+    })
+    .finally(() => {
+      dailyAccountRefreshPromise = null;
+    });
+
+  return dailyAccountRefreshPromise;
+}
+
 async function handleTesterLogin(event, destination) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -549,7 +582,9 @@ async function handleDailyDeckClick(event) {
   dailyActivationInFlight = true;
   try {
     const [controller] = await Promise.all([dailyDeck3D, prototypeTesterSessionPromise]);
+    if (dailyAccountStateExpired() && !await refreshPrototypeAccountState()) return;
     if (!controller || (readSavedDailyCard() && !controller.isResultActive())) return;
+    if (!readSavedDailyCard() && !prepareDailyCardCandidate()) return;
     const keyboard = event.detail === 0;
     if (!keyboard && !controller.hitTest(event.clientX, event.clientY)) return;
     controller.activate({ keyboard });
@@ -568,6 +603,7 @@ async function switchMode(mode) {
   await new Promise((resolve) => window.setTimeout(resolve, reducedMotion ? 1 : 180));
 
   if (mode === "daily") {
+    await refreshPrototypeAccountState();
     showDailyMode();
   } else {
     showSpreadMode();
@@ -582,7 +618,8 @@ async function switchMode(mode) {
 }
 
 function showDailyMode() {
-  dailyDeck3D.then((controller) => controller?.setActive(true));
+  const savedDailyCard = readSavedDailyCard();
+  const showActive3DResult = Boolean(savedDailyCard && daily3DResultActive);
   resetSavedCardTilt();
   savedReturnChapter = null;
   stateTransitionInFlight = false;
@@ -595,30 +632,28 @@ function showDailyMode() {
     "saved-reading-entering",
     "reading-to-saved",
     "reading-saved-entering",
-    "daily-result-ready",
     "daily-result-entering",
-    "daily-3d-result",
     "daily-3d-result-entering",
     "daily-3d-error",
     "daily-3d-ritual",
     "daily-3d-animating",
   );
   document.body.classList.remove("guest-spread-mode");
+  document.body.classList.toggle("daily-result-ready", Boolean(savedDailyCard));
+  document.body.classList.toggle("daily-3d-result", showActive3DResult);
   document.body.classList.add("daily-mode");
   dailyModeButton.classList.add("active");
   spreadModeButton.classList.remove("active");
+  dailyDeck3D.then((controller) => controller?.setActive(true));
 
-  const savedDailyCard = readSavedDailyCard();
   dailyDeck.disabled = Boolean(savedDailyCard);
-  daily3DResultActive = Boolean(savedDailyCard && daily3DResultActive);
+  daily3DResultActive = showActive3DResult;
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
     document.documentElement.classList.remove("daily-saved-pending");
-    document.body.classList.add("daily-result-ready");
     scheduleDailyResultScrollUpdate();
     if (daily3DResultActive) {
       dailyDeck.disabled = false;
-      document.body.classList.add("daily-3d-result");
     } else if (!daily3DRestoreInFlight) {
       daily3DRestoreInFlight = true;
       document.body.classList.add("daily-3d-restoring");
@@ -1720,7 +1755,9 @@ function updateDailyCooldownButton() {
     if (remaining <= 0) {
       window.clearInterval(dailyCooldownTimer);
       dailyCooldownTimer = undefined;
-      if (document.body.classList.contains("daily-mode")) showDailyMode();
+      if (document.body.classList.contains("daily-mode")) {
+        refreshPrototypeAccountState().then(showDailyMode);
+      }
     }
   };
 
@@ -1728,12 +1765,13 @@ function updateDailyCooldownButton() {
   if (cooldownEndsAt > Date.now()) dailyCooldownTimer = window.setInterval(render, 1000);
 }
 
-function refreshDailyStateAfterBackground() {
+async function refreshDailyStateAfterBackground() {
   if (
     document.visibilityState !== "visible"
     || !testerSessionResolved
     || !document.body.classList.contains("daily-mode")
   ) return;
+  await refreshPrototypeAccountState();
   if (readSavedDailyCard()) updateDailyCooldownButton();
   else showDailyMode();
 }
