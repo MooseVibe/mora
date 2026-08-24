@@ -2347,6 +2347,25 @@ readingSummaryHomeButton.addEventListener("click", () => closeReadingToSaved(act
 
 dailyResultCopy.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
 dailyResult.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
+window.addEventListener("wheel", (event) => {
+  if (
+    window.innerWidth <= 720
+    || event.ctrlKey
+    || !document.body.classList.contains("daily-mode")
+    || !document.body.matches(".daily-result-ready, .daily-3d-result")
+    || dailyResultCopy.contains(event.target)
+    || Math.abs(event.deltaY) <= Math.abs(event.deltaX)
+  ) return;
+
+  const deltaScale = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+    ? 16
+    : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+      ? dailyResultCopy.clientHeight
+      : 1;
+  const previousScrollTop = dailyResultCopy.scrollTop;
+  dailyResultCopy.scrollTop += event.deltaY * deltaScale;
+  if (dailyResultCopy.scrollTop !== previousScrollTop) event.preventDefault();
+}, { passive: false });
 window.addEventListener("resize", scheduleDailyResultScrollUpdate, { passive: true });
 document.addEventListener("visibilitychange", refreshDailyStateAfterBackground);
 chapters.forEach((chapter) => {
