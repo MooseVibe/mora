@@ -443,4 +443,4 @@ Mobile typography release исправляет два полевых кейса.
 
 ## Локальный desktop daily-scroll — 2026-08-24
 
-В desktop-result карты дня вертикальный wheel/trackpad над любой частью сцены теперь прокручивает единственный существующий контейнер `.daily-result-copy`; над самим текстом сохраняется нативный scroll. Mobile, horizontal gestures и browser zoom не перехватываются. Browser QA на `1280×600` подтвердил одинаковое смещение текста при wheel над картой и над текстом; ручной LAN QA автора пройден. Изменение одобрено для отдельного production release.
+В desktop-result карты дня вертикальный wheel/trackpad над любой частью сцены теперь прокручивает единственный существующий контейнер `.daily-result-copy`; над самим текстом сохраняется нативный scroll. Mobile, horizontal gestures и browser zoom не перехватываются. После первого production release `a386441` выявлено scroll chaining на границе текста: локальный hotfix всегда поглощает перенаправленный wheel, поэтому фон страницы не двигается, даже когда текст уже дошёл до начала или конца. Требуется повторный ручной LAN QA и отдельный production hotfix.

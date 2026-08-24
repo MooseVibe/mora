@@ -2362,9 +2362,8 @@ window.addEventListener("wheel", (event) => {
     : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
       ? dailyResultCopy.clientHeight
       : 1;
-  const previousScrollTop = dailyResultCopy.scrollTop;
   dailyResultCopy.scrollTop += event.deltaY * deltaScale;
-  if (dailyResultCopy.scrollTop !== previousScrollTop) event.preventDefault();
+  event.preventDefault();
 }, { passive: false });
 window.addEventListener("resize", scheduleDailyResultScrollUpdate, { passive: true });
 document.addEventListener("visibilitychange", refreshDailyStateAfterBackground);
