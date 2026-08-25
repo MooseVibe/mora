@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260821-mobileritual21";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260822-prodhotfix1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260825-spreadsmooth1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const availableSpreadCards = TAROT_CARDS
@@ -360,9 +360,12 @@ async function restorePrototypeTesterSession() {
     testerSessionResolved = true;
     reportClientEvent("daily-state-resolved");
     if (daily3DReady) reportClientEvent("daily-3d-ready");
-    document.documentElement.classList.remove("tester-session-pending");
     if (document.body.classList.contains("daily-mode")) showDailyMode();
-    else if (prototypeTesterAuthenticated) restoreSavedSpread();
+    else if (prototypeTesterAuthenticated) {
+      await ensureSpreadDeck3D();
+      restoreSavedSpread();
+    }
+    document.documentElement.classList.remove("tester-session-pending");
   }
 }
 
@@ -606,6 +609,7 @@ async function switchMode(mode) {
     await refreshPrototypeAccountState();
     showDailyMode();
   } else {
+    if (prototypeTesterAuthenticated) await ensureSpreadDeck3D();
     showSpreadMode();
   }
 
@@ -1215,7 +1219,7 @@ function ensureSpreadDeck3D() {
 function renderDeck() {
   const spacing = spreadDeckSpacing();
   const visibleCardIndices = [];
-  const visibleLimit = window.innerWidth / 2 + 320;
+  const visibleLimit = window.innerWidth / 2 + (window.innerWidth <= 720 ? 160 : 240);
   deckCards.forEach((card, index) => {
     const offset = index - (deckCardCount - 1) / 2 + deckScroll / spacing;
     card.style.top = `${offset ** 2 * spreadDeckCurve()}px`;
@@ -1392,13 +1396,12 @@ topics.forEach((topic) => {
     ritual.dataset.step = "choose";
     showDeckHint();
     playDeckDiscoveryMotion();
-    preloadVisibleSpreadFaces();
   });
 });
 
 async function preloadVisibleSpreadFaces() {
   const paths = visibleSpreadCardIndices
-    .slice(0, 10)
+    .slice(0, 4)
     .map((index) => spreadDeck[index]?.image)
     .filter(Boolean);
   for (let index = 0; index < paths.length; index += 2) {

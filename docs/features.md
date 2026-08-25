@@ -55,7 +55,7 @@
 1. ✅ Production cleanup и clean URL выпущены.
 2. ✅ Минимальная privacy-safe PostHog Cloud EU аналитика подключена без autocapture и session replay.
 3. Купить домен, настроить Vercel, Supabase Site URL/redirects и production SMTP.
-4. Сделать базовые metadata/SEO и провести закрытую бету 7–14 дней на 20–30 пользователях.
+4. 🟡 Базовые metadata/SEO подготовлены локально; после deploy проверить индексацию и провести закрытую бету 7–14 дней на 20–30 пользователях.
 5. Перед масштабированием подключить доступный платный AI provider и проверить structured logs на реальном раскладе.
 
 ## Не делаем сейчас

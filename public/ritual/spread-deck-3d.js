@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const isMobile = () => window.innerWidth <= 720;
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 const easeInOut = (value) => {
   const t = clamp01(value);
@@ -122,7 +121,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 3 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.7));
   const key = new THREE.DirectionalLight(0xffe7d2, 2.8);
   key.position.set(-4, 8, 8);
@@ -486,7 +485,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       const card = cards[index];
       const shadow = shadows[index];
       shadow.visible = false;
-      const texturePromise = preloadFace(imageUrl);
+      const texture = await preloadFace(imageUrl);
       const flightStartedAt = performance.now();
       let firstFrameRecorded = false;
 
@@ -523,6 +522,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       card.visible = true;
       shadow.material = shadow.material.clone();
       shadow.material.opacity = 0;
+      applyFaceTexture(card, texture);
       const updateFlight = (rawProgress) => {
         if (!firstFrameRecorded) {
           firstFrameRecorded = true;
@@ -561,10 +561,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         renderer.render(scene, camera);
       };
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      await tween(reduceMotion ? 1 : 180, (progress) => updateFlight(progress * 0.22));
-      const texture = await texturePromise;
-      applyFaceTexture(card, texture);
-      await tween(reduceMotion ? 1 : 640, (progress) => updateFlight(0.22 + progress * 0.78));
+      await tween(reduceMotion ? 1 : 820, updateFlight);
 
       card.position.copy(targetPosition);
       card.quaternion.copy(frontCamera);

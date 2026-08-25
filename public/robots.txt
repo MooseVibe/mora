@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /qa/
+
+Sitemap: https://mora-kappa.vercel.app/sitemap.xml
