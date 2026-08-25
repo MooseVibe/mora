@@ -3,14 +3,6 @@ const spreadUrl = "/ritual";
 
 window.MoraAnalytics.capture("welcome_viewed");
 
-try {
-  if (window.localStorage.getItem(welcomeKey) === "1") {
-    window.location.replace(spreadUrl);
-  }
-} catch {
-  // Without browser storage the welcome screen remains repeatable.
-}
-
 function enterMora(destination = spreadUrl) {
   window.MoraAnalytics.capture("welcome_entered", {
     destination: destination.includes("login=1") ? "login" : "ritual",

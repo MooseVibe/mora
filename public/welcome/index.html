@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <base href="/welcome/" />
+    <script>
+      try {
+        if (window.localStorage.getItem("mora:prototype:welcomeCompleted") === "1") {
+          window.location.replace("/ritual");
+        }
+      } catch {
+        // Without browser storage the welcome screen remains repeatable.
+      }
+    </script>
     <title>Mora — карта дня и расклады таро</title>
     <meta
       name="description"
