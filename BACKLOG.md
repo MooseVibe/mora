@@ -161,7 +161,7 @@
 
 ### High · 3D-колода расклада лагает на desktop/laptop
 
-**Статус:** Prepared locally · Needs cold-cache device QA
+**Статус:** Production · Needs cold-cache device QA
 **Дата:** 2026-08-10
 **Где:** Mora Next, выбор трёх карт
 **Источник:** повторяющийся production-сигнал с разных устройств
@@ -180,7 +180,7 @@
 - центральные face-текстуры начинают preload и GPU-upload сразу после готовности spread WebGL, повторно прогреваются после discovery-motion и ручной прокрутки;
 - прямой authenticated cold-entry теперь поднимает WebGL-controller до показа spread-screen, поэтому видимый CSS-fallback не заменяет 3D-веер после восстановления сессии;
 - выбранная карта больше не останавливается на `22%` полёта в ожидании face-текстуры: видимые лица по-прежнему префетчатся заранее, а редкий остаточный wait происходит до старта, после чего утверждённая траектория `820ms` проигрывается без паузы;
-- локальный smoothness-pass ограничивает spread WebGL до DPR `1.5`, сокращает невидимый overscan и переносит урезанный preload четырёх лиц за пределы discovery-motion/инерции; нужен реальный iPhone/слабый laptop QA до production;
+- production smoothness-pass ограничивает spread WebGL до DPR `1.5`, сокращает невидимый overscan и переносит урезанный preload четырёх лиц за пределы discovery-motion/инерции; остаточный риск проверяется на реальном iPhone/слабом laptop;
 - daily idle-loop остановлен, а realtime shadow-pass ограничен верхней картой стопки и отключён при скрытом receiver веера;
 - «Ещё расклад» сбрасывает готовую сцену in-page без повторной загрузки session, Three.js и GLB.
 
