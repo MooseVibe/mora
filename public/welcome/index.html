@@ -4,9 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <base href="/welcome/" />
+    <link rel="icon" href="/favicon-light.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
     <script>
       try {
-        if (window.localStorage.getItem("mora:prototype:welcomeCompleted") === "1") {
+        const params = new URLSearchParams(window.location.search);
+        const isLocal = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+          || /^192\.168\./.test(window.location.hostname)
+          || /^10\./.test(window.location.hostname)
+          || /^172\.(1[6-9]|2\d|3[01])\./.test(window.location.hostname);
+        const showPreview = isLocal && params.get("welcomePreview") === "1";
+        if (!showPreview && window.localStorage.getItem("mora:prototype:welcomeCompleted") === "1") {
           window.location.replace("/ritual");
         }
       } catch {
@@ -45,7 +54,7 @@
       }
     </script>
     <link rel="stylesheet" href="/assets/fonts.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260823-welcomescroll1" />
+    <link rel="stylesheet" href="./styles.css?v=20260825-legal2" />
     <script src="/assets/analytics.js?v=20260823-product2"></script>
     <script type="module" src="./app.js?v=20260823-product2"></script>
   </head>

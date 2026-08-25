@@ -216,6 +216,7 @@ body::before {
   .card-snake {
     display: none;
   }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -223,4 +224,5 @@ body::before {
   .ritual-action {
     transition-duration: 150ms;
   }
+
 }

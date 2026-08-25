@@ -30,6 +30,14 @@ const nextConfig = {
           source: '/ritual',
           destination: '/ritual/index.html',
         },
+        {
+          source: '/privacy',
+          destination: '/legal/privacy.html',
+        },
+        {
+          source: '/terms',
+          destination: '/legal/terms.html',
+        },
       ],
     };
   },

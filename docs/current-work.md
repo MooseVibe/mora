@@ -78,6 +78,8 @@ Desktop-регрессия открытой вкладки карты дня п�
 - Авторский `Cover.png` экспортирован в точном OG-соотношении `2400×1260`; production использует визуально идентичную копию `public/og-cover.png` размером `1200×630` и `745 KB`. Welcome и ritual ссылаются на неё через `og:image` и `twitter:card=summary_large_image`; исходник на Desktop не менялся.
 - Release commit `e0bf995` выпущен в canonical production через проверенный Ready preview и promotion deployment `dpl_93vRAZJLKWU9CtafPWmgkbKD2aAm`. Два прямых CLI deployment до него остались в Vercel со статусом `UNKNOWN` и никогда не получили alias; production smoke подтвердил canonical HTML/cache-key `spreadsmooth1`, OG PNG, robots/sitemap, session `200` и account auth-boundary `401`.
 - Выпущен fix flash welcome при повторном входе: существующая проверка `welcomeCompleted` перенесена из отложенного module-script в начало `<head>`, поэтому возврат на `/` делает `location.replace('/ritual')` до первого paint. Supabase restore внутри `/ritual` и одноразовый welcome нового пользователя не менялись; автор подтвердил LAN-flow в Safari. Release commit `54e9203`, production deployment `dpl_Dea8wxkLCrTTxaksiYKD9SYP74jq`; canonical HTML, `/ritual` и guest-session прошли smoke.
+- Подготовлен и визуально согласован legal UX-пакет по Mobbin-паттернам: отдельные `/privacy` и `/terms` с desktop-оглавлением и mobile one-column scroll; единственная продуктовая точка входа — короткое согласие под auth-form, поскольку Mora пока бесплатна. Auth legal-блок использует `20px` input→buttons→legal, текст `14/20` secondary, dashed underline и белый hover ссылок. В draft внесены данные оператора «физическое лицо Лось Илья, Россия, Санкт-Петербург», контакт `mora.privacy@gmail.com` и правило использования `18+`; страницы сохраняют `noindex` до финальной юридической проверки адреса оператора, retention и будущего AI provider. Локальный `?welcomePreview=1` позволяет смотреть Welcome после сохранённого redirect-флага, но не действует на production origin. Текст отражает только реальные Mora data flows. Авторские favicon SVG подключены отдельными light/dark variants через `prefers-color-scheme`. Responsive Browser QA прошёл на `1440×900` и `375×812` без horizontal overflow; пакет готов к release.
+- Read-only privacy/data audit зафиксирован в `docs/privacy-data-map.md`. Supabase Dashboard подтвердил основной project region `AWS ap-southeast-1` (Сингапур); там лежат Auth email, daily state и полный spread snapshot. PostHog использует EU endpoint и не получает явные email/topic/cards/reading, но часть remote SDK defaults не закреплена в коде. Vercel видит сетевые данные и исполняет API на зарубежной инфраструктуре; AI route может передавать фиксированную тему и три карты Gemini/GigaChat без email. До публичной регистрации российских пользователей нужен выбор первичной БД в РФ, процедура удаления/retention и профильная проверка уведомлений Роскомнадзора/трансграничной передачи. Домен не решает этот блокер.
 
 - Финальный mobile integration pass переиспользует общую desktop-механику без второго flow: guest/auth daily проходят тот же 3D-controller, burger вызывает существующий `switchMode`, login использует настоящий tester-session, а расклад сохраняется и читается через прежний account/API contract. Локальный `testerPreview=1` теперь честно получает временную pending-карту только для визуального QA и не делает account POST без Supabase-сессии. Browser contract-tests прошли guest → login, authenticated daily pending → complete → result, полный расклад через пять секций и saved state, mobile `375×812` без horizontal overflow и desktop `1440×900` без регрессии.
 
@@ -221,11 +223,11 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Следующие шаги
 
-1. Подготовить Privacy Policy, Terms и их точки входа в welcome/auth UI.
-2. Остаточную плавность spread-flow продолжать оценивать по полевым устройствам, не добавляя новый renderer заранее.
-3. После появления первых реальных тестеров дополнить PostHog отдельными daily- и spread-воронками из уже подключённых explicit events.
-4. Подготовить домен, production SMTP и Supabase redirect URLs.
-5. Провести closed beta; платный AI provider подключить перед масштабированием теста.
+1. Спроектировать повторяемый процесс перегенерации колоды в едином стиле: сначала skill и один пакет из пяти карт с ручным аппрувом каждого результата, без массовой замены production-ассетов заранее.
+2. Подготовить portfolio-case: короткий текст для Notion и Recordly-видео канонических desktop/mobile сценариев.
+3. Для закрытого теста временно сохранить Supabase; не расширять публичную регистрацию до решения российского первичного хранения, retention и процедуры удаления данных.
+4. Покупку домена, production SMTP и платный AI API отложить до завершения portfolio-прохода.
+5. Остаточную плавность spread-flow продолжать оценивать по полевым устройствам, не добавляя новый renderer заранее.
 
 ## Исторические планы ниже не активны
 

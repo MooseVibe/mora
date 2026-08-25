@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <base href="/ritual/" />
+    <link rel="icon" href="/favicon-light.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
     <title>Карта дня и расклад из трёх карт — Mora</title>
     <meta
       name="description"
@@ -66,7 +69,7 @@
     <link rel="modulepreload" href="./spread-deck-3d.js?v=20260825-spreadsmooth1" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/build/three.module.js" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/examples/jsm/loaders/GLTFLoader.js" />
-    <link rel="stylesheet" href="./styles.css?v=20260824-dailystate1" />
+    <link rel="stylesheet" href="./styles.css?v=20260825-legal2" />
   </head>
   <body class="daily-mode">
     <header class="header">
@@ -456,6 +459,10 @@
             <button class="primary-action" type="submit">Продолжить</button>
             <button class="login-screen-home primary-action secondary-action" type="button">На главную</button>
           </div>
+          <p class="login-screen-legal">
+            Продолжая, вы принимаете <a href="/terms">Условия использования</a>
+            и <a href="/privacy">Политику конфиденциальности</a>.
+          </p>
         </form>
       </div>
     </section>
