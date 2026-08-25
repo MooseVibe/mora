@@ -14,7 +14,17 @@ The production deck lives in `public/assets/cards/` and committed tarot cards us
 - File paths in code:
   - `assets/cards/{card-id}.webp`
 
-Some files in the folder are not standard deck cards: `Tarolog`, `Tarolog2`, `image`, `moose`, `moose-mobile`. Do not use them as the primary style baseline for new tarot cards.
+The folder currently contains only the 77 canonical production card WebPs. Removed legacy files such as `Tarolog`, `Tarolog2`, `image`, `moose`, and `moose-mobile` are not style references.
+
+### Working Visual References For The Next Regeneration Pass
+
+Until the author approves a full master-spec, use these three existing production cards as the working visual direction:
+
+- `world` / «Мир»;
+- `sun` / «Солнце»;
+- `judgement` / «Суд».
+
+They are references for the shared palette, light, texture, contrast, composition density, and overall deck feeling. They do not yet authorize regeneration, asset replacement, or automatic copying of every detail. The final master-spec and each regenerated card still require separate visual approval from the author.
 
 ## Visual Direction
 

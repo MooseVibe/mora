@@ -59,6 +59,8 @@ async function loadBackTexture(renderer) {
 }
 
 function createMaterials(backTexture) {
+  const frameColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--result-card-frame-surface").trim() || "#343434";
   return {
     face: new THREE.MeshBasicMaterial({
       color: 0x242323,
@@ -71,15 +73,14 @@ function createMaterials(backTexture) {
       toneMapped: false,
     }),
     body: new THREE.MeshStandardMaterial({
-      color: 0x343231,
+      color: frameColor,
       roughness: 0.38,
       metalness: 0.06,
     }),
-    border: new THREE.MeshStandardMaterial({
-      color: 0x5f5f5f,
-      roughness: 0.5,
-      metalness: 0.04,
+    border: new THREE.MeshBasicMaterial({
+      color: frameColor,
       side: THREE.DoubleSide,
+      toneMapped: false,
     }),
   };
 }
@@ -1001,7 +1002,13 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     const fanPullWorldDirection = fanPullDirection.clone().transformDirection(deckGroup.matrixWorld);
     const groupRetreatTarget = groupStart.clone().addScaledVector(fanPullWorldDirection, -0.8);
     const faceTexturePromise = (preparedFaceTexture || loadFaceTexture(renderer, selection.imageUrl))
-      .then((texture) => applyFaceTexture(resultModel, texture))
+      .then((texture) => {
+        const faceSlot = document.querySelector("#daily-result-image")?.getBoundingClientRect();
+        if (faceSlot?.width && faceSlot?.height) {
+          fitTextureCover(resultModel, texture, faceSlot.width / faceSlot.height);
+        }
+        applyFaceTexture(resultModel, texture);
+      })
       .catch((error) => console.error("Mora daily card texture failed to load", error));
     const separationPromise = tween(reducedMotion ? 1 : 260, (progress) => {
       const movementProgress = progress;
@@ -1138,10 +1145,14 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     const resultTemplate = await loadResultTemplate();
     const card = resultTemplate.clone(true);
     scene.add(card);
-    const faceTexture = preparedImageUrl === selection.imageUrl && preparedFaceTexture
+    const faceTexture = await (preparedImageUrl === selection.imageUrl && preparedFaceTexture
       ? preparedFaceTexture
-      : loadFaceTexture(renderer, selection.imageUrl);
-    await faceTexture.then((texture) => applyFaceTexture(card, texture));
+      : loadFaceTexture(renderer, selection.imageUrl));
+    const faceSlot = document.querySelector("#daily-result-image")?.getBoundingClientRect();
+    if (faceSlot?.width && faceSlot?.height) {
+      fitTextureCover(card, faceTexture, faceSlot.width / faceSlot.height);
+    }
+    applyFaceTexture(card, faceTexture);
     scene.attach(card);
     deckGroup.visible = false;
     floor.visible = false;

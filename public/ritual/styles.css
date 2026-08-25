@@ -11,8 +11,7 @@
   --profile-surface: #262626;
   --profile-border: #5a5a5a;
   --result-card-frame-border: rgba(255, 255, 255, 0.12);
-  --result-card-frame-start: rgba(255, 255, 255, 0.12);
-  --result-card-frame-end: rgba(255, 255, 255, 0.04);
+  --result-card-frame-surface: #343434;
   --tag-bg: rgba(255, 255, 255, 0.08);
   --tag-border-start: rgba(255, 255, 255, 0.5);
   --tag-border-end: rgba(255, 255, 255, 0.1);
@@ -1308,11 +1307,7 @@ body.daily-result-entering .daily-result-copy {
   inset: 0;
   border: 1px solid var(--result-card-frame-border);
   border-radius: var(--daily-result-card-outer-radius);
-  background: linear-gradient(
-    150.918deg,
-    var(--result-card-frame-start) 2.609%,
-    var(--result-card-frame-end) 97.33%
-  );
+  background: var(--result-card-frame-surface);
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.44);
   transform:
     rotateX(var(--daily-result-tilt-x))
@@ -2104,11 +2099,7 @@ body.saved-home .saved-spread {
   position: relative;
   border: 1px solid var(--result-card-frame-border);
   border-radius: 12px;
-  background: linear-gradient(
-    150.596deg,
-    var(--result-card-frame-start) 2.609%,
-    var(--result-card-frame-end) 97.33%
-  );
+  background: var(--result-card-frame-surface);
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.44);
   transform:
     rotateX(var(--saved-card-tilt-x))

@@ -50,6 +50,8 @@ function createFacePlaceholderTexture() {
 }
 
 function applyMaterials(root, backTexture) {
+  const frameColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--result-card-frame-surface").trim() || "#343434";
   const materials = {
     face: new THREE.MeshBasicMaterial({
       color: 0x242323,
@@ -65,12 +67,11 @@ function applyMaterials(root, backTexture) {
       polygonOffsetFactor: -1,
       polygonOffsetUnits: -2,
     }),
-    body: new THREE.MeshStandardMaterial({ color: 0x343231, roughness: 0.38, metalness: 0.06 }),
-    border: new THREE.MeshStandardMaterial({
-      color: 0x5f5f5f,
-      roughness: 0.5,
-      metalness: 0.04,
+    body: new THREE.MeshStandardMaterial({ color: frameColor, roughness: 0.38, metalness: 0.06 }),
+    border: new THREE.MeshBasicMaterial({
+      color: frameColor,
       side: THREE.DoubleSide,
+      toneMapped: false,
     }),
   };
   root.traverse((object) => {
@@ -105,6 +106,37 @@ function applyFaceTexture(card, texture) {
     material.toneMapped = false;
     object.material = material;
   });
+}
+
+function fitTextureCover(card, texture, targetAspect) {
+  const sourceWidth = texture.image?.naturalWidth || texture.image?.width;
+  const sourceHeight = texture.image?.naturalHeight || texture.image?.height;
+  if (!sourceWidth || !sourceHeight || !targetAspect) return;
+
+  const uvMin = new THREE.Vector2(1, 1);
+  const uvMax = new THREE.Vector2(0, 0);
+  card.traverse((object) => {
+    if (!object.isMesh || !object.name.toLowerCase().endsWith("_front")) return;
+    const uv = object.geometry.attributes.uv;
+    for (let index = 0; index < uv.count; index += 1) {
+      uvMin.min(new THREE.Vector2(uv.getX(index), uv.getY(index)));
+      uvMax.max(new THREE.Vector2(uv.getX(index), uv.getY(index)));
+    }
+  });
+
+  const sourceAspect = sourceWidth / sourceHeight;
+  texture.repeat.set(1, 1);
+  texture.offset.set(0, 0);
+  if (sourceAspect > targetAspect) {
+    const visibleSpan = targetAspect / sourceAspect;
+    texture.repeat.x = visibleSpan / (uvMax.x - uvMin.x);
+    texture.offset.x = (1 - visibleSpan) / 2 - uvMin.x * texture.repeat.x;
+  } else {
+    const visibleSpan = sourceAspect / targetAspect;
+    texture.repeat.y = visibleSpan / (uvMax.y - uvMin.y);
+    texture.offset.y = (1 - visibleSpan) / 2 - uvMin.y * texture.repeat.y;
+  }
+  texture.needsUpdate = true;
 }
 
 export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
@@ -269,6 +301,11 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
 
     parkedResults.forEach((result) => {
       const rect = result.targetElement.getBoundingClientRect();
+      const targetAspect = rect.width / rect.height;
+      if (Math.abs(targetAspect - result.targetAspect) > 0.001) {
+        fitTextureCover(result.card, result.texture, targetAspect);
+        result.targetAspect = targetAspect;
+      }
       result.target.position.set(
         rect.left + rect.width / 2 - viewport.width / 2,
         viewport.height / 2 - rect.top - rect.height / 2,
@@ -522,6 +559,8 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       card.visible = true;
       shadow.material = shadow.material.clone();
       shadow.material.opacity = 0;
+      const targetAspect = targetRect.width / targetRect.height;
+      fitTextureCover(card, texture, targetAspect);
       applyFaceTexture(card, texture);
       const updateFlight = (rawProgress) => {
         if (!firstFrameRecorded) {
@@ -577,6 +616,8 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         tiltPoint: new THREE.Vector2(),
         hovered: false,
         spinning: false,
+        texture,
+        targetAspect,
       });
       renderer.render(scene, camera);
       return true;
