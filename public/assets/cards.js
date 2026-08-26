@@ -1177,7 +1177,7 @@ export const TAROT_CARDS = [
     streetName: 'Подсел',
     streetText: 'Смотри что тебя держит. Это не клетка — ты сам её не открываешь.',
     visualHint: 'козёл, цепи, огонь, фигуры в плену',
-    image: 'assets/cards/devil.webp',
+    image: 'assets/cards/devil.webp?v=20260826-xix',
     num: 'XV',
     symbol: '▼',
     result: {
@@ -1252,7 +1252,7 @@ export const TAROT_CARDS = [
     streetName: 'Разнос',
     streetText: 'Щас всё посыпется, готовься. Не паникуй — соберёшь по кускам.',
     visualHint: 'молния, падающие фигуры, трещины, хаос',
-    image: 'assets/cards/tower.webp',
+    image: 'assets/cards/tower.webp?v=20260826-xix',
     num: 'XVI',
     symbol: '⚡',
     result: {
@@ -1330,7 +1330,7 @@ export const TAROT_CARDS = [
     streetName: 'Всё норм',
     streetText: 'Выдохни. Всё реально норм — ты просто слишком накручиваешь.',
     visualHint: 'большая звезда, фигура у воды, спокойная ночь',
-    image: 'assets/cards/star.webp?v=20260717',
+    image: 'assets/cards/star.webp?v=20260826-xix',
     num: 'XVII',
     symbol: '★',
     result: {
@@ -1408,7 +1408,7 @@ export const TAROT_CARDS = [
     streetName: 'Паранойка',
     streetText: 'Ты себе уже нарисовал страшную картину. Скорее всего всё проще — проверь.',
     visualHint: 'луна с человеческим профилем, две башни, дорога между ними, домашняя собака слева, дикий волк справа, один рак выходит из воды',
-    image: 'assets/cards/moon.webp?v=20260720',
+    image: 'assets/cards/moon.webp?v=20260826-xix',
     num: 'XVIII',
     symbol: '◯',
     result: {
@@ -1486,7 +1486,7 @@ export const TAROT_CARDS = [
     streetName: 'Огонь',
     streetText: 'Сегодня просто горишь. Не туши — действуй.',
     visualHint: 'яркое солнце, ребёнок, лошадь, подсолнухи',
-    image: 'assets/cards/sun.webp?v=20260722',
+    image: 'assets/cards/sun.webp?v=20260826-xix',
     num: 'XIX',
     symbol: '☀',
     result: {
