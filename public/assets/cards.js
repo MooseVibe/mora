@@ -1720,7 +1720,7 @@ export const TAROT_CARDS = [
     streetName: 'Чаша',
     streetText: 'Не дави на себя. Где спокойно откликается — туда и смотри.',
     visualHint: 'чаша, вода, лунный свет, золотой поток, тихое начало',
-    image: 'assets/cards/ace-of-cups.webp',
+    image: 'assets/cards/ace-of-cups.webp?v=20260826-minor-i',
     num: 'I',
     symbol: '◇',
     result: {
@@ -1774,7 +1774,7 @@ export const TAROT_CARDS = [
     streetName: 'Два кубка',
     streetText: 'Не угадывай и не тащи связь один. Скажи честно и посмотри, есть ли встречное движение.',
     visualHint: 'две фигуры, два кубка, кадуцей, львиная голова, взаимный обмен',
-    image: 'assets/cards/two-of-cups.webp',
+    image: 'assets/cards/two-of-cups.webp?v=20260826-minor-i',
     num: 'II',
     symbol: '◇',
     result: {
@@ -1852,7 +1852,7 @@ export const TAROT_CARDS = [
     streetName: 'Старый двор',
     streetText: 'Если прошлое всплывёт — не беги за ним сразу. Сначала пойми, что оно тебе напоминает.',
     visualHint: 'двое детей, шесть кубков с белыми цветами, двор, старый дом, память',
-    image: 'assets/cards/six-of-cups.webp',
+    image: 'assets/cards/six-of-cups.webp?v=20260826-minor-i',
     num: 'VI',
     symbol: '◇',
     result: {
@@ -1930,7 +1930,7 @@ export const TAROT_CARDS = [
     streetName: 'Меч',
     streetText: 'Скажи прямо. Не для спора, а чтобы наконец стало понятно.',
     visualHint: 'один меч, рука из облака, корона, лавр, пальма, горы, ясность',
-    image: 'assets/cards/ace-of-swords.webp',
+    image: 'assets/cards/ace-of-swords.webp?v=20260826-minor-i',
     num: 'I',
     symbol: '†',
     result: {
@@ -2008,7 +2008,7 @@ export const TAROT_CARDS = [
     streetName: 'Знак',
     streetText: 'Не гони с ответом. Сначала пойми, что в тебе реально откликнулось.',
     visualHint: 'паж, кубок, рыба из кубка, море, тихий эмоциональный знак',
-    image: 'assets/cards/page-of-cups.webp',
+    image: 'assets/cards/page-of-cups.webp?v=20260826-minor-i',
     num: 'P',
     symbol: '♙',
     result: {
@@ -2086,7 +2086,7 @@ export const TAROT_CARDS = [
     streetName: 'Король на воде',
     streetText: 'Не отвечай на первой злости. Остынь и скажи только то, что важно.',
     visualHint: 'король на троне среди воды, кубок, скипетр, волны, корабль вдали',
-    image: 'assets/cards/king-of-cups.webp',
+    image: 'assets/cards/king-of-cups.webp?v=20260826-minor-ii',
     num: 'K',
     symbol: '♕',
     result: {
@@ -2164,7 +2164,7 @@ export const TAROT_CARDS = [
     streetName: 'Тихая вода',
     streetText: 'Не спасай всех подряд. Сначала пойми, что чувствуешь ты сам.',
     visualHint: 'королева на троне у воды, закрытый кубок, тёмное море, спокойная глубина',
-    image: 'assets/cards/queen-of-cups.webp',
+    image: 'assets/cards/queen-of-cups.webp?v=20260826-minor-ii',
     num: 'Q',
     symbol: '♕',
     result: {
@@ -2242,7 +2242,7 @@ export const TAROT_CARDS = [
     streetName: 'Два меча',
     streetText: 'Не руби с плеча. Сначала убери шум, потом выбирай.',
     visualHint: 'две скрещённые сабли, повязка, луна, вода, тишина перед выбором',
-    image: 'assets/cards/two-of-swords.webp',
+    image: 'assets/cards/two-of-swords.webp?v=20260826-minor-ii',
     num: 'II',
     symbol: '∥',
     result: {
@@ -2296,7 +2296,7 @@ export const TAROT_CARDS = [
     streetName: 'Передышка',
     streetText: 'Не каждый бой нужно продолжать. Возьми паузу, пока голова снова не станет твоей.',
     visualHint: 'фигура на каменном ложе, три меча на стене, один меч снизу, витраж, часовня',
-    image: 'assets/cards/four-of-swords.webp',
+    image: 'assets/cards/four-of-swords.webp?v=20260826-minor-ii',
     num: 'IV',
     symbol: '✧',
     result: {
@@ -2374,7 +2374,7 @@ export const TAROT_CARDS = [
     streetName: 'Свои рядом',
     streetText: 'Не тащи всё один. Напиши своим, отметь хорошее, прими поддержку.',
     visualHint: 'три фигуры, три поднятых кубка, общий тост, плоды и цветы у ног',
-    image: 'assets/cards/three-of-cups.webp',
+    image: 'assets/cards/three-of-cups.webp?v=20260826-minor-ii',
     num: 'III',
     symbol: '◇',
     result: {
