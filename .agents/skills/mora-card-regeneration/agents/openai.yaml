@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mora Card Regeneration"
+  short_description: "Regenerate Mora tarot cards in approved batches of five"
+  default_prompt: "Regenerate the next approved batch of five Mora tarot cards with per-card canon and visual approval."

@@ -400,7 +400,7 @@ export const TAROT_CARDS = [
     streetName: 'Дед мудрый',
     streetText: 'Не надо изобретать велосипед. Кто-то это уже прошёл — иди спроси.',
     visualHint: 'два столпа, ключи, ученики, передача знания',
-    image: 'assets/cards/hierophant.webp',
+    image: 'assets/cards/hierophant.webp?v=20260826-vix',
     num: 'V',
     symbol: '✛',
     result: {
@@ -475,7 +475,7 @@ export const TAROT_CARDS = [
     streetName: 'Развилка',
     streetText: 'Ты уже знаешь что выбрать — просто боишься. Выбирай, не тяни.',
     visualHint: 'два пути, ангел сверху, момент выбора',
-    image: 'assets/cards/lovers.webp',
+    image: 'assets/cards/lovers.webp?v=20260826-vix',
     num: 'VI',
     symbol: '♡',
     result: {
@@ -553,7 +553,7 @@ export const TAROT_CARDS = [
     streetName: 'Едет как едет',
     streetText: 'Главное не останавливаться. Давишь — вот и продолжай давить.',
     visualHint: 'колесница, два сфинкса, город позади, путь вперёд',
-    image: 'assets/cards/chariot.webp',
+    image: 'assets/cards/chariot.webp?v=20260826-vix',
     num: 'VII',
     symbol: '◈',
     result: {
@@ -631,7 +631,7 @@ export const TAROT_CARDS = [
     streetName: 'Тихий вайб',
     streetText: 'Хорош орать и давить. Самый сильный ход сейчас — выдохнуть и не нервничать.',
     visualHint: 'человек и лев, мягкость, бесконечность над головой',
-    image: 'assets/cards/strength.webp',
+    image: 'assets/cards/strength.webp?v=20260826-vix',
     num: 'VIII',
     symbol: '∞',
     result: {
@@ -709,7 +709,7 @@ export const TAROT_CARDS = [
     streetName: 'Один дома',
     streetText: 'Не лезь ни к кому сегодня. Сам с собой посиди, мозги в порядок приведи.',
     visualHint: 'одинокий силуэт, фонарь, тёмный горный путь',
-    image: 'assets/cards/hermit.webp',
+    image: 'assets/cards/hermit.webp?v=20260826-vix',
     num: 'IX',
     symbol: '☾',
     result: {
@@ -787,7 +787,7 @@ export const TAROT_CARDS = [
     streetName: 'Закрутило',
     streetText: 'Харе всё контролить — ты не диспетчер. Отпусти, само вывезет.',
     visualHint: 'большое колесо, символы, фигуры на подъёме и спуске',
-    image: 'assets/cards/wheel.webp',
+    image: 'assets/cards/wheel.webp?v=20260826-xiv',
     num: 'X',
     symbol: '⊕',
     result: {
@@ -865,7 +865,7 @@ export const TAROT_CARDS = [
     streetName: 'По факту',
     streetText: 'Чё наделал — то и разгребай. Тут без сюрпризов, брат.',
     visualHint: 'весы, меч, трон, равновесие',
-    image: 'assets/cards/justice.webp',
+    image: 'assets/cards/justice.webp?v=20260826-xiv',
     num: 'XI',
     symbol: '⚖',
     result: {
@@ -943,7 +943,7 @@ export const TAROT_CARDS = [
     streetName: 'Висяк',
     streetText: 'Хорош ломиться в закрытую дверь. Развернись, посмотри с другой стороны.',
     visualHint: 'фигура вниз головой, нимб, спокойное выражение',
-    image: 'assets/cards/hanged-man.webp',
+    image: 'assets/cards/hanged-man.webp?v=20260826-xiv',
     num: 'XII',
     symbol: '⊥',
     result: {
@@ -1021,7 +1021,7 @@ export const TAROT_CARDS = [
     streetName: 'Обнуление',
     streetText: 'Всё, эта глава закрыта. Не цепляйся — впереди норм, просто ещё не видно.',
     visualHint: 'белый конь, флаг с розой, восход за горизонтом',
-    image: 'assets/cards/death.webp',
+    image: 'assets/cards/death.webp?v=20260826-xiv',
     num: 'XIII',
     symbol: '†',
     result: {
@@ -1099,7 +1099,7 @@ export const TAROT_CARDS = [
     streetName: 'Ровно едем',
     streetText: 'Не гони и не сдавай. Ровный темп сегодня лучше любых крайностей.',
     visualHint: 'ангел, два кубка, вода, путь вдали',
-    image: 'assets/cards/temperance.webp',
+    image: 'assets/cards/temperance.webp?v=20260826-xiv',
     num: 'XIV',
     symbol: '△',
     result: {

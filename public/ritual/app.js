@@ -1,4 +1,4 @@
-import { TAROT_CARDS } from "/assets/cards.js";
+import { TAROT_CARDS } from "/assets/cards.js?v=20260826-xiv";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260825-cardmatch2";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260825-cardmatch2";
 
@@ -856,6 +856,11 @@ function getDailyCard() {
   const availableCards = TAROT_CARDS.filter((card) => {
     return card?.result?.dayVariants?.length && card.image;
   });
+  const qaCardId = isLocalPrototype ? urlParams.get("qaCard") : null;
+  if (qaCardId) {
+    const qaCard = availableCards.find((card) => card.id === qaCardId);
+    if (qaCard) return qaCard;
+  }
   return availableCards[Math.floor(Math.random() * availableCards.length)];
 }
 

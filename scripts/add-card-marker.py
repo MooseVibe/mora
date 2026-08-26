@@ -72,7 +72,11 @@ def main() -> None:
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--marker", required=True)
-    parser.add_argument("--font", type=Path, default=Path("public/assets/fonts/cormorant-garamond-400.ttf"))
+    parser.add_argument(
+        "--font",
+        type=Path,
+        default=Path(".agents/skills/mora-card-regeneration/assets/cormorant-garamond-400.ttf"),
+    )
     parser.add_argument("--font-size", type=int, default=104)
     parser.add_argument("--tracking", type=int, default=10)
     parser.add_argument("--center-y", type=float, default=0.915)

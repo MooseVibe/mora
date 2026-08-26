@@ -16,15 +16,14 @@ The production deck lives in `public/assets/cards/` and committed tarot cards us
 
 The folder currently contains only the 77 canonical production card WebPs. Removed legacy files such as `Tarolog`, `Tarolog2`, `image`, `moose`, and `moose-mobile` are not style references.
 
-### Working Visual References For The Next Regeneration Pass
+### Locked Visual References For The Next Regeneration Pass
 
-Until the author approves a full master-spec, use these three existing production cards as the working visual direction:
+The approved master-spec uses these two existing production cards as the fixed style-and-palette direction:
 
 - `world` / «Мир»;
-- `sun` / «Солнце»;
 - `judgement` / «Суд».
 
-They are references for the shared palette, light, texture, contrast, composition density, and overall deck feeling. They do not yet authorize regeneration, asset replacement, or automatic copying of every detail. The final master-spec and each regenerated card still require separate visual approval from the author.
+They lock the shared muted smoky-blue/slate, charcoal, aged-parchment/cream, earth-brown/olive and restrained antique-gold balance, as well as texture, contrast, composition density and overall deck feeling. `sun` is not a palette reference for this batch. A card may add only a small canon-required accent; it may not introduce its own dominant palette. The references do not authorize asset replacement or copying their figures and symbols. Each regenerated card still requires separate visual approval from the author.
 
 ## Visual Direction
 
@@ -77,9 +76,7 @@ After generation, compare the output against the canonical composition before op
 - Main figure/object should occupy roughly 55-75% of the card height.
 - The meaning-bearing figure or object must read instantly as a distinct silhouette, even in a small dashboard thumbnail. Separate it from the scene with value contrast, rim light, negative space, or a darker/lighter background plane; do not let the main figure merge into trees, ruins, smoke, fabric, or other surrounding texture.
 - Treat `ace-of-swords` as the current quality benchmark for main-scene contrast: the core symbol must be brighter, cleaner, and more legible than the surrounding ritual environment while the background stays atmospheric and subordinate.
-- Keep the lower part of the scene gently dark enough for the Roman numeral or symbolic footer, but do not create a visible black footer band. The marker area should feel like the image naturally falls into shadow, not like a separate UI strip.
-- Reserve a consistent footer-marker placement for the card rank: horizontally centered, with the marker center around 91-92% of image height and its bottom leaving roughly 5-6% image height as margin. The artwork only needs a subtle low-contrast darkening behind this placement; avoid abrupt fades, hard horizontal transitions, empty black blocks, plaques, or oversized blank zones that steal space from the scene. The marker should be large enough to read as part of the deck system, not a tiny caption: target visual height about 5-6% of the full card height for Roman numerals or rank letters, and about 6-8% including a small court crown. Use `queen-of-pentacles` (`Q` with crown) and `six-of-swords` (`VI`) as the size/placement benchmark; avoid the too-small `eight-of-pentacles` marker.
-- Footer markers should look like one coherent deck typeface, not generated text fragments. Roman numerals, rank letters, crowns, and suit/rank signs must share the same antique-gold serif/engraved character, stroke weight, line height, and optical spacing. Repeated Roman strokes such as `III` must have readable letter spacing: not fused into a single block, not unevenly scattered, and not drawn as three unrelated marks.
+- Let the scene continue naturally to the lower edge. Do not reserve a footer zone or create an empty band, plaque, hard fade, numeral, rank letter, or footer symbol inside the artwork.
 - Use a centered or slightly off-center composition with strong silhouette readability.
 - Background should feel like a ritual space: stone, ruins, mountains, night sky, columns, forest, cave, temple, smoke, storm, or celestial void.
 - Add secondary symbols around the main subject, but keep them subordinate.
@@ -99,7 +96,7 @@ After generation, compare the output against the canonical composition before op
 
 - Use archetypal tarot symbols: moon, sun, stars, flame, cup, sword, coin, wand, scale, key, crown, veil, gate, wheel, thread, mirror, hand, mountain, water, path, animal, arch, tower, laurel.
 - Symbols should be integrated into the scene, not pasted as flat icons.
-- Existing card images include a Roman numeral or rank marker at the bottom. New numbered cards should include an antique-gold Roman numeral in the consistent footer-marker zone; court cards can use a compact rank marker such as `Q` with a tiny crown instead of a misleading Roman numeral. The marker is part of deck consistency, so it must not be tiny, oversized, off-center, too close to the edge, hidden in texture, or typographically inconsistent with the rest of the deck.
+- New and regenerated card images contain no Roman numeral, rank letter, or footer symbol. Rank and number remain in card data and UI rather than being baked into the artwork.
 - Do not put Russian card names on the image. Text belongs in UI, not in the artwork.
 - Do not add a decorative card frame, corner ornaments, rounded border, or separate footer plaque. Existing Mora UI provides the card framing; the artwork should bleed to the edge with only natural dark vignette.
 
@@ -139,75 +136,18 @@ Light rules:
 - Do not make the whole card evenly bright.
 - Do not let the whole image collapse into one brown/green/gold tone; a unified deck palette still needs local contrast and readable focal hierarchy.
 
-## Footer Marker Postprocess
-
-Do not ask the image generator to draw the final footer rank marker anymore. The generator should leave the lower scene lightly and naturally darkened around the future marker placement, without a separate black footer band. After the visual is approved, add the marker deterministically with the project helper.
-
-Default marker settings:
-
-- font: `public/assets/fonts/cormorant-garamond-400.ttf`
-- color: `#c9a96e`
-- font size: `104px` on a `1024x1536` card
-- tracking: `10px`
-- marker center Y: `91.5%` of image height
-
-This is the source of truth for marker size, typeface, spacing, and placement. Prompt text can reserve the zone, but it must not be trusted to create the marker.
-
-Marker geometry should stay boring and consistent: same font, size, tracking, and placement unless the author explicitly asks to revisit the standard. For routine new cards, it is acceptable to skip the separate clean-overlay approval and generate the integrated marker directly.
-
-For court cards and any other non-numbered rank cards, reuse the already accepted marker pattern for the same rank whenever it exists in the deck. Pages, Kings, Queens, and future court ranks use rank symbols such as `P`, `K`, or `Q` with the established crown/sign treatment instead of Roman numerals. Keep the existing marker's visual size, crown/sign relationship, centered footer position, and deck character, then integrate it into the new scene texture. Do not invent a new marker style just because the generic marker helper has default font/color settings.
-
-Knights are an explicit Mora exception: starting with `knight-of-pentacles`, they reuse the full existing King marker `K` with crown instead of introducing `Kn`, another letter, or a numeral. Future Knights should take the accepted marker from an existing Knight/King card with the same geometry and distinguish the rank through the card name and scene.
-
-Scene integration means the marker should feel embedded in the card surface, not placed above it. Preserve the standard geometry, then let the scene affect the marker through subtle opacity, texture distress, shadow, and local contrast so it inherits the artwork's mood. Each card's final marker may differ slightly in color impression because the scene texture, palette, and lighting are different; that is expected. The invariant is typography and placement, not identical flat color. Do not solve integration by changing the font, shrinking it, adding outlines, adding plaques, adding decorative lines, or forcing every marker to the same visually flat gold.
-
-After generating the integrated marker, show the card to the author and ask for explicit marker approval before moving on to texts or code integration. Visual approval of the artwork does not automatically approve the marker.
-
-Default routine command:
-
-```bash
-python3 scripts/add-card-marker.py \
-  --input public/assets/cards/{card-id}-source.png \
-  --output public/assets/cards/{card-id}.png \
-  --marker III \
-  --integrate-scene
-```
-
-Use a separate clean marker overlay and bottom comparison sheet only when the marker standard itself is in question or the result looks visually off.
-
-Example comparison sheet:
-
-```bash
-python3 scripts/make-footer-marker-sheet.py \
-  --item 'public/assets/cards/three-of-pentacles.webp|3 Pentacles' \
-  --item 'public/assets/cards/seven-of-pentacles.webp|7 Pentacles' \
-  --item 'public/assets/cards/four-of-swords.webp|4 Swords' \
-  --item 'public/assets/cards/{card-id}.png|New card marker' \
-  --output /tmp/{card-id}-footer-marker-sheet.jpg
-```
-
-Example integrated marker:
-
-```bash
-python3 scripts/add-card-marker.py \
-  --input public/assets/cards/{card-id}-source.png \
-  --output public/assets/cards/{card-id}.png \
-  --marker III \
-  --integrate-scene
-```
-
 ## Prompt Template
 
 Use this as the base and replace bracketed parts.
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, lower scene softly and naturally falls into shadow around the future centered footer marker placement, no black footer band, no abrupt horizontal fade, no oversized empty bottom zone, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, [CARD NAME / ARCHETYPE], [MAIN SUBJECT AND POSE], [KEY SYMBOLS], ancient stone / smoke / night atmosphere, unified Mora deck palette of near-black charcoal, dark moss, deep brown, aged bronze, antique gold, and muted cream highlights, strong value separation between the main subject and background, brighter face/hands/central symbols with antique-gold rim light, darker subordinate environment, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, scene continues naturally to the lower edge, no black footer band, no abrupt horizontal fade, no oversized empty bottom zone, no Roman numeral, no rank letter, no footer symbol, no decorative lower mark, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 Example:
 
 ```text
-Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, lower scene softly and naturally falls into shadow around the future centered footer marker placement, no black footer band, no abrupt horizontal fade, no oversized empty bottom zone, no Roman numeral, no rank letter, no footer symbol, no decorative mark in the lower footer zone, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
+Dark ritual tarot card illustration for Mora, vertical 2:3 composition, Ace of Cups / first emotional opening, a single ancient chalice held above dark water, thin stream of golden light pouring into the cup, moonlit mist, black stone shore, antique gold rim light, near-black charcoal and deep brown palette, dramatic chiaroscuro, painterly engraved texture, worn metal and cracked stone details, mystical but grounded, centered readable silhouette, ornate but restrained, scene continues naturally to the lower edge, no black footer band, no abrupt horizontal fade, no oversized empty bottom zone, no Roman numeral, no rank letter, no footer symbol, no decorative lower mark, no card name text, no decorative frame or corner ornaments, no separate footer plaque, artwork bleeds to the edge, high detail, cinematic, solemn, old tarot deck mood
 ```
 
 ## Negative Prompt

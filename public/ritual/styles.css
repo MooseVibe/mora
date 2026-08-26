@@ -1089,7 +1089,6 @@ body.daily-3d-result-entering .daily-result-copy {
   display: flex;
   min-height: 0;
   max-height: var(--daily-result-card-height, 619px);
-  padding-bottom: 24px;
   overflow-y: auto;
   overscroll-behavior-y: contain;
   flex-direction: column;
@@ -1100,6 +1099,10 @@ body.daily-3d-result-entering .daily-result-copy {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 500ms var(--ease) 160ms, transform 650ms var(--ease) 160ms;
+}
+
+.daily-result-copy:is(.can-scroll-up, .can-scroll-down) {
+  padding-bottom: 24px;
 }
 
 .daily-result-copy::-webkit-scrollbar {

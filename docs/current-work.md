@@ -57,12 +57,13 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Последний рабочий цикл
 
-Дата обновления: 2026-08-25.
+Дата обновления: 2026-08-26.
 
 В последних чатах:
 
 - Автор утвердил общий тёмно-серый цвет рамки `#343434` для DOM-карт и WebGL/GLB-карт. Daily-result и выбранные карты расклада теперь подгоняют face-текстуру как `cover` под фактический aspect слота вместо stretch; геометрия GLB, motion и responsive layout не менялись. Также заменены все 22 SVG-маркера Старших арканов и подтверждённая автором иконка Кубков. Локальный QA на `1440×900` и `375×812` прошёл без overflow, broken images и console errors. Release commit `0b71187` выпущен в canonical production deployment `dpl_7e7NU24NYmpMY1UKACnxGo2tnuUo`; `/`, `/ritual`, новые SVG и guest auth-boundary прошли smoke.
-- Для следующей перегенерации рабочими визуальными референсами выбраны `world` / «Мир», `sun` / «Солнце» и `judgement` / «Суд». Это ориентиры палитры, света, фактуры, контраста и плотности композиции, но не утверждённый master-spec. Следующий отдельный проход — reusable skill для партий по пять карт; каждая карта всё равно требует собственной RWS-сверки и ручного визуального аппрува до интеграции.
+- Для перегенерации обязательной style-and-palette парой остаются `world` / «Мир» и `judgement` / «Суд»; `sun` не задаёт цвет batch. Project-local skill `.agents/skills/mora-card-regeneration/` ведёт партии ровно по пять existing card ID через source-vs-render аудит, RWS-contract, locked palette и один per-card visual approval. Первые пятнадцать approved-final artworks (`fool`–`temperance`) без номеров/rank/footer markers оптимизированы в WebP `1024×1536` и заменили canonical assets; все весят меньше `500 KB`. Третья партия (`wheel`, `justice`, `hanged-man`, `death`, `temperance`) получила cache-bust `20260826-xiv`; первый красный `justice` и первый `temperance` с неверной струёй воды были отклонены до production-интеграции. Автор самостоятельно проверяет карты по local-only URL `qaCard={id}` и сообщает только найденные баги, поэтому автоматический визуальный QA approved batch не выполняется.
+- Desktop daily-result micro-fix завершён и вручную принят автором: базовый `.daily-result-copy` больше не получает нижний `24px` padding, поэтому короткий текст геометрически центрируется относительно карты; тот же padding возвращается только при существующих `.can-scroll-up/.can-scroll-down`, когда desktop-copy действительно прокручивается. JS и mobile `display: contents` не менялись.
 - Начат production cleanup после утверждения финального Mora Next flow. На commit `eddd517` созданы локальные archive branch/tag; standalone `/prototypes/3d-daily/` удалён, а реально используемые deck/result GLB и WebP-рубашка перенесены в `/assets/3d/`. Landing переключён на существующий WebP-фон; неподключённые `snake-3d.js` и landing GLB удалены.
 - По просьбе автора полностью удалён процедурный WebGL-starfield: canvas, shader, resize-listener и постоянный render-loop. Production background теперь только статичный авторский texture-layer.
 - Legacy `/auth`, `/dashboard`, `/journal`, `/api/draws`, их React-компоненты, middleware и старый native draw-runtime удалены из основной ветки. Все 53 МБ карточных PNG-fallback, старые фоны, legacy stylesheet, лишние изображения и шрифты также удалены; `public/` уменьшен примерно со `103 МБ` до `31 МБ`.
@@ -218,7 +219,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 До обсуждения новой задачи:
 
-1. Работать только в `/Users/moose/.codex/worktrees/6487/mora` на `codex/mora-next-closed-test`; не трогать Desktop-копию и не создавать новый worktree.
+1. Единственная каноническая локальная копия — `/Users/moose/Desktop/mora` на `main`; не создавать дополнительные Mora-worktree или параллельные checkout.
 2. Сначала read-only сверить branch/status/log. Не трогать `supabase/.temp`.
 3. Канонический UI: `/` → `public/welcome/`, `/ritual` → `public/ritual/`; старые UI `/prototypes/*` должны оставаться `404`.
 4. Analytics release `c4147b8` выпущен в production deployment `dpl_7ycReRZsgquinjJ8F4pKmwceDaUT`; syntax, lint, build и production HTTP smoke прошли.
@@ -226,7 +227,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Следующие шаги
 
-1. Спроектировать повторяемый процесс перегенерации колоды в едином стиле: сначала skill и один пакет из пяти карт с ручным аппрувом каждого результата, без массовой замены production-ассетов заранее.
+1. Автору просмотреть третью пятёрку (`wheel`, `justice`, `hanged-man`, `death`, `temperance`) в local daily-result через `?resetDaily=always&qaCard={id}`; после полевого QA отдельно закоммитить и выпустить накопленные card batches только по явному запросу.
 2. Подготовить portfolio-case: короткий текст для Notion и Recordly-видео канонических desktop/mobile сценариев.
 3. Для закрытого теста временно сохранить Supabase; не расширять публичную регистрацию до решения российского первичного хранения, retention и процедуры удаления данных.
 4. Покупку домена, production SMTP и платный AI API отложить до завершения portfolio-прохода.
