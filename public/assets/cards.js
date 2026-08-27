@@ -3576,7 +3576,7 @@ export const TAROT_CARDS = [
     streetName: 'Держи высоту',
     streetText: 'На тебя давят — не распадайся. Пойми, что защищаешь, и держи линию.',
     visualHint: 'один человек выше, один жезл в руках, шесть жезлов снизу, защита позиции',
-    image: 'assets/cards/seven-of-wands.webp',
+    image: 'assets/cards/seven-of-wands.webp?v=20260827-minor-vi',
     num: 'VII',
     symbol: '✦',
     result: {
@@ -3654,7 +3654,7 @@ export const TAROT_CARDS = [
     streetName: 'Полетело',
     streetText: 'Всё уже сдвинулось. Не зависай на старте — смотри направление и действуй.',
     visualHint: 'восемь летящих жезлов, диагональное движение, скорость, небо, дальний горизонт',
-    image: 'assets/cards/eight-of-wands.webp',
+    image: 'assets/cards/eight-of-wands.webp?v=20260827-minor-vi',
     num: 'VIII',
     symbol: '✦',
     result: {
@@ -3732,7 +3732,7 @@ export const TAROT_CARDS = [
     streetName: 'Общий дом',
     streetText: 'Смотри на долгий результат: что укрепит дом, дело или связь с людьми.',
     visualHint: 'старшая фигура, взрослые, ребёнок, две собаки, арка дома, десять пентаклей',
-    image: 'assets/cards/ten-of-pentacles.webp',
+    image: 'assets/cards/ten-of-pentacles.webp?v=20260827-minor-vi',
     num: 'X',
     symbol: '✦',
     result: {
@@ -3810,7 +3810,7 @@ export const TAROT_CARDS = [
     streetName: 'Свой сад',
     streetText: 'Ты уже многое сделал. Не обесценивай свой результат и не раздавай его без меры.',
     visualHint: 'ухоженный сад, девять пентаклей, один человек, птица на руке, спокойный достаток',
-    image: 'assets/cards/nine-of-pentacles.webp',
+    image: 'assets/cards/nine-of-pentacles.webp?v=20260827-minor-vi',
     num: 'IX',
     symbol: '✦',
     result: {
@@ -3888,7 +3888,7 @@ export const TAROT_CARDS = [
     streetName: 'На посту',
     streetText: 'Ты уже устал, но не сломался. Береги силы и не кидайся в каждую новую тревогу.',
     visualHint: 'человек в повязке, один жезл в руках, восемь жезлов позади, последний рубеж',
-    image: 'assets/cards/nine-of-wands.webp',
+    image: 'assets/cards/nine-of-wands.webp?v=20260827-minor-vi',
     num: 'IX',
     symbol: '✦',
     result: {

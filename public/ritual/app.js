@@ -1,4 +1,4 @@
-import { TAROT_CARDS } from "/assets/cards.js?v=20260827-minor-v";
+import { TAROT_CARDS } from "/assets/cards.js?v=20260827-minor-vi";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260825-cardmatch2";
 

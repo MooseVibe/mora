@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-27 — Шестая пятёрка Младших арканов интегрирована после общего аппрува
+
+**Что:** `seven-of-wands`, `eight-of-wands`, `ten-of-pentacles`, `nine-of-pentacles` и `nine-of-wands` получили `approved-final` и заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят `342–430 KB` и получили cache-bust `20260827-minor-vi` в image paths, импорте `cards.js` и `app.js` preload/script entry. RWS-контракты сохраняют точные количества фигур, животных, жезлов и пентаклей; ID, тексты, CSS, GLB и flow не менялись. Artwork не содержит встроенных номеров, текста, рамок или footer-плашек. `git diff --check`, JS syntax, lint и production build прошли; автор отдельно разрешил commit и production deploy без push.
+
+**Почему:** Автор просмотрел полный комплект и явно утвердил все пять. Первый кандидат Девятки Пентаклей был отклонён из-за восьми пентаклей вместо девяти; первый кандидат Восьмёрки Жезлов также содержал семь жезлов, ошибку заметил автор, после чего исправленный вариант получил ровно восемь отдельных жезлов.
+
+**Кто:** автор + агент.
+
 ## 2026-08-27 — Крупная daily GLB-карта использует Retina DPR 2
 
 **Что:** Верхний pixel-ratio cap только у `daily-3d.js` поднят с desktop `1.5` до общего `2`; spread renderer сохраняет performance-cap `1.5`. GLB, WebP, texture filters, материалы, свет, геометрия и motion не менялись. Cache-bust daily module и его app entry обновлён до `20260827-dailysharp1`.
