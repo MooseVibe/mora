@@ -61,7 +61,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 В последних чатах:
 
-- Локальный daily-only sharpness fix поднял desktop DPR крупной 3D-карты дня с `1.5` до `2`, совпадающего с Retina DOM-rendering. Автор подтвердил, что изображение стало намного резче. Spread renderer остаётся на `1.5`; GLB, WebP, texture filters, материал, свет, геометрия и motion не менялись. Добавлен cache-bust `20260827-dailysharp1`; commit и deploy ожидают отдельной команды.
+- Daily-only sharpness fix поднял desktop DPR крупной 3D-карты дня с `1.5` до `2`, совпадающего с Retina DOM-rendering. Автор подтвердил, что изображение стало намного резче. Spread renderer остаётся на `1.5`; GLB, WebP, texture filters, материал, свет, геометрия и motion не менялись. Cache-bust `20260827-dailysharp1` выпущен commit `d789139` в production deployment `dpl_JBtezzS5gDmEmt3rdAiv9hXN2AQJ`; alias, модули и guest auth-boundary прошли smoke.
 
 - Пятая пятёрка Младших арканов — `two-of-wands`, `three-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands` — получила общий явный аппрув автора и интегрирована по master-spec `world + judgement`. Все canonical WebP имеют `1024×1536`, созданы через `cwebp -q 82`, весят `278–463 KB`, не содержат встроенных номеров, текста, рамок или плашек и получили cache-bust `20260827-minor-v`. Первый вариант Шестёрки был отклонён из-за четырёх сопровождающих вместо пяти; в следующем автор нашёл разорванный жезл у правой тройки. Финальный clean art сохраняет одного всадника, пять сопровождающих, одного коня и шесть цельных жезлов. Партия выпущена commit `361d83b` в production deployment `dpl_FCkpFCV6quTbG6YVZ2V3JtnXhGo6`; alias, cache-bust, все пять canonical SHA-256 и guest auth-boundary прошли smoke.
 
@@ -239,12 +239,11 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Следующие шаги
 
-1. Выпустить утверждённый daily-only DPR `2` sharpness fix отдельным commit/deploy только по команде автора.
-2. Наблюдать пятую пятёрку Младших арканов (`two-of-wands`–`six-of-wands`) в production; следующую партию начинать только явно и с тем же `world + judgement` master-spec.
-3. Подготовить portfolio-case: короткий текст для Notion и Recordly-видео канонических desktop/mobile сценариев.
-4. Для закрытого теста временно сохранить Supabase; не расширять публичную регистрацию до решения российского первичного хранения, retention и процедуры удаления данных.
-5. Покупку домена, production SMTP и платный AI API отложить до завершения portfolio-прохода.
-6. Остаточную плавность spread-flow продолжать оценивать по полевым устройствам, не добавляя новый renderer заранее.
+1. Наблюдать пятую пятёрку Младших арканов (`two-of-wands`–`six-of-wands`) и daily DPR `2` в production; следующую карточную партию начинать только явно и с тем же `world + judgement` master-spec.
+2. Подготовить portfolio-case: короткий текст для Notion и Recordly-видео канонических desktop/mobile сценариев.
+3. Для закрытого теста временно сохранить Supabase; не расширять публичную регистрацию до решения российского первичного хранения, retention и процедуры удаления данных.
+4. Покупку домена, production SMTP и платный AI API отложить до завершения portfolio-прохода.
+5. Остаточную плавность spread-flow продолжать оценивать по полевым устройствам, не добавляя новый renderer заранее.
 
 ## Исторические планы ниже не активны
 

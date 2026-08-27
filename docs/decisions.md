@@ -12,6 +12,8 @@
 
 **Почему:** Один и тот же canonical WebP был резким в DOM, но мутным на крупной daily GLB-карте Retina-экрана. При DPR `1.5` WebGL имел на 25% меньше пикселей по каждой оси, чем DOM с DPR `2`. После узкого повышения автор подтвердил заметное улучшение резкости; повышать разрешение колоды или менять свет не требуется.
 
+**Release:** commit `d789139`, production deployment `dpl_JBtezzS5gDmEmt3rdAiv9hXN2AQJ`, alias `https://mora-kappa.vercel.app`. Production smoke подтвердил `dailysharp1`, DPR `2`, страницу и оба модуля `200`, unauthenticated account-state `401`.
+
 **Кто:** автор + агент.
 
 ## 2026-08-27 — Пятая пятёрка Младших арканов интегрирована после общего аппрува
