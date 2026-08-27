@@ -2449,7 +2449,7 @@ export const TAROT_CARDS = [
     streetName: 'Не хочу',
     streetText: 'Не отшивай всё подряд. Может, ты не против, а просто устал.',
     visualHint: 'сидящий человек под деревом, три кубка перед ним, четвёртый кубок протянут из дыма',
-    image: 'assets/cards/four-of-cups.webp',
+    image: 'assets/cards/four-of-cups.webp?v=20260827-minor-iii',
     num: 'IV',
     symbol: '◇',
     result: {
@@ -2527,7 +2527,7 @@ export const TAROT_CARDS = [
     streetName: 'Не всё пролито',
     streetText: 'Да, что-то пошло не так. Но не делай вид, будто вместе с этим исчезло вообще всё.',
     visualHint: 'фигура в плаще, три опрокинутых кубка, два стоящих кубка, вода, мост и дальний замок',
-    image: 'assets/cards/five-of-cups.webp',
+    image: 'assets/cards/five-of-cups.webp?v=20260827-minor-iii',
     num: 'V',
     symbol: '◇',
     result: {
@@ -2605,7 +2605,7 @@ export const TAROT_CARDS = [
     streetName: 'Монета шанса',
     streetText: 'Смотри не на мечту, а на то, что уже можно взять в руки и начать растить.',
     visualHint: 'рука из дыма, один крупный пентакль, сад, ворота, дорога к горам',
-    image: 'assets/cards/ace-of-pentacles.webp',
+    image: 'assets/cards/ace-of-pentacles.webp?v=20260827-minor-iii',
     num: 'I',
     symbol: '◆',
     result: {
@@ -2683,7 +2683,7 @@ export const TAROT_CARDS = [
     streetName: 'Жонглёр дел',
     streetText: 'День будет качать. Не стой столбом — перекидывай вес и держи главное.',
     visualHint: 'две монеты-пентакля, петля бесконечности, фигура в движении, волны и два корабля',
-    image: 'assets/cards/two-of-pentacles.webp',
+    image: 'assets/cards/two-of-pentacles.webp?v=20260827-minor-iii',
     num: 'II',
     symbol: '◆',
     result: {
@@ -2761,7 +2761,7 @@ export const TAROT_CARDS = [
     streetName: 'Весы ресурса',
     streetText: 'Не раздавай себя без счёта. И помощь просить тоже не стыдно.',
     visualHint: 'шесть пентаклей, фигура с весами, раздача монет, две фигуры у ног',
-    image: 'assets/cards/six-of-pentacles.webp',
+    image: 'assets/cards/six-of-pentacles.webp?v=20260827-minor-iii',
     num: 'VI',
     symbol: '◆',
     result: {
@@ -2839,7 +2839,7 @@ export const TAROT_CARDS = [
     streetName: 'Три мастера',
     streetText: 'Не строй всё один. Покажи работу, уточни план и не обижайся на полезную правку.',
     visualHint: 'мастер в храме, две фигуры с планом, три пентакля в арке, совместное строительство',
-    image: 'assets/cards/three-of-pentacles.webp',
+    image: 'assets/cards/three-of-pentacles.webp?v=20260827-minor-iv',
     num: 'III',
     symbol: '◆',
     result: {
@@ -2917,7 +2917,7 @@ export const TAROT_CARDS = [
     streetName: 'Сейф на ногах',
     streetText: 'Береги своё, но не превращай жизнь в запертый сундук.',
     visualHint: 'сидящая фигура, один пентакль у груди, один над головой, два под ногами, город на фоне',
-    image: 'assets/cards/four-of-pentacles.webp',
+    image: 'assets/cards/four-of-pentacles.webp?v=20260827-minor-iv',
     num: 'IV',
     symbol: '◆',
     result: {
@@ -2995,7 +2995,7 @@ export const TAROT_CARDS = [
     streetName: 'Окно со светом',
     streetText: 'Если тяжело, скажи прямо. Иногда помощь ближе, чем кажется.',
     visualHint: 'две фигуры в снегу, освещённое окно, пять пентаклей, холод и помощь рядом',
-    image: 'assets/cards/five-of-pentacles.webp',
+    image: 'assets/cards/five-of-pentacles.webp?v=20260827-minor-iv',
     num: 'V',
     symbol: '◆',
     result: {
@@ -3078,7 +3078,7 @@ export const TAROT_CARDS = [
     streetName: 'Ждать урожай',
     streetText: 'Не дёргай росток каждые пять минут. Посмотри, что уже выросло, и реши, куда дальше вкладываться.',
     visualHint: 'садовник, длинный инструмент, семь пентаклей на лозе, пауза перед урожаем',
-    image: 'assets/cards/seven-of-pentacles.webp',
+    image: 'assets/cards/seven-of-pentacles.webp?v=20260827-minor-iv',
     num: 'VII',
     symbol: '◆',
     result: {
@@ -3156,7 +3156,7 @@ export const TAROT_CARDS = [
     streetName: 'Мастерская',
     streetText: 'Не геройствуй. Просто сделай свою работу нормально, шаг за шагом.',
     visualHint: 'мастерская, монеты-пентакли, свеча, руки, кропотливая работа',
-    image: 'assets/cards/eight-of-pentacles.webp',
+    image: 'assets/cards/eight-of-pentacles.webp?v=20260827-minor-iv',
     num: 'VIII',
     symbol: '◆',
     result: {
