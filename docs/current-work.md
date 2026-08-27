@@ -61,7 +61,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 В последних чатах:
 
-- Шестая пятёрка Младших арканов — `seven-of-wands`, `eight-of-wands`, `ten-of-pentacles`, `nine-of-pentacles`, `nine-of-wands` — получила общий явный аппрув автора и интегрирована локально по master-spec `world + judgement`. Все canonical WebP имеют `1024×1536`, созданы через `cwebp -q 82`, весят `342–430 KB`, не содержат встроенных номеров, текста, рамок или плашек и получили cache-bust `20260827-minor-vi` во всех фактических import/preload слоях. Первый вариант Девятки Пентаклей отклонён из-за восьми дисков; первый вариант Восьмёрки Жезлов также оказался с семью жезлами и был исправлен после проверки автора. Финальные clean artworks сохраняют точные RWS-количества. `git diff --check`, JS syntax, lint и production build прошли; автор отдельно разрешил commit и production deploy. Release выполняется без `Cover.png`; push не запрошен.
+- Шестая пятёрка Младших арканов — `seven-of-wands`, `eight-of-wands`, `ten-of-pentacles`, `nine-of-pentacles`, `nine-of-wands` — получила общий явный аппрув автора и интегрирована по master-spec `world + judgement`. Все canonical WebP имеют `1024×1536`, созданы через `cwebp -q 82`, весят `342–430 KB`, не содержат встроенных номеров, текста, рамок или плашек и получили cache-bust `20260827-minor-vi` во всех фактических import/preload слоях. Первый вариант Девятки Пентаклей отклонён из-за восьми дисков; первый вариант Восьмёрки Жезлов также оказался с семью жезлами и был исправлен после проверки автора. Финальные clean artworks сохраняют точные RWS-количества. `git diff --check`, JS syntax, lint и production build прошли. Партия выпущена commit `0fb23b8` в production deployment `dpl_7ynuDoRkGzDNBqv9scuCSygSiaTw`; alias, cache-bust, все пять canonical SHA-256 и guest auth-boundary прошли smoke. Deploy выполнен из чистого Git archive без `Cover.png`; push не выполнялся.
 
 - Daily-only sharpness fix поднял desktop DPR крупной 3D-карты дня с `1.5` до `2`, совпадающего с Retina DOM-rendering. Автор подтвердил, что изображение стало намного резче. Spread renderer остаётся на `1.5`; GLB, WebP, texture filters, материал, свет, геометрия и motion не менялись. Cache-bust `20260827-dailysharp1` выпущен commit `d789139` в production deployment `dpl_JBtezzS5gDmEmt3rdAiv9hXN2AQJ`; alias, модули и guest auth-boundary прошли smoke.
 
@@ -241,7 +241,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Следующие шаги
 
-1. Выпустить авторизованную шестую пятёрку Младших арканов из чистого Git archive без `Cover.png`, затем проверить production alias, cache-bust и canonical WebP; следующую партию начинать только явно и с тем же `world + judgement` master-spec.
+1. Наблюдать шестую пятёрку Младших арканов (`seven-of-wands`, `eight-of-wands`, `ten-of-pentacles`, `nine-of-pentacles`, `nine-of-wands`) и daily DPR `2` в production; следующую карточную партию начинать только явно и с тем же `world + judgement` master-spec.
 2. Подготовить portfolio-case: короткий текст для Notion и Recordly-видео канонических desktop/mobile сценариев.
 3. Для закрытого теста временно сохранить Supabase; не расширять публичную регистрацию до решения российского первичного хранения, retention и процедуры удаления данных.
 4. Покупку домена, production SMTP и платный AI API отложить до завершения portfolio-прохода.

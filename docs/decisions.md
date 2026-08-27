@@ -14,6 +14,8 @@
 
 **Кто:** автор + агент.
 
+**Release:** commit `0fb23b8`, production deployment `dpl_7ynuDoRkGzDNBqv9scuCSygSiaTw`, alias `https://mora-kappa.vercel.app`. Production smoke подтвердил status `Ready`, cache-bust `20260827-minor-vi`, совпадение SHA-256 всех пяти canonical WebP, `/` и `/ritual` `200`, guest account-state `401`. Deploy выполнен из чистого Git archive без пользовательского `Cover.png`; push не выполнялся.
+
 ## 2026-08-27 — Крупная daily GLB-карта использует Retina DPR 2
 
 **Что:** Верхний pixel-ratio cap только у `daily-3d.js` поднят с desktop `1.5` до общего `2`; spread renderer сохраняет performance-cap `1.5`. GLB, WebP, texture filters, материалы, свет, геометрия и motion не менялись. Cache-bust daily module и его app entry обновлён до `20260827-dailysharp1`.
