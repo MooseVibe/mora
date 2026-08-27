@@ -3966,7 +3966,7 @@ export const TAROT_CARDS = [
     streetName: 'Переправа',
     streetText: 'Пора выбираться из шума. Не громко, но по-настоящему.',
     visualHint: 'лодка, шесть мечей, тёмная вода, туман, дальний берег, луна',
-    image: 'assets/cards/six-of-swords.webp',
+    image: 'assets/cards/six-of-swords.webp?v=20260827-minor-vii',
     num: 'VI',
     symbol: '☽',
     result: {
@@ -4020,7 +4020,7 @@ export const TAROT_CARDS = [
     streetName: 'Хозяйка',
     streetText: 'Сначала база: тело, деньги, дом, еда, сон. Магия любит опору.',
     visualHint: 'королева, пентакль, травы, свечи, каменный трон, тёмный лес',
-    image: 'assets/cards/queen-of-pentacles.webp',
+    image: 'assets/cards/queen-of-pentacles.webp?v=20260827-minor-vii',
     num: 'Q',
     symbol: '♕',
     result: {
@@ -4074,7 +4074,7 @@ export const TAROT_CARDS = [
     streetName: 'Искра',
     streetText: 'Появилась энергия — не туши её разговорами. Сделай первый шаг.',
     visualHint: 'рука из облака, один жезл, ростки, золотая искра, дальний замок',
-    image: 'assets/cards/ace-of-wands.webp',
+    image: 'assets/cards/ace-of-wands.webp?v=20260827-minor-vii',
     num: 'I',
     symbol: '✦',
     result: {
@@ -4128,7 +4128,7 @@ export const TAROT_CARDS = [
     streetName: 'Огонь',
     streetText: 'Если хочешь что-то сказать или предложить — скажи прямо. Намёки сегодня не работают.',
     visualHint: 'королева на троне, один жезл, подсолнух, чёрная кошка, львы, огненный пустынный фон',
-    image: 'assets/cards/queen-of-wands.webp',
+    image: 'assets/cards/queen-of-wands.webp?v=20260827-minor-vii',
     num: 'Q',
     symbol: '♕',
     result: {
@@ -4206,7 +4206,7 @@ export const TAROT_CARDS = [
     streetName: 'Росток',
     streetText: 'Если что-то тянет вперёд — проверь действием. Не обещай много, просто начни.',
     visualHint: 'паж, один жезл с ростками, открытая дорога, пустынное пространство, начало движения',
-    image: 'assets/cards/page-of-wands.webp',
+    image: 'assets/cards/page-of-wands.webp?v=20260827-minor-vii',
     num: 'P',
     symbol: '♙',
     result: {

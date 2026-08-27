@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-27 — Седьмая пятёрка Младших арканов интегрирована после общего аппрува
+
+**Что:** `six-of-swords`, `queen-of-pentacles`, `ace-of-wands`, `queen-of-wands` и `page-of-wands` получили `approved-final` и локально заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят меньше `500 KB` и получили cache-bust `20260827-minor-vii` в image paths, импорте `cards.js` и `app.js` preload/script entry. `git diff --check`, JS syntax, lint, production build, local HTTP smoke и ручной local-only QA автора прошли. ID, тексты, CSS, GLB и product flow не менялись; commit, push и deploy не выполнялись.
+
+**Почему:** Автор просмотрел полный комплект и явно утвердил все пять, а для `six-of-swords` отдельно выбрал приложенный финальный master с одним лодочником, двумя пассажирами и ровно шестью мечами. Промежуточные варианты с `7`, `4` и снова `7` мечами были отклонены как объективно неканоничные.
+
+**Кто:** автор + агент.
+
 ## 2026-08-27 — Шестая пятёрка Младших арканов интегрирована после общего аппрува
 
 **Что:** `seven-of-wands`, `eight-of-wands`, `ten-of-pentacles`, `nine-of-pentacles` и `nine-of-wands` получили `approved-final` и заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят `342–430 KB` и получили cache-bust `20260827-minor-vi` в image paths, импорте `cards.js` и `app.js` preload/script entry. RWS-контракты сохраняют точные количества фигур, животных, жезлов и пентаклей; ID, тексты, CSS, GLB и flow не менялись. Artwork не содержит встроенных номеров, текста, рамок или footer-плашек. `git diff --check`, JS syntax, lint и production build прошли; автор отдельно разрешил commit и production deploy без push.
