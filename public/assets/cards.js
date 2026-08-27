@@ -3210,7 +3210,7 @@ export const TAROT_CARDS = [
     streetName: 'Два жезла',
     streetText: 'Не зависай на балконе. Выбери направление и сделай один живой шаг.',
     visualHint: 'фигура на стене, глобус, два жезла, горизонт, выбор направления',
-    image: 'assets/cards/two-of-wands.webp',
+    image: 'assets/cards/two-of-wands.webp?v=20260827-minor-v',
     num: 'II',
     symbol: '✦',
     result: {
@@ -3288,7 +3288,7 @@ export const TAROT_CARDS = [
     streetName: 'Горизонт',
     streetText: 'Ты уже двинулся. Теперь смотри не под ноги, а чуть дальше.',
     visualHint: 'три жезла, утёс, горизонт, корабли, золотой рассвет, ожидание',
-    image: 'assets/cards/three-of-wands.webp',
+    image: 'assets/cards/three-of-wands.webp?v=20260827-minor-v',
     num: 'III',
     symbol: '✦',
     result: {
@@ -3342,7 +3342,7 @@ export const TAROT_CARDS = [
     streetName: 'Опора',
     streetText: 'Не проскочи то, что уже получилось. Выдохни, отметь этап, позови своих.',
     visualHint: 'четыре жезла, гирлянда, две фигуры, дом, праздник у порога',
-    image: 'assets/cards/four-of-wands.webp',
+    image: 'assets/cards/four-of-wands.webp?v=20260827-minor-v',
     num: 'IV',
     symbol: '✦',
     result: {
@@ -3420,7 +3420,7 @@ export const TAROT_CARDS = [
     streetName: 'Палочный спор',
     streetText: 'Все тянут в разные стороны. Не ори громче всех — пойми, за что реально спор.',
     visualHint: 'пять разных фигур, пять жезлов, напряжение, спор, тренировочная схватка без войны',
-    image: 'assets/cards/five-of-wands.webp',
+    image: 'assets/cards/five-of-wands.webp?v=20260827-minor-v',
     num: 'V',
     symbol: '✦',
     result: {
@@ -3498,7 +3498,7 @@ export const TAROT_CARDS = [
     streetName: 'Едешь красиво',
     streetText: 'Ты это сделал. Не мямли “да ничего такого” — прими результат нормально.',
     visualHint: 'всадник, жезл с лавровым венком, пять жезлов вокруг, признание после пути',
-    image: 'assets/cards/six-of-wands.webp',
+    image: 'assets/cards/six-of-wands.webp?v=20260827-minor-v',
     num: 'VI',
     symbol: '✦',
     result: {
