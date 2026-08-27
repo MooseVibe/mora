@@ -14,6 +14,8 @@
 
 **Кто:** автор + агент.
 
+**Release:** commit `a39ca6d`, production deployment `dpl_7zkcuPgfShFRm6TRstXYG6JAMAtM`, alias `https://mora-kappa.vercel.app`. Production smoke подтвердил status `Ready`, cache-bust `20260827-minor-vii`, совпадение SHA-256 всех пяти canonical WebP, `/` и `/ritual` `200`, guest account-state `401`. Deploy выполнен из чистого Git archive без пользовательского `Cover.png`; push не выполнялся.
+
 ## 2026-08-27 — Шестая пятёрка Младших арканов интегрирована после общего аппрува
 
 **Что:** `seven-of-wands`, `eight-of-wands`, `ten-of-pentacles`, `nine-of-pentacles` и `nine-of-wands` получили `approved-final` и заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят `342–430 KB` и получили cache-bust `20260827-minor-vi` в image paths, импорте `cards.js` и `app.js` preload/script entry. RWS-контракты сохраняют точные количества фигур, животных, жезлов и пентаклей; ID, тексты, CSS, GLB и flow не менялись. Artwork не содержит встроенных номеров, текста, рамок или footer-плашек. `git diff --check`, JS syntax, lint и production build прошли; автор отдельно разрешил commit и production deploy без push.
