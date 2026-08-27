@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-27 — Третья и четвёртая пятёрки Младших арканов выпущены в production
+
+**Что:** Десять approved-final artwork из двух последних партий выпущены release commit `eba5629` в canonical Vercel project `mora`, production deployment `dpl_94abEHnXqEygGNoegxDzSHQXbp3S`. Alias `mora-kappa.vercel.app` получил cache-bust `20260827-minor-iv`; `/` и `/ritual` вернули `200`, production `cards.js` содержит версии обеих партий, SHA-256 `ace-of-pentacles` и `eight-of-pentacles` совпали с canonical файлами, account-state без сессии вернул ожидаемый `401`. Deploy выполнен из чистого Git archive commit; untracked пользовательский `Cover.png` не загружался.
+
+**Почему:** Автор отдельно утвердил все десять clean artwork и явно разрешил commit и production deploy. Чистый archive сохраняет соответствие production точному Git commit и исключает пользовательский SEO-source из upload.
+
+**Кто:** автор + агент.
+
 ## 2026-08-27 — Четвёртая пятёрка Младших арканов интегрирована после общего аппрува
 
 **Что:** `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles` и `eight-of-pentacles` получили `approved-final` и заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят `302–399 KB` и получили cache-bust `20260827-minor-iv`; версия синхронно обновлена на import/preload `cards.js` и `app.js`. RWS-контракты сохранены: Тройка показывает трёх участников работы и три пентакля; Четвёрка — один диск над головой, один у груди и два под ногами; Пятёрка — двух путников, две костыли, перевязанную ногу и пять пентаклей в окне; Семёрка — одного работника у лозы с семью дисками; Восьмёрка — одного мастера и точные восемь дисков в схеме `6+1+1`. ID, тексты, CSS, GLB и flow не менялись; artwork не содержит встроенных номеров, текста, рамок или footer-плашек.
