@@ -61,6 +61,8 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 В последних чатах:
 
+- Локальный daily-only sharpness fix поднял desktop DPR крупной 3D-карты дня с `1.5` до `2`, совпадающего с Retina DOM-rendering. Автор подтвердил, что изображение стало намного резче. Spread renderer остаётся на `1.5`; GLB, WebP, texture filters, материал, свет, геометрия и motion не менялись. Добавлен cache-bust `20260827-dailysharp1`; commit и deploy ожидают отдельной команды.
+
 - Пятая пятёрка Младших арканов — `two-of-wands`, `three-of-wands`, `four-of-wands`, `five-of-wands`, `six-of-wands` — получила общий явный аппрув автора и интегрирована по master-spec `world + judgement`. Все canonical WebP имеют `1024×1536`, созданы через `cwebp -q 82`, весят `278–463 KB`, не содержат встроенных номеров, текста, рамок или плашек и получили cache-bust `20260827-minor-v`. Первый вариант Шестёрки был отклонён из-за четырёх сопровождающих вместо пяти; в следующем автор нашёл разорванный жезл у правой тройки. Финальный clean art сохраняет одного всадника, пять сопровождающих, одного коня и шесть цельных жезлов. Партия выпущена commit `361d83b` в production deployment `dpl_FCkpFCV6quTbG6YVZ2V3JtnXhGo6`; alias, cache-bust, все пять canonical SHA-256 и guest auth-boundary прошли smoke.
 
 - Четвёртая пятёрка Младших арканов — `three-of-pentacles`, `four-of-pentacles`, `five-of-pentacles`, `seven-of-pentacles`, `eight-of-pentacles` — получила общий явный аппрув автора и интегрирована по master-spec `world + judgement`. Все canonical WebP имеют `1024×1536`, созданы через `cwebp -q 82`, весят `302–399 KB`, не содержат встроенных номеров, текста, рамок или плашек и получили cache-bust `20260827-minor-iv`; та же версия применена к import/preload `cards.js` и `app.js`. Первый `eight-of-pentacles` отклонён из-за лишних дисков; финальный сохраняет точную схему `6 на стенде + 1 в работе + 1 на земле`. `five-of-pentacles` по просьбе автора переразложена ближе к центру: обе фигуры целиком помещаются в композиции, при этом ровно пять пентаклей в окне полностью читаются. Обе новые пятёрки выпущены artwork commit `eba5629` в production deployment `dpl_94abEHnXqEygGNoegxDzSHQXbp3S`; alias, cache-bust, два canonical SHA-256 и guest auth-boundary прошли smoke.
@@ -237,7 +239,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 ## Следующие шаги
 
-1. Отдельным read-only проходом диагностировать заметную мутность artwork именно на крупной 3D/GLB-карте дня: сравнить effective DPR/texel density, texture filters/mipmaps/anisotropy и влияние материала/света с резким DOM-рендером того же WebP; до измерения не менять artwork и не повышать размеры всех текстур.
+1. Выпустить утверждённый daily-only DPR `2` sharpness fix отдельным commit/deploy только по команде автора.
 2. Наблюдать пятую пятёрку Младших арканов (`two-of-wands`–`six-of-wands`) в production; следующую партию начинать только явно и с тем же `world + judgement` master-spec.
 3. Подготовить portfolio-case: короткий текст для Notion и Recordly-видео канонических desktop/mobile сценариев.
 4. Для закрытого теста временно сохранить Supabase; не расширять публичную регистрацию до решения российского первичного хранения, retention и процедуры удаления данных.

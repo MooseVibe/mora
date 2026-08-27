@@ -216,7 +216,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 2 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.55));
 

@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-27 — Крупная daily GLB-карта использует Retina DPR 2
+
+**Что:** Верхний pixel-ratio cap только у `daily-3d.js` поднят с desktop `1.5` до общего `2`; spread renderer сохраняет performance-cap `1.5`. GLB, WebP, texture filters, материалы, свет, геометрия и motion не менялись. Cache-bust daily module и его app entry обновлён до `20260827-dailysharp1`.
+
+**Почему:** Один и тот же canonical WebP был резким в DOM, но мутным на крупной daily GLB-карте Retina-экрана. При DPR `1.5` WebGL имел на 25% меньше пикселей по каждой оси, чем DOM с DPR `2`. После узкого повышения автор подтвердил заметное улучшение резкости; повышать разрешение колоды или менять свет не требуется.
+
+**Кто:** автор + агент.
+
 ## 2026-08-27 — Пятая пятёрка Младших арканов интегрирована после общего аппрува
 
 **Что:** `two-of-wands`, `three-of-wands`, `four-of-wands`, `five-of-wands` и `six-of-wands` получили `approved-final` и заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят `278–463 KB` и получили cache-bust `20260827-minor-v`. RWS-контракты сохраняют точные количества фигур и жезлов; ID, тексты, CSS, GLB и flow не менялись. Artwork не содержит встроенных номеров, текста, рамок или footer-плашек. Release commit `361d83b` выпущен в canonical production deployment `dpl_FCkpFCV6quTbG6YVZ2V3JtnXhGo6`; alias, cache-key, все пять WebP и guest auth-boundary прошли smoke.
