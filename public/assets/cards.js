@@ -4281,7 +4281,7 @@ export const TAROT_CARDS = [
     streetName: 'Острый вопрос',
     streetText: 'Не спеши отвечать на шум. Проверь факты, задай прямой вопрос и говори по делу.',
     visualHint: 'паж, один поднятый меч, ветер, тучи, холм, настороженный взгляд, ясность',
-    image: 'assets/cards/page-of-swords.webp',
+    image: 'assets/cards/page-of-swords.webp?v=20260828-minor-viii',
     num: 'P',
     symbol: '♙',
     result: {
@@ -4359,7 +4359,7 @@ export const TAROT_CARDS = [
     streetName: 'Уйти от пустого',
     streetText: 'Если место давно пустое, не надо снова делать вид, что всё нормально. Уходи спокойно.',
     visualHint: 'восемь чаш, уходящая фигура, луна, вода, горная тропа, тихий уход',
-    image: 'assets/cards/eight-of-cups.webp',
+    image: 'assets/cards/eight-of-cups.webp?v=20260828-minor-viii',
     num: 'VIII',
     symbol: '◇',
     result: {
@@ -4437,7 +4437,7 @@ export const TAROT_CARDS = [
     streetName: 'Дом сердца',
     streetText: 'Не проходи мимо тех, рядом с кем можно выдохнуть. Не всё тёплое должно быть громким.',
     visualHint: 'семья, два взрослых, двое детей, десять кубков в небе, дом, вода, тихая радость',
-    image: 'assets/cards/ten-of-cups.webp',
+    image: 'assets/cards/ten-of-cups.webp?v=20260828-minor-viii',
     num: 'X',
     symbol: '◇',
     result: {
@@ -4515,7 +4515,7 @@ export const TAROT_CARDS = [
     streetName: 'Девять кубков',
     streetText: 'Не гонись за новым просто по привычке. Сначала посмотри, что у тебя уже есть.',
     visualHint: 'сидящая фигура, девять кубков на полке, спокойная полнота, довольство',
-    image: 'assets/cards/nine-of-cups.webp',
+    image: 'assets/cards/nine-of-cups.webp?v=20260828-minor-viii',
     num: 'IX',
     symbol: '◇',
     result: {
@@ -4593,7 +4593,7 @@ export const TAROT_CARDS = [
     streetName: 'Семь вариантов',
     streetText: 'Вариантов много, но не все настоящие. Выбери одно и не ведись на блеск.',
     visualHint: 'семь кубков в дыму, силуэт со спины, видения, змея, башня, дракон',
-    image: 'assets/cards/seven-of-cups.webp',
+    image: 'assets/cards/seven-of-cups.webp?v=20260828-minor-viii',
     num: 'VII',
     symbol: '◇',
     result: {
@@ -4657,7 +4657,7 @@ export const TAROT_CARDS = [
     streetName: 'Перетаскал',
     streetText: 'Ты взвалил слишком много. Донеси важное, остальное пора скинуть.',
     visualHint: 'согнутая фигура, десять жезлов, тяжёлая дорога, дальний дом, золотой свет',
-    image: 'assets/cards/ten-of-wands.webp',
+    image: 'assets/cards/ten-of-wands.webp?v=20260828-minor-ix',
     num: 'X',
     symbol: '✦',
     result: {
@@ -4740,7 +4740,7 @@ export const TAROT_CARDS = [
     streetName: 'Накрутка',
     streetText: 'Голова разогналась сильнее реальности. Проверь факты, потом верь страху.',
     visualHint: 'ночная кровать, закрытое лицо, девять мечей на стене, бессонница',
-    image: 'assets/cards/nine-of-swords.webp',
+    image: 'assets/cards/nine-of-swords.webp?v=20260828-minor-ix',
     num: 'IX',
     symbol: '∥',
     result: {
@@ -4823,7 +4823,7 @@ export const TAROT_CARDS = [
     streetName: 'Курс',
     streetText: 'Выбери главное, назови следующий шаг и не распыляй силы на всё сразу.',
     visualHint: 'король на каменном троне с львами, один цветущий жезл, корона, саламандра, сухой огненный пейзаж',
-    image: 'assets/cards/king-of-wands.webp',
+    image: 'assets/cards/king-of-wands.webp?v=20260828-minor-ix',
     num: 'K',
     symbol: '♕',
     result: {
@@ -4901,7 +4901,7 @@ export const TAROT_CARDS = [
     streetName: 'Цена победы',
     streetText: 'Даже если ты прав, думай над каждой фразой. Один спор не стоит испорченных отношений.',
     visualHint: 'один победитель с тремя мечами, два меча на земле, ровно двое побеждённых уходят вдаль, тяжёлое небо и напряжение после конфликта',
-    image: 'assets/cards/five-of-swords.webp',
+    image: 'assets/cards/five-of-swords.webp?v=20260828-minor-ix',
     num: 'V',
     symbol: '∥',
     result: {
@@ -4979,7 +4979,7 @@ export const TAROT_CARDS = [
     streetName: 'Тихий план',
     streetText: 'Проверь, что ты скрываешь и зачем. Иногда нужна осторожность, иногда — честный разговор.',
     visualHint: 'один человек оглядывается на лагерь, несёт пять мечей, два меча остаются позади у шатров, холодный рассвет',
-    image: 'assets/cards/seven-of-swords.webp',
+    image: 'assets/cards/seven-of-swords.webp?v=20260828-minor-ix',
     num: 'VII',
     symbol: '∥',
     result: {
@@ -5057,7 +5057,7 @@ export const TAROT_CARDS = [
     streetName: 'По фактам',
     streetText: 'Скажи прямо, что тебе подходит, а что нет. Длинные оправдания сегодня не нужны.',
     visualHint: 'коронованная королева на каменном троне, один вертикальный меч, открытая ладонь, бабочки, херувим, облака и одна птица',
-    image: 'assets/cards/queen-of-swords.webp',
+    image: 'assets/cards/queen-of-swords.webp?v=20260828-minor-x',
     num: 'Q',
     symbol: '♕',
     result: {
@@ -5132,7 +5132,7 @@ export const TAROT_CARDS = [
     streetName: 'По правилам',
     streetText: 'Если решение зависит от тебя, проверь факты, назови правила и объясни, что будет дальше.',
     visualHint: 'коронованный король анфас на высоком каменном троне, один вертикальный меч в правой руке, свободная рука на колене, бабочка и лунные мотивы, облака, две птицы и деревья',
-    image: 'assets/cards/king-of-swords.webp',
+    image: 'assets/cards/king-of-swords.webp?v=20260828-minor-x',
     num: 'K',
     symbol: '♕',
     result: {
@@ -5210,7 +5210,7 @@ export const TAROT_CARDS = [
     streetName: 'Ученик',
     streetText: 'Выбери одно новое дело. Пойми основные правила и закончи первую часть так, чтобы результат можно было сохранить или показать.',
     visualHint: 'молодой паж стоит в цветущем поле и держит один пентакль перед лицом, за ним роща, вспаханная земля и далёкие горы',
-    image: 'assets/cards/page-of-pentacles.webp',
+    image: 'assets/cards/page-of-pentacles.webp?v=20260828-minor-x',
     num: 'P',
     symbol: '♙',
     result: {
@@ -5288,7 +5288,7 @@ export const TAROT_CARDS = [
     streetName: 'Хозяин дела',
     streetText: 'Проверь бюджет, позаботься о том, что должно служить долго, и не занижай цену своей работы.',
     visualHint: 'коронованный король на тёмном каменном троне с бычьими головами, один пентакль, один скипетр, виноградные лозы, сад и замок',
-    image: 'assets/cards/king-of-pentacles.webp',
+    image: 'assets/cards/king-of-pentacles.webp?v=20260828-minor-x',
     num: 'K',
     symbol: '♕',
     result: {
@@ -5366,7 +5366,7 @@ export const TAROT_CARDS = [
     streetName: 'Прямой рывок',
     streetText: 'Действуй быстро, но сначала проверь один факт или условие, от которого зависит результат.',
     visualHint: 'один рыцарь на одном светлом скачущем коне, один поднятый меч, красный плюмаж и плащ, буря и согнутые ветром деревья',
-    image: 'assets/cards/knight-of-swords.webp',
+    image: 'assets/cards/knight-of-swords.webp?v=20260828-minor-x',
     num: 'K',
     symbol: '♞',
     result: {

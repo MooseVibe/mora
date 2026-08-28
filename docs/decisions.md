@@ -6,6 +6,40 @@
 
 ---
 
+## 2026-08-28 — Десятая пятёрка Младших арканов интегрирована после общего аппрува
+
+**Что:** `queen-of-swords`, `king-of-swords`, `page-of-pentacles`, `king-of-pentacles` и `knight-of-swords` получили `approved-final` и локально заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы через `cwebp -q 82`, весят `313–420 KB` и получили cache-bust `20260828-minor-x` в image paths, импорте `cards.js` и `app.js` preload/script entry. Clean artwork не содержит встроенных rank/number markers, текста, рамок или footer-плашек; ID, карточные тексты, UI, CSS, GLB и product flow не менялись. JS syntax, `git diff --check`, lint, production build и local HTTP smoke прошли; пять финальных и один отклонённый временный PNG удалены после успешной WebP-интеграции.
+
+**Почему:** Автор просмотрел полный комплект с RWS-количествами и явно указанными safe-area рисками и утвердил все пять одним общим аппрувом. Первый кандидат `king-of-swords` агент автоматически отклонил как объективно неканоничный: единственный меч был направлен клинком вниз; финальный master сохраняет один меч клинком вверх. Финальные `page-of-pentacles` и `king-of-pentacles` содержат по одному пентаклю, а `king-of-pentacles` дополнительно ровно один скипетр.
+
+**Кто:** автор + агент.
+
+**QA:** автор вручную проверил интегрированную пятёрку через local-only `qaCard` flow и утвердил все пять. Затем автор отдельно разрешил commit и production deploy накопленных восьмой–десятой партий; push не запрошен.
+
+**Release:** ожидает commit и production deploy из точного Git archive.
+
+## 2026-08-28 — Девятая пятёрка Младших арканов интегрирована после общего аппрува
+
+**Что:** `ten-of-wands`, `nine-of-swords`, `king-of-wands`, `five-of-swords` и `seven-of-swords` получили `approved-final` и локально заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы через `cwebp -q 82`, весят `192–437 KB` и получили cache-bust `20260828-minor-ix` в image paths, импорте `cards.js` и `app.js` preload/script entry. Clean artwork не содержит встроенных rank/number markers, текста, рамок или footer-плашек; ID, карточные тексты, UI, CSS, GLB и product flow не менялись. JS syntax, `git diff --check`, lint, production build и local HTTP smoke прошли; пять финальных и пять отклонённых временных PNG удалены после успешной WebP-интеграции.
+
+**Почему:** Автор просмотрел полный комплект с RWS-количествами и safe-area рисками и явно утвердил все пять. Для `ten-of-wands` автор отдельно отклонил корректную по числу, но искусственную композицию из двух веерных пачек; финальный master сохраняет один естественный плотный сноп, связанный верёвкой за спиной, и ровно десять жезлов. В процессе также были отклонены варианты с девятью жезлами, лишними скрытыми наконечниками, семью читаемыми жезлами и сгенерированными цифровыми подписями.
+
+**Кто:** автор + агент.
+
+**Release:** commit, push и deploy не выполнялись; dev-server запущен на `http://localhost:3000`, следующий gate — ручной local-only QA автора.
+
+## 2026-08-28 — Восьмая пятёрка Младших арканов интегрирована после общего аппрува
+
+**Что:** `page-of-swords`, `eight-of-cups`, `ten-of-cups`, `nine-of-cups` и `seven-of-cups` получили `approved-final` и локально заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы через `cwebp -q 82`, весят `247–353 KB` и получили cache-bust `20260828-minor-viii` в image paths, импорте `cards.js` и `app.js` preload/script entry. Clean artwork не содержит встроенных rank/number markers, текста, рамок или footer-плашек; ID, карточные тексты, UI, CSS, GLB и product flow не менялись. JS syntax, `git diff --check`, lint, production build и local HTTP smoke прошли; пять финальных и три отклонённых временных PNG удалены после успешной WebP-интеграции.
+
+**Почему:** Автор просмотрел полный комплект с явно указанными RWS-количествами и safe-area рисками и утвердил все пять одним общим аппрувом. Первый кандидат `ten-of-cups` был отклонён из-за одиннадцати кубков вместо десяти; первые два кандидата `nine-of-cups` — из-за десяти кубков вместо девяти. Финальные версии сохраняют соответственно `10 = 5+5` и `9 = 3+3+3`; safe-area риски крайних объектов автор принял визуальным решением.
+
+**Кто:** автор + агент.
+
+**QA:** автор вручную проверил интегрированную пятёрку через local-only `qaCard` flow и явно утвердил все пять. Финальный статус каждой карты — `integrated`; партия завершена локально.
+
+**Release:** commit, push и deploy не выполнялись и остаются отдельными явными gates.
+
 ## 2026-08-27 — Седьмая пятёрка Младших арканов интегрирована после общего аппрува
 
 **Что:** `six-of-swords`, `queen-of-pentacles`, `ace-of-wands`, `queen-of-wands` и `page-of-wands` получили `approved-final` и локально заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы `cwebp -q 82`, весят меньше `500 KB` и получили cache-bust `20260827-minor-vii` в image paths, импорте `cards.js` и `app.js` preload/script entry. `git diff --check`, JS syntax, lint, production build, local HTTP smoke и ручной local-only QA автора прошли. ID, тексты, CSS, GLB и product flow не менялись; commit, push и deploy не выполнялись.
