@@ -6,6 +6,26 @@
 
 ---
 
+## 2026-08-28 — Welcome art декодируется до единого staged entrance
+
+**Что:** Исходный `public/welcome/card-snake-final.png` (`4096×3079`, `5.3 MB`) заменён на прозрачный `card-snake-final.webp` (`2820×2120`, `211 KB`, `cwebp -q 82`). Desktop preload ограничен media-query `min-width: 901px`; mobile получает только встроенный `1×1` placeholder и не скачивает декоративный art. На desktop после `img.decode()` и `document.fonts.ready` вся карточная композиция появляется одним слоем за номинальные 40 кадров / `667ms`: `translateX(-50px) → 0`, `blur(50px) → 0`, `opacity 0 → 1` по нелинейному `--ease`. Только после полного окончания art-анимации весь `hero-copy` проявляется одним блоком через `opacity 0 → 1` за номинальные 30 кадров / `500ms`; дочерние элементы больше не имеют stagger, blur или собственного motion, поэтому не моргают и не распадаются на три события. На mobile image-decode gate явно отключён, а delay текстового блока равен `0ms`, потому что artwork там отсутствует. Reduced-motion использует единый `300ms` opacity-only reveal.
+
+**Почему:** Прогрессивная декодировка 5.3 MB PNG показывала пользователю отдельные загруженные полосы. Retina-достаточный WebP уменьшает transfer примерно в 25 раз, а decode-gate гарантирует, что браузер начинает общий entrance только с полностью готовым изображением и финальными локальными шрифтами. Первоначальный directional clip-reveal отклонён автором: он всё ещё читался как послойное появление. Единый blur/opacity/position tween сохраняет композицию цельным объектом; CSS keyframes подходят для одноразовой staged-анимации и не добавляют runtime-зависимость.
+
+**Кто:** автор + агент.
+
+**QA:** desktop `1440×900` подтвердил source `2820×2120`, последовательный reveal и финальный кадр без console errors; mobile `375×812` подтвердил `1×1` currentSrc, скрытый art, ширину контента `327px` и отсутствие horizontal overflow. Старый PNG удалён как неиспользуемый, но восстановим из Git.
+
+## 2026-08-28 — moratarot.com подключён как канонический production-домен
+
+**Что:** Автор зарегистрировал `moratarot.com` у Beget на один год до 2027-08-28. Домен и `www.moratarot.com` добавлены только в канонический Vercel project `mora` (`prj_iNES6q89fIyBt1acJ2j7OfMY1ygB`). В Beget корневые A-записи `@` и `www` направлены на выданный Vercel адрес `76.76.21.21`; существующие MX/TXT, `autoconfig`, `autodiscover` и NS сохранены. Vercel подтвердил оба домена и выпустил отдельные автоматически возобновляемые SSL-сертификаты; `www` настроен нативным permanent redirect `308` на `https://moratarot.com`.
+
+**Почему:** Один короткий брендовый origin проще сообщать пользователям и использовать в metadata/auth, а Vercel domain redirect устраняет SEO-дубликат без нового кода или deployment. DNS остаётся в Beget: для текущего apex-origin достаточно двух точных A-записей, поэтому перенос nameservers и новая инфраструктура не нужны.
+
+**Кто:** автор + агент.
+
+**QA:** публичный DNS `@1.1.1.1` вернул `76.76.21.21` для обоих имён; `https://moratarot.com/ritual` вернул `HTTP/2 200`, `https://www.moratarot.com` — `HTTP/2 308` с `Location: https://moratarot.com/`. Код, UI и production deployment не менялись. Следующий отдельный release должен обновить canonical/OG/JSON-LD/robots/sitemap, PostHog allowlist и Supabase auth redirects для нового origin.
+
 ## 2026-08-28 — Тройка Мечей интегрирована последней картой полной колоды
 
 **Что:** Последняя отсутствовавшая карта `three-of-swords` добавлена в единый источник, `TarotCardId` и первое место QA-сортировки «Сначала новые»; колода теперь содержит ровно 78 уникальных карт и 78 WebP. Approved-final по master-spec `world + judgement` сохраняет одно сердце, ровно три меча и дождевые облака, имеет `1024×1536`, `286634` bytes, `cwebp -q 82` и не содержит встроенных `III`, текста, рамки или footer marker. Три отдельно утверждённых сценария `preview/full/share` описывают неприятный разговор, отказ/критику и нарушение доверия простым русским языком. Cache-bust `20260828-three-swords` синхронизирован в image path, `cards.js` import и ritual preload/script entry.

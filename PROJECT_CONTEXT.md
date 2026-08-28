@@ -16,7 +16,8 @@ North Star: an AI tarot reader in chat. The daily card and journal are retention
 - Auth and database: Supabase
 - Path alias: `@/*` -> `./src/*`
 - Local dev URL: `http://localhost:3000`
-- Production: `mora-kappa.vercel.app`
+- Canonical production: `https://moratarot.com`
+- Vercel fallback alias: `https://mora-kappa.vercel.app`
 - Vercel project: `mora` (`prj_iNES6q89fIyBt1acJ2j7OfMY1ygB`); the retired `mora-vnkt` project must never be used
 
 ## Start The App
@@ -94,7 +95,7 @@ Current work phase:
 - Mora Next in `public/ritual/` is canonical production, not a parallel laboratory
 - standalone 3D and legacy dashboard/journal/auth routes are archived outside the production tree
 - current cleanup keeps only the static landing/spread UI, three protected APIs, Supabase server adapter, QA cards and shared assets
-- cleanup и минимальная privacy-safe PostHog EU аналитика готовы; дальше домен/SMTP/auth redirects, metadata/SEO и закрытая бета
+- cleanup, минимальная privacy-safe PostHog EU аналитика и custom domain готовы; дальше canonical metadata/PostHog allowlist, SMTP/auth redirects и закрытая бета
 - cards-first visual unification is complete across all 78 cards; `world` and `judgement` remain the locked style-and-palette references, while 8 old cards still need approved `preview/full/share` texts
 - AI tarot chat is planned later, after the product feels presentable
 

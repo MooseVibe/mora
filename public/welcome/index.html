@@ -21,6 +21,8 @@
       } catch {
         // Without browser storage the welcome screen remains repeatable.
       }
+      document.documentElement.classList.add("welcome-entering");
+      window.setTimeout(() => document.documentElement.classList.add("welcome-ready"), 4000);
     </script>
     <title>Mora — карта дня и расклады таро</title>
     <meta
@@ -54,9 +56,19 @@
       }
     </script>
     <link rel="stylesheet" href="/assets/fonts.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260825-legal2" />
+    <link rel="preload" as="font" href="/assets/fonts/spectral-sc-500.ttf" type="font/ttf" crossorigin />
+    <link rel="preload" as="font" href="/assets/fonts/inter-display-400.woff2" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      as="image"
+      href="./card-snake-final.webp"
+      type="image/webp"
+      media="(min-width: 901px)"
+      fetchpriority="high"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260828-welcome-copy2" />
     <script src="/assets/analytics.js?v=20260823-product2"></script>
-    <script type="module" src="./app.js?v=20260823-product2"></script>
+    <script type="module" src="./app.js?v=20260828-welcome-reveal2"></script>
   </head>
   <body>
     <header class="header">
@@ -68,7 +80,17 @@
 
     <main class="hero">
       <div class="card-snake" aria-hidden="true">
-        <img src="./card-snake-final.png" alt="" />
+        <picture>
+          <source media="(min-width: 901px)" srcset="./card-snake-final.webp" type="image/webp" />
+          <img
+            src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+            alt=""
+            width="2820"
+            height="2120"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </picture>
       </div>
 
       <section class="hero-copy" aria-labelledby="hero-title">

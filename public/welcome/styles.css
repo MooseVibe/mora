@@ -115,6 +115,10 @@ body::before {
   overflow: hidden;
 }
 
+.card-snake picture {
+  display: contents;
+}
+
 .card-snake img {
   position: absolute;
   top: -256px;
@@ -123,6 +127,50 @@ body::before {
   width: min(98.051vw, 1410px);
   height: auto;
   user-select: none;
+}
+
+.welcome-entering:not(.welcome-ready) .card-snake img,
+.welcome-entering:not(.welcome-ready) .hero-copy {
+  opacity: 0;
+}
+
+.welcome-entering:not(.welcome-ready) .card-snake img {
+  filter: blur(50px);
+  transform: translateX(-50px);
+}
+
+.welcome-entering.welcome-ready .card-snake img {
+  animation: welcome-art-reveal 667ms var(--ease) both;
+  will-change: transform, opacity, filter;
+}
+
+.welcome-entering.welcome-ready .hero-copy {
+  animation: welcome-copy-reveal 500ms var(--ease) 667ms both;
+  will-change: opacity;
+}
+
+@keyframes welcome-art-reveal {
+  from {
+    opacity: 0;
+    filter: blur(50px);
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes welcome-copy-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .hero-copy {
@@ -217,12 +265,34 @@ body::before {
     display: none;
   }
 
+  .welcome-entering.welcome-ready .hero-copy {
+    animation-delay: 0ms;
+  }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
   .login,
   .ritual-action {
     transition-duration: 150ms;
+  }
+
+  .welcome-entering.welcome-ready .card-snake img,
+  .welcome-entering.welcome-ready .hero-copy {
+    animation-delay: 0ms;
+    animation-duration: 300ms;
+    animation-name: welcome-reduced-reveal;
+    will-change: opacity;
+  }
+
+  @keyframes welcome-reduced-reveal {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
 }
