@@ -14,7 +14,7 @@
 
 **Кто:** автор + агент.
 
-**QA:** desktop `1440×900` подтвердил source `2820×2120`, последовательный reveal и финальный кадр без console errors; mobile `375×812` подтвердил `1×1` currentSrc, скрытый art, ширину контента `327px` и отсутствие horizontal overflow. Старый PNG удалён как неиспользуемый, но восстановим из Git.
+**QA:** desktop `1440×900` подтвердил source `2820×2120`, последовательный reveal и финальный кадр без console errors; mobile `375×812` подтвердил `1×1` currentSrc, скрытый art, ширину контента `327px` и отсутствие horizontal overflow. Старый PNG удалён как неиспользуемый, но восстановим из Git. Release commit `58e917d` выпущен в production deployment `dpl_8cWuZT6PJkztSxQNYzJgzjrhfyQG`; canonical `moratarot.com` отдал новый HTML/cache-bust и WebP `215886` bytes, `/ritual` вернул `200`. Deploy создан из точного Git archive без `Cover.png`; push не выполнялся.
 
 ## 2026-08-28 — moratarot.com подключён как канонический production-домен
 
