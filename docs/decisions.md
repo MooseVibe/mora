@@ -3489,3 +3489,5 @@ Welcome и ritual физически перенесены из `public/prototype
 ## 2026-08-28 — Mobile zoom и tap highlight отключаются только на выборе карт
 
 Экран mobile-веера является полноэкранной жестовой поверхностью и не получает нативный browser zoom или WebKit tap highlight: scoped `touch-action: none` действует только при `data-step="choose"`, а `appearance: none` и прозрачный tap highlight применяются только к слотам и рубашкам этого состояния. Остальные экраны, desktop hover и keyboard focus не меняются, поэтому accessibility trade-off ограничен ритуалом, где масштабирование ломает физический выбор карт.
+
+Fix commits `bdcb176` и `740d355` вместе с ранее ожидавшим production daily flash hotfix `69cc6c3` выпущены из точного Git archive без пользовательского `Cover.png` в deployment `dpl_FWBfRCwfemBKAJj6UQuH2NyCUTu9`. Alias `moratarot.com` обновлён; HTTP и browser smoke подтвердили cache-bust `instantdraw1/instantdraw2`, prepared-spread код, неблокирующую face-загрузку и отсутствие console errors.

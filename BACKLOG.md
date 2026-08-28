@@ -170,7 +170,7 @@ Canonical WebP выглядел заметно резче в DOM-контекс�
 
 ### High · 3D-колода расклада могла зависнуть перед полётом карты
 
-**Статус:** Fix approved locally · Needs production cold-cache smoke
+**Статус:** Production · Needs author cold-cache smoke
 **Дата:** 2026-08-10
 **Где:** Mora Next, выбор трёх карт
 **Источник:** повторяющийся production-сигнал с разных устройств
