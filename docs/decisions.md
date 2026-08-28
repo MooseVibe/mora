@@ -16,7 +16,7 @@
 
 **QA:** автор вручную проверил интегрированную пятёрку через local-only `qaCard` flow и утвердил все пять. Затем автор отдельно разрешил commit и production deploy накопленных восьмой–десятой партий; push не запрошен.
 
-**Release:** ожидает commit и production deploy из точного Git archive.
+**Release:** artwork commit `1ff060c`, production deployment `dpl_G7S8qc36UsS6dxuNZ3tRsUZkii8d`, alias `https://mora-kappa.vercel.app`. Production smoke подтвердил status `READY`, cache-bust `20260828-minor-x`, побайтное совпадение всех пятнадцати canonical WebP восьмой–десятой партий, `/` и `/ritual` `200`, guest account-state `401`. Deploy выполнен из точного Git archive без пользовательского `Cover.png`; push не выполнялся.
 
 ## 2026-08-28 — Девятая пятёрка Младших арканов интегрирована после общего аппрува
 
@@ -26,7 +26,7 @@
 
 **Кто:** автор + агент.
 
-**Release:** commit, push и deploy не выполнялись; dev-server запущен на `http://localhost:3000`, следующий gate — ручной local-only QA автора.
+**Release:** партия выпущена вместе с восьмой и десятой artwork commit `1ff060c` в production deployment `dpl_G7S8qc36UsS6dxuNZ3tRsUZkii8d`; alias, cache-bust и canonical WebP прошли smoke. Deploy выполнен из точного Git archive без `Cover.png`; push не выполнялся.
 
 ## 2026-08-28 — Восьмая пятёрка Младших арканов интегрирована после общего аппрува
 
@@ -38,7 +38,7 @@
 
 **QA:** автор вручную проверил интегрированную пятёрку через local-only `qaCard` flow и явно утвердил все пять. Финальный статус каждой карты — `integrated`; партия завершена локально.
 
-**Release:** commit, push и deploy не выполнялись и остаются отдельными явными gates.
+**Release:** партия выпущена вместе с девятой и десятой artwork commit `1ff060c` в production deployment `dpl_G7S8qc36UsS6dxuNZ3tRsUZkii8d`; alias, cache-bust и canonical WebP прошли smoke. Deploy выполнен из точного Git archive без `Cover.png`; push не выполнялся.
 
 ## 2026-08-27 — Седьмая пятёрка Младших арканов интегрирована после общего аппрува
 
