@@ -48,7 +48,7 @@
 - `public/assets/cards.js` — единый источник карт, текстов и metadata.
 - В production используются WebP-изображения.
 - Служебный `/qa/cards` показывает колоду и reading-варианты; production требует `CARD_QA_TOKEN`.
-- В колоде 77 карт; `three-of-swords` остаётся последней недостающей картой и добавляется только отдельной задачей.
+- В колоде все 78 карт Rider–Waite–Smith; `three-of-swords` добавлена последней отдельным проходом.
 
 ## Release work
 
