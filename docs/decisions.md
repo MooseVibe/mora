@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-28 — Result-state всегда скрывает idle-заголовок без перехода
+
+**Что:** `.daily-card-heading` теперь немедленно получает `opacity: 0`, `pointer-events: none` и `transition: none` при любом `daily-result-ready` или `daily-3d-result`, а не только внутри `mode-switching`. Ritual CSS получил cache-bust `20260828-dailyhydrate1`.
+
+**Почему:** при холодном обновлении авторизованный server-state восстанавливается асинхронно. Main скрыт до ответа, но браузер мог начать старый `420ms` fade `.daily-card-screen` в тот же layout, где открывался результат, и на несколько кадров показывал idle-заголовок поверх сохранённой карты. Состояние результата уже известно в body-class, поэтому CSS-инвариант устраняет гонку без нового JS-state и без изменения draw/save/auth.
+
+**Кто:** автор + агент.
+
 ## 2026-08-28 — Welcome art декодируется до единого staged entrance
 
 **Что:** Исходный `public/welcome/card-snake-final.png` (`4096×3079`, `5.3 MB`) заменён на прозрачный `card-snake-final.webp` (`2820×2120`, `211 KB`, `cwebp -q 82`). Desktop preload ограничен media-query `min-width: 901px`; mobile получает только встроенный `1×1` placeholder и не скачивает декоративный art. На desktop после `img.decode()` и `document.fonts.ready` вся карточная композиция появляется одним слоем за номинальные 40 кадров / `667ms`: `translateX(-50px) → 0`, `blur(50px) → 0`, `opacity 0 → 1` по нелинейному `--ease`. Только после полного окончания art-анимации весь `hero-copy` проявляется одним блоком через `opacity 0 → 1` за номинальные 30 кадров / `500ms`; дочерние элементы больше не имеют stagger, blur или собственного motion, поэтому не моргают и не распадаются на три события. На mobile image-decode gate явно отключён, а delay текстового блока равен `0ms`, потому что artwork там отсутствует. Reduced-motion использует единый `300ms` opacity-only reveal.

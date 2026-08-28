@@ -87,8 +87,9 @@ body.mode-switching main {
   transition-duration: 180ms;
 }
 
-body.mode-switching:is(.daily-result-ready, .daily-3d-result) .daily-card-heading {
+body.daily-mode:is(.daily-result-ready, .daily-3d-result) .daily-card-heading {
   opacity: 0;
+  pointer-events: none;
   transition: none;
 }
 
