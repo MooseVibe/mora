@@ -16,6 +16,8 @@
 
 **QA:** deck/ID/variant assertions, JS syntax, размер изображения, `git diff --check`, lint, production build и local HTTP smoke прошли. Автор принял финальный local-only результат и отдельно запросил commit и production deploy без push.
 
+**Release:** product/docs commit `132bb9d`, production deployment `dpl_8oB4GQZsM8A2ifci8cyRgtSfBH9V`, alias `https://mora-kappa.vercel.app`. Deploy выполнен из точного Git archive без пользовательского `Cover.png`; push не выполнялся. Production smoke подтвердил status `Ready`, `/` и `/ritual` `200`, cache-bust `20260828-three-swords`, карточную запись, точное побайтное совпадение WebP и guest account-state `401`.
+
 ## 2026-08-28 — Одиннадцатая пятёрка Младших/придворных карт интегрирована после общего аппрува
 
 **Что:** `knight-of-wands`, `knight-of-cups`, `knight-of-pentacles`, `ten-of-swords` и `eight-of-swords` получили `approved-final` и локально заменили прежние canonical WebP. Все пять имеют `1024×1536`, закодированы через `cwebp -q 82`, весят `231–381 KB` и получили cache-bust `20260828-minor-xi` в image paths, импорте `cards.js` и `app.js` preload/script entry. Clean artwork не содержит встроенных rank/number markers, текста, рамок или footer-плашек; ID, карточные тексты, UI, CSS, GLB и product flow не менялись.
@@ -26,7 +28,7 @@
 
 **QA:** автор вручную проверил интегрированную пятёрку через local-only `qaCard` flow и явно утвердил все пять. Финальный статус каждой карты — `integrated`; локальная партия завершена.
 
-**Release:** commit, push и deploy не выполнялись; партия остаётся локальной до отдельного запроса автора.
+**Release:** партия выпущена вместе с финальной `three-of-swords` product/docs commit `132bb9d` в production deployment `dpl_8oB4GQZsM8A2ifci8cyRgtSfBH9V`; push не выполнялся.
 
 ## 2026-08-28 — Десятая пятёрка Младших арканов интегрирована после общего аппрува
 
