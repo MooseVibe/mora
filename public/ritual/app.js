@@ -1,12 +1,14 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260825-cardmatch2";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260828-instantdraw1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
+const preparedSpreadKey = "mora:prototype:preparedSpread";
 const availableSpreadCards = TAROT_CARDS
   .filter((card) => card.image)
   .map((card) => ({ ...card, image: `/${card.image.replace(/^\/+/, "")}` }));
 let spreadDeck = restoreSpreadDeckOrder(availableSpreadCards);
+let preparedSpreadCards = [];
 const selectedCards = [];
 const spreadSize = 3;
 
@@ -121,7 +123,6 @@ let spreadCooldownTimer;
 let dailyCooldownTimer;
 let volatileFailedSpread = null;
 let pendingDailySelection = null;
-let visibleSpreadCardIndices = [];
 let dailyActivationInFlight = false;
 let dailyAccountRefreshPromise = null;
 const clientEventTrace = crypto.randomUUID?.() || String(Date.now());
@@ -195,6 +196,50 @@ function shuffleCards(cards) {
     [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
   }
   return shuffled;
+}
+
+function secureRandomIndex(length) {
+  const values = new Uint32Array(1);
+  const limit = Math.floor(0x100000000 / length) * length;
+  do window.crypto.getRandomValues(values); while (values[0] >= limit);
+  return values[0] % length;
+}
+
+function createPreparedSpread() {
+  const pool = [...availableSpreadCards];
+  return Array.from({ length: spreadSize }, () => (
+    pool.splice(secureRandomIndex(pool.length), 1)[0]
+  ));
+}
+
+function ensurePreparedSpread() {
+  if (preparedSpreadCards.length === spreadSize) return preparedSpreadCards;
+  try {
+    const savedIds = JSON.parse(window.sessionStorage.getItem(preparedSpreadKey) || "null");
+    if (Array.isArray(savedIds) && savedIds.length === spreadSize && new Set(savedIds).size === spreadSize) {
+      const cardsById = new Map(availableSpreadCards.map((card) => [card.id, card]));
+      const restored = savedIds.map((id) => cardsById.get(id));
+      if (restored.every(Boolean)) preparedSpreadCards = restored;
+    }
+  } catch {
+    // A fresh spread below replaces invalid or unavailable session storage.
+  }
+  if (preparedSpreadCards.length !== spreadSize) preparedSpreadCards = createPreparedSpread();
+  try {
+    window.sessionStorage.setItem(preparedSpreadKey, JSON.stringify(preparedSpreadCards.map((card) => card.id)));
+  } catch {
+    // The spread still works when sessionStorage is unavailable.
+  }
+  return preparedSpreadCards;
+}
+
+function clearPreparedSpread() {
+  preparedSpreadCards = [];
+  try {
+    window.sessionStorage.removeItem(preparedSpreadKey);
+  } catch {
+    // The next in-memory spread still gets a fresh set.
+  }
 }
 
 function createNextDeckOrder(cards, previousOrder = []) {
@@ -714,6 +759,9 @@ function showSpreadMode() {
 
   if (readLastSpread()) {
     restoreSavedSpread();
+  } else if (prototypeTesterAuthenticated) {
+    ensurePreparedSpread();
+    scheduleVisibleSpreadFaces();
   }
 }
 
@@ -1172,12 +1220,12 @@ for (let index = 0; index < deckCardCount; index += 1) {
   card.setAttribute("aria-label", `Выбрать карту ${index + 1}`);
   card.addEventListener("click", pickCard);
   card.addEventListener("pointerdown", (event) => {
-    const currentCard = spreadDeck.find((item) => item.id === card.dataset.cardId);
+    const currentCard = ensurePreparedSpread()[picked];
     if (currentCard) spreadDeck3DController?.preloadFace(currentCard.image);
     startCardDrag(event);
   });
   card.addEventListener("pointerenter", () => {
-    const currentCard = spreadDeck.find((item) => item.id === card.dataset.cardId);
+    const currentCard = ensurePreparedSpread()[picked];
     if (currentCard) spreadDeck3DController?.preloadFace(currentCard.image);
     if (window.innerWidth > 720) spreadDeck3DController?.setHovered(index);
   });
@@ -1236,7 +1284,6 @@ function renderDeck() {
     Math.abs(left - (deckCardCount - 1) / 2 + deckScroll / spacing)
     - Math.abs(right - (deckCardCount - 1) / 2 + deckScroll / spacing)
   ));
-  visibleSpreadCardIndices = visibleCardIndices;
   spreadDeck3DController?.setVisibleIndices(visibleCardIndices);
 }
 
@@ -1395,6 +1442,8 @@ function startMobileFanInertia(initialVelocity) {
 
 topics.forEach((topic) => {
   topic.addEventListener("click", () => {
+    ensurePreparedSpread();
+    scheduleVisibleSpreadFaces();
     currentTopic = topic.dataset.topic;
     window.MoraAnalytics.capture("spread_topic_selected");
     selectedTopic.innerHTML = topic.innerHTML;
@@ -1405,15 +1454,11 @@ topics.forEach((topic) => {
 });
 
 async function preloadVisibleSpreadFaces() {
-  const paths = visibleSpreadCardIndices
-    .slice(0, 4)
-    .map((index) => spreadDeck[index]?.image)
-    .filter(Boolean);
-  for (let index = 0; index < paths.length; index += 2) {
-    await Promise.allSettled(paths.slice(index, index + 2).map((path) => (
-      spreadDeck3DController?.preloadFace(path)
-    )));
-  }
+  if (!spreadDeck3DController) return;
+  const [first, ...rest] = ensurePreparedSpread();
+  spreadDeck3DController.preloadFace(first.image).catch(() => {});
+  await new Promise((resolve) => window.setTimeout(resolve, 120));
+  await Promise.allSettled(rest.map((card) => spreadDeck3DController.preloadFace(card.image)));
 }
 
 function scheduleVisibleSpreadFaces() {
@@ -1484,7 +1529,7 @@ async function flyCardToNextSlot(source) {
   window.clearTimeout(deckPromptTimer);
 
   const target = slots[picked];
-  const card = spreadDeck.find((item) => item.id === source.dataset.cardId);
+  const card = ensurePreparedSpread()[picked];
   if (!card) {
     selectionInFlight = false;
     return;
@@ -1497,7 +1542,11 @@ async function flyCardToNextSlot(source) {
         imageUrl: card.image,
         targetElement: target,
         onTextReveal: () => revealSlotName(target, card.name),
-        onCover: () => target.classList.add("is-3d-covered"),
+        onCover: (faceReady) => {
+          target.classList.add("is-3d-covered");
+          target.classList.toggle("is-face-loading", !faceReady);
+        },
+        onFaceReady: () => target.classList.remove("is-face-loading"),
       });
       if (selected) commitCard(source, card, { threeD: true });
       else target.classList.remove("is-3d-covered");
@@ -1666,6 +1715,7 @@ function saveLastSpread(reading, source, persistedSnapshot = null) {
     // The prototype still completes when localStorage is unavailable.
   }
   volatileFailedSpread = null;
+  clearPreparedSpread();
 }
 
 function readLastSpread() {
@@ -1916,6 +1966,9 @@ newSpreadButton.addEventListener("click", () => {
   } else if (prototypeTesterAuthenticated) accountSpreadSnapshot = null;
   const nextDeck = createNextDeckOrder(spreadDeck, spreadDeck.map((card) => card.id));
   spreadDeck = nextDeck;
+  clearPreparedSpread();
+  ensurePreparedSpread();
+  scheduleVisibleSpreadFaces();
   saveSpreadDeckOrder(nextDeck);
   window.localStorage.removeItem(savedSpreadKey);
   volatileFailedSpread = null;
@@ -2045,7 +2098,7 @@ async function endCardDrag(event) {
   source.dataset.suppressClick = "true";
   if (magnetized && spreadDeck3DController) {
     selectionInFlight = true;
-    const card = spreadDeck.find((item) => item.id === source.dataset.cardId);
+    const card = ensurePreparedSpread()[picked];
     target.classList.add("is-3d-covered");
     try {
       const selected = await spreadDeck3DController.drawToSlot({
@@ -2054,7 +2107,11 @@ async function endCardDrag(event) {
         imageUrl: card.image,
         targetElement: target,
         onTextReveal: () => revealSlotName(target, card.name),
-        onCover: () => target.classList.add("is-3d-covered"),
+        onCover: (faceReady) => {
+          target.classList.add("is-3d-covered");
+          target.classList.toggle("is-face-loading", !faceReady);
+        },
+        onFaceReady: () => target.classList.remove("is-face-loading"),
       });
       if (selected) commitCard(source, card, { threeD: true });
       else showDeckHint();

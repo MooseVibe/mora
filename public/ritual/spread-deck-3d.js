@@ -192,6 +192,9 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       faceTextures.set(path, loadFaceTexture(renderer, path).then((texture) => {
         renderer.initTexture(texture);
         return texture;
+      }).catch((error) => {
+        faceTextures.delete(path);
+        throw error;
       }));
     }
     return faceTextures.get(path);
@@ -302,7 +305,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     parkedResults.forEach((result) => {
       const rect = result.targetElement.getBoundingClientRect();
       const targetAspect = rect.width / rect.height;
-      if (Math.abs(targetAspect - result.targetAspect) > 0.001) {
+      if (result.texture && Math.abs(targetAspect - result.targetAspect) > 0.001) {
         fitTextureCover(result.card, result.texture, targetAspect);
         result.targetAspect = targetAspect;
       }
@@ -510,7 +513,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       result.spinning = false;
       renderDeck();
     },
-    async drawToSlot({ index, slotIndex, imageUrl, targetElement, onCover, onTextReveal }) {
+    async drawToSlot({ index, slotIndex, imageUrl, targetElement, onCover, onTextReveal, onFaceReady }) {
       if (selectedIndices.has(index)) return false;
       ensureCard(index);
       const viewport = configureViewport();
@@ -522,7 +525,6 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       const card = cards[index];
       const shadow = shadows[index];
       shadow.visible = false;
-      const texture = await preloadFace(imageUrl);
       const flightStartedAt = performance.now();
       let firstFrameRecorded = false;
 
@@ -560,8 +562,19 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       shadow.material = shadow.material.clone();
       shadow.material.opacity = 0;
       const targetAspect = targetRect.width / targetRect.height;
-      fitTextureCover(card, texture, targetAspect);
-      applyFaceTexture(card, texture);
+      let texture = null;
+      const applyLoadedFace = (loadedTexture) => {
+        texture = loadedTexture;
+        fitTextureCover(card, texture, targetAspect);
+        applyFaceTexture(card, texture);
+        const result = parkedResults.get(slotIndex);
+        if (result) result.texture = texture;
+        renderer.render(scene, camera);
+        onFaceReady?.();
+      };
+      preloadFace(imageUrl).then(applyLoadedFace).catch(() => {
+        window.setTimeout(() => preloadFace(imageUrl).then(applyLoadedFace).catch(() => {}), 1500);
+      });
       const updateFlight = (rawProgress) => {
         if (!firstFrameRecorded) {
           firstFrameRecorded = true;
@@ -576,7 +589,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         }
         if (!coverStarted && rawProgress >= 0.8) {
           coverStarted = true;
-          onCover?.();
+          onCover?.(Boolean(texture));
         }
         const progress = easeInOut(rawProgress);
         const liftProgress = 1 - (1 - clamp01(rawProgress / 0.2)) ** 3;

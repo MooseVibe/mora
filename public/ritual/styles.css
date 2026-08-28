@@ -1679,6 +1679,40 @@ h1 {
     height 700ms var(--ease);
 }
 
+.slot.is-face-loading {
+  z-index: 3;
+  background: var(--result-card-frame-surface);
+}
+
+.slot.is-face-loading::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    transparent 18%,
+    rgba(255, 255, 255, 0.12) 48%,
+    transparent 78%
+  );
+  background-size: 100% 220%;
+  content: "";
+  pointer-events: none;
+  animation: spread-face-loading 1.4s ease-in-out infinite;
+}
+
+@keyframes spread-face-loading {
+  from { background-position-y: 100%; }
+  to { background-position-y: -120%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot.is-face-loading::after {
+    animation: none;
+    background-position-y: 50%;
+  }
+}
+
 .deck-hint {
   position: fixed;
   z-index: 4;

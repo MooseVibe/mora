@@ -168,14 +168,14 @@ Canonical WebP выглядел заметно резче в DOM-контекс�
 
 Общие ключи `dailyCard`, `pendingDailyCard` и `lastSpread` принадлежали origin браузера, а не аккаунту; обычный email также не подтверждался. Production-пакет вводит OTP для всех email и закрытый `prototype_account_states` по Supabase Auth `user_id`. Для аккаунта server-state становится источником истины, legacy localStorage очищается, login/logout сбрасывает DOM/WebGL через reload. Серверные smoke и permission-check прошли; осталось проверить один account на двух устройствах и два account в одном браузере, затем перевести задачу в Done.
 
-### High · 3D-колода расклада лагает на desktop/laptop
+### High · 3D-колода расклада могла зависнуть перед полётом карты
 
-**Статус:** Production · Needs cold-cache device QA
+**Статус:** Fix approved locally · Needs production cold-cache smoke
 **Дата:** 2026-08-10
 **Где:** Mora Next, выбор трёх карт
 **Источник:** повторяющийся production-сигнал с разных устройств
 
-**Что оптимизировано локально:**
+**Что исправлено и оптимизировано:**
 - GLB-клоны создаются лениво только для видимой части колоды, невидимые карты и тени исключены из draw calls;
 - fullscreen starfield полностью удалён из production вместе с постоянным render-loop;
 - постоянный render-loop карты дня приостанавливается в табе раскладов;
@@ -185,13 +185,13 @@ Canonical WebP выглядел заметно резче в DOM-контекс�
 - сохранены геометрия, click/drag-flow и тайминги анимаций.
 - отменено глобальное ожидание daily WebGL; отклонённая автором искусственная CSS-стопка удалена, а точный 3D-canvas появляется только после готовности;
 - исправлен click/drag race, из-за которого обычный click мог быть отброшен;
-- face-текстуры видимых карт префетчатся вне момента выбора;
-- центральные face-текстуры начинают preload и GPU-upload сразу после готовности spread WebGL, повторно прогреваются после discovery-motion и ручной прокрутки;
+- новый расклад заранее выбирает через Web Crypto ровно три уникальные карты, сохраняет draft в `sessionStorage` и прогревает именно эти face-текстуры с приоритетом первой;
 - прямой authenticated cold-entry теперь поднимает WebGL-controller до показа spread-screen, поэтому видимый CSS-fallback не заменяет 3D-веер после восстановления сессии;
-- выбранная карта больше не останавливается на `22%` полёта в ожидании face-текстуры: видимые лица по-прежнему префетчатся заранее, а редкий остаточный wait происходит до старта, после чего утверждённая траектория `820ms` проигрывается без паузы;
+- face fetch/decode/GPU-upload полностью удалены из критического пути: карта начинает утверждённую траекторию сразу, а редкий cache miss показывает имя и shimmer до готовности той же текстуры;
 - production smoothness-pass ограничивает spread WebGL до DPR `1.5`, сокращает невидимый overscan и переносит урезанный preload четырёх лиц за пределы discovery-motion/инерции; остаточный риск проверяется на реальном iPhone/слабом laptop;
 - daily idle-loop остановлен, а realtime shadow-pass ограничен верхней картой стопки и отключён при скрытом receiver веера;
 - «Ещё расклад» сбрасывает готовую сцену in-page без повторной загрузки session, Three.js и GLB.
+- автор подтвердил локальный полный выбор трёх карт без лагов на desktop и реальном телефоне по Wi-Fi; после deploy остаётся cold-cache smoke на `moratarot.com`.
 
 **Подтверждение:** локально прошли daily ritual/result и повторный вход, полный desktop click-flow из трёх карт, возврат, in-page «Ещё расклад», повторный выбор после reset, mobile first-paint/crossfade и отсутствие console errors. Для click-latency пакета отдельно прошли `git diff --check`, JS syntax, lint и production build. Commits `7bfee5e` и `00f1e82` выпущены как production deployment `dpl_HgkvZ7GapBDvAeFfCSHWggiAfAtd`; smoke подтвердил новые модули и защиту AI-маршрута. Следующий шаг — повторный визуальный тест на реальных устройствах. GPU instancing или предвыбор трёх карт делать только если этот retest покажет остаточную просадку.
 
