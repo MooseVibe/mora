@@ -3964,6 +3964,16 @@ body.reading-to-saved.reading-saved-entering .reading {
 }
 
 @media (max-width: 720px) {
+  body.prototype-tester:not(.daily-mode) .ritual-screen[data-step="choose"] {
+    touch-action: none;
+  }
+
+  body.prototype-tester:not(.daily-mode) .ritual-screen[data-step="choose"] :is(.slot, .deck-card) {
+    appearance: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body.prototype-tester:not(.daily-mode) .ritual-screen[data-step="topic"] {
     touch-action: none;
     user-select: none;
