@@ -518,7 +518,6 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       ensureCard(index);
       const viewport = configureViewport();
       if (!viewport) return false;
-      renderDeck();
       hoveredIndex = null;
       selectedIndices.add(index);
 
@@ -559,10 +558,10 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       card.quaternion.copy(startQuaternion);
       card.scale.copy(startScale);
       card.visible = true;
-      shadow.material = shadow.material.clone();
       shadow.material.opacity = 0;
       const targetAspect = targetRect.width / targetRect.height;
       let texture = null;
+      let pendingTexture = null;
       const applyLoadedFace = (loadedTexture) => {
         texture = loadedTexture;
         fitTextureCover(card, texture, targetAspect);
@@ -572,8 +571,15 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         renderer.render(scene, camera);
         onFaceReady?.();
       };
-      preloadFace(imageUrl).then(applyLoadedFace).catch(() => {
-        window.setTimeout(() => preloadFace(imageUrl).then(applyLoadedFace).catch(() => {}), 1500);
+      const queueLoadedFace = (loadedTexture) => {
+        if (!firstFrameRecorded) {
+          pendingTexture = loadedTexture;
+          return;
+        }
+        window.requestAnimationFrame(() => applyLoadedFace(loadedTexture));
+      };
+      preloadFace(imageUrl).then(queueLoadedFace).catch(() => {
+        window.setTimeout(() => preloadFace(imageUrl).then(queueLoadedFace).catch(() => {}), 1500);
       });
       const updateFlight = (rawProgress) => {
         if (!firstFrameRecorded) {
@@ -582,6 +588,11 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
             start: flightStartedAt,
             end: performance.now(),
           });
+          if (pendingTexture) {
+            const loadedTexture = pendingTexture;
+            pendingTexture = null;
+            window.requestAnimationFrame(() => applyLoadedFace(loadedTexture));
+          }
         }
         if (!textRevealStarted && rawProgress >= 0.7) {
           textRevealStarted = true;
@@ -592,6 +603,11 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
           onCover?.(Boolean(texture));
         }
         const progress = easeInOut(rawProgress);
+        const responseLift = (
+          (1 - (1 - clamp01(rawProgress / 0.12)) ** 3)
+          * 10
+          * (1 - progress)
+        );
         const liftProgress = 1 - (1 - clamp01(rawProgress / 0.2)) ** 3;
         const landingProgress = easeInOut(clamp01((rawProgress - 0.84) / 0.16));
         const straightenProgress = easeInOut(clamp01(rawProgress / 0.22));
@@ -599,7 +615,10 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         const inverse = 1 - progress;
         card.position.set(
           inverse ** 2 * startPosition.x + 2 * inverse * progress * control.x + progress ** 2 * targetPosition.x,
-          inverse ** 2 * startPosition.y + 2 * inverse * progress * control.y + progress ** 2 * targetPosition.y,
+          inverse ** 2 * startPosition.y
+            + 2 * inverse * progress * control.y
+            + progress ** 2 * targetPosition.y
+            + responseLift,
           THREE.MathUtils.lerp(
             THREE.MathUtils.lerp(startPosition.z, flightZ, liftProgress),
             targetPosition.z,

@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260828-instantdraw1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260828-instantdraw5";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const preparedSpreadKey = "mora:prototype:preparedSpread";
@@ -16,6 +16,7 @@ const ritual = document.querySelector(".ritual-screen");
 const topics = document.querySelectorAll(".topic");
 const selectedTopic = document.querySelector("#selected-topic");
 const slots = [...document.querySelectorAll(".slot")];
+const slotsHost = document.querySelector(".slots");
 const deckHint = document.querySelector("#deck-hint");
 const deck = document.querySelector("#deck");
 const savedTopic = document.querySelector("#saved-topic");
@@ -188,6 +189,33 @@ const topicIcons = {
   "Отношения": "./icons/heart.svg",
   "Выбор": "./icons/diamonds-four.svg",
 };
+const tagIconPreloads = new Map();
+
+function cardTag(card) {
+  const tags = card.result.tags || [];
+  const suit = tags.find((tag) => suitTags[tag]);
+  const isMajorArcana = tags.includes("Старший аркан");
+  return {
+    icon: isMajorArcana ? `./icons/arcana-${card.num}.svg` : suitTags[suit],
+    label: isMajorArcana ? "Старший аркан" : suit || tags[0] || "Таро",
+  };
+}
+
+function preloadCardTagIcons(cards) {
+  return Promise.all(cards.map((card) => {
+    const { icon } = cardTag(card);
+    if (!icon) return Promise.resolve();
+    if (!tagIconPreloads.has(icon)) {
+      tagIconPreloads.set(icon, new Promise((resolve) => {
+        const image = new Image();
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+        image.src = icon;
+      }));
+    }
+    return tagIconPreloads.get(icon);
+  }));
+}
 
 function shuffleCards(cards) {
   const shuffled = [...cards];
@@ -213,7 +241,10 @@ function createPreparedSpread() {
 }
 
 function ensurePreparedSpread() {
-  if (preparedSpreadCards.length === spreadSize) return preparedSpreadCards;
+  if (preparedSpreadCards.length === spreadSize) {
+    preloadCardTagIcons(preparedSpreadCards);
+    return preparedSpreadCards;
+  }
   try {
     const savedIds = JSON.parse(window.sessionStorage.getItem(preparedSpreadKey) || "null");
     if (Array.isArray(savedIds) && savedIds.length === spreadSize && new Set(savedIds).size === spreadSize) {
@@ -230,6 +261,7 @@ function ensurePreparedSpread() {
   } catch {
     // The spread still works when sessionStorage is unavailable.
   }
+  preloadCardTagIcons(preparedSpreadCards);
   return preparedSpreadCards;
 }
 
@@ -938,15 +970,12 @@ function populateDailyResult(card, variantIndex) {
 }
 
 function populateCardTag(container, label, icon, card) {
-  const tags = card.result.tags || [];
-  const suit = tags.find((tag) => suitTags[tag]);
-  const isMajorArcana = tags.includes("Старший аркан");
-  const tagIcon = isMajorArcana ? `./icons/arcana-${card.num}.svg` : suitTags[suit];
+  const tag = cardTag(card);
 
-  label.textContent = isMajorArcana ? "Старший аркан" : suit || tags[0] || "Таро";
-  icon.hidden = !tagIcon;
-  container.classList.toggle("without-icon", !tagIcon);
-  if (tagIcon) icon.style.setProperty("--daily-result-tag-icon", `url("${tagIcon}")`);
+  label.textContent = tag.label;
+  icon.hidden = !tag.icon;
+  container.classList.toggle("without-icon", !tag.icon);
+  if (tag.icon) icon.style.setProperty("--daily-result-tag-icon", `url("${tag.icon}")`);
 }
 
 function getLocalDayKey(date = new Date()) {
@@ -1290,15 +1319,28 @@ function renderDeck() {
 function stopDeckDiscoveryMotion() {
   window.cancelAnimationFrame(deckDiscoveryFrame);
   deck.classList.remove("is-discovering");
+  ritual.classList.remove("spread-discovering");
+  deck.inert = false;
+  slotsHost.inert = false;
+  selectedTopic.inert = false;
 }
 
 function playDeckDiscoveryMotion() {
   stopDeckDiscoveryMotion();
+  deckHint.classList.add("is-hidden");
   deckScroll = 0;
   renderDeck();
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    showDeckHint();
+    scheduleVisibleSpreadFaces();
+    return;
+  }
 
   deck.classList.add("is-discovering");
+  ritual.classList.add("spread-discovering");
+  deck.inert = true;
+  slotsHost.inert = true;
+  selectedTopic.inert = true;
   const startedAt = performance.now();
   const spacing = spreadDeckSpacing();
   const target = -Math.min(((deckCardCount - visibleDeckCards) * spacing) / 2, 5 * spacing);
@@ -1311,7 +1353,8 @@ function playDeckDiscoveryMotion() {
     if (progress < 1) {
       deckDiscoveryFrame = window.requestAnimationFrame(moveDeck);
     } else {
-      deck.classList.remove("is-discovering");
+      stopDeckDiscoveryMotion();
+      showDeckHint();
       scheduleVisibleSpreadFaces();
     }
   }
@@ -1443,12 +1486,10 @@ function startMobileFanInertia(initialVelocity) {
 topics.forEach((topic) => {
   topic.addEventListener("click", () => {
     ensurePreparedSpread();
-    scheduleVisibleSpreadFaces();
     currentTopic = topic.dataset.topic;
     window.MoraAnalytics.capture("spread_topic_selected");
     selectedTopic.innerHTML = topic.innerHTML;
     ritual.dataset.step = "choose";
-    showDeckHint();
     playDeckDiscoveryMotion();
   });
 });
@@ -1757,6 +1798,7 @@ function restoreSavedSpread() {
 function renderSavedSpread(snapshot) {
   resetSavedCardTilt();
   currentTopic = snapshot.topic;
+  preloadCardTagIcons(snapshot.cards);
   populateReading(snapshot.reading, snapshot.cards);
   savedTopic.replaceChildren();
   const icon = document.createElement("img");
@@ -2209,6 +2251,8 @@ async function generateReading() {
     window.clearTimeout(longResponseTimer);
     readingStatusCopy.firstChild.textContent = "Раскладываем";
   }
+
+  await preloadCardTagIcons(selectedCards);
 
   const remainingRitual = Math.max(0, 1500 - (Date.now() - startedAt));
   window.setTimeout(showReading, remainingRitual);

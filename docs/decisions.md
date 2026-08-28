@@ -3491,3 +3491,9 @@ Welcome и ritual физически перенесены из `public/prototype
 Экран mobile-веера является полноэкранной жестовой поверхностью и не получает нативный browser zoom или WebKit tap highlight: scoped `touch-action: none` действует только при `data-step="choose"`, а `appearance: none` и прозрачный tap highlight применяются только к слотам и рубашкам этого состояния. Остальные экраны, desktop hover и keyboard focus не меняются, поэтому accessibility trade-off ограничен ритуалом, где масштабирование ломает физический выбор карт.
 
 Fix commits `bdcb176` и `740d355` вместе с ранее ожидавшим production daily flash hotfix `69cc6c3` выпущены из точного Git archive без пользовательского `Cover.png` в deployment `dpl_FWBfRCwfemBKAJj6UQuH2NyCUTu9`. Alias `moratarot.com` обновлён; HTTP и browser smoke подтвердили cache-bust `instantdraw1/instantdraw2`, prepared-spread код, неблокирующую face-загрузку и отсутствие console errors.
+
+## 2026-08-28 — Въезд веера является отдельной неинтерактивной фазой
+
+Во время `1050ms` discovery-motion веер, слоты и выбранная тема не принимают pointer/focus interaction, а подсказка выбора появляется только после окончания движения. Мы не обрываем ритуальный въезд первым тапом: одновременные fan-scroll и card-flight конкурировали за один WebGL render и визуально превращали принятый клик в «лаг». После handoff первый тап сразу начинает полёт; подготовка трёх face-текстур тоже переносится за окончание discovery, чтобы fetch/decode/upload не делили этот момент с анимацией.
+
+SVG-маркеры расклада не превращаются в inline-дубликаты и не грузятся полным набором. Поскольку три карты известны до выбора рубашек, клиент заранее прогревает только их три URL и перед показом нового reading ждёт завершения этих same-origin запросов; сохранённый расклад делает то же при восстановлении. Cache-version app/modulepreload/spread/CSS синхронизирован: исполняемый script больше не остаётся на старом ключе при новом preload.

@@ -53,6 +53,19 @@ body {
   overscroll-behavior-x: none;
 }
 
+html:has(body.prototype-tester:not(.daily-mode) .ritual-screen[data-step="loading"]),
+body.prototype-tester:not(.daily-mode):has(.ritual-screen[data-step="loading"]) {
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.prototype-tester:not(.daily-mode) .ritual-screen[data-step="loading"] {
+  height: 100dvh;
+  min-height: 0;
+  touch-action: none;
+}
+
 button,
 a {
   color: inherit;
@@ -2022,6 +2035,10 @@ h1 {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   pointer-events: auto;
+}
+
+.ritual-screen.spread-discovering :is(.selected-topic, .slots, .deck) {
+  pointer-events: none;
 }
 
 .ritual-screen[data-step="choose"]::before,

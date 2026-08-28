@@ -438,6 +438,10 @@ Release commits `76fc34a`, `8c188d3`, `26f2126` и docs commit `37df8fb` вып�
 
 ## Границы текущей работы
 
+### Локальный spread interaction hotfix — ожидает ручной QA
+
+После production-полевого теста подготовлен `instantdraw5`: первый видимый кадр полёта получил небольшой response-lift, синхронный rerender до tween удалён, а применение готовой face-текстуры отложено за первый визуальный кадр. В loading-состоянии `html/body` закреплены на `100dvh`, чтобы фон не скроллился. Отдельно discovery-motion веера теперь является неинтерактивной фазой: карты, слоты и тема включаются, а подсказка появляется только после завершения `1050ms` въезда; preload трёх лиц стартует после него. Три нужных SVG-маркера масти/аркана прогреваются после определения карт и подтверждаются до показа нового чтения. Найден и исправлен production cache mismatch: modulepreload указывал на свежий app, но исполняемый script сохранял старый `three-swords` key; теперь app/CSS/spread preload и script используют единый `instantdraw5`. Syntax, regression-check, diff-check, lint, production build и local HTTP smoke чистые. Изменение ожидает commit/deploy и production QA.
+
 - Production MVP не заменяем и не ломаем.
 - Mora Next остаётся изолированным прототипом до отдельного решения.
 - Не создаём копию колоды или текстов.
