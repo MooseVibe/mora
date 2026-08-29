@@ -3526,3 +3526,5 @@ Fix commit `4e10ee6` выпущен в production deployment `dpl_D7PxVZoQ6ZYmt3
 ## 2026-08-29 — Make daily visual pending state first-paint safe
 
 Field QA showed that CSS/body-state gating could still reveal a cached artwork before the card shell was ready. The result card now carries `is-visual-pending` from initial HTML and removes it only after the current image decode; cache key is `dailyatomic2`. This keeps the atomic reveal contract true from first paint.
+
+Released in commit `0f03a77` as production deployment `dpl_J1uZ5sFHipfJdK8tNmmf9E5izunV`; Vercel reported `READY` and aliased it to `moratarot.com`.
