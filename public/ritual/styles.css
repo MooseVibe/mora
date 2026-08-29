@@ -1213,9 +1213,7 @@ body.daily-result-entering .daily-result-copy {
   width: 24px;
   height: 24px;
   flex: 0 0 24px;
-  background: currentColor;
-  -webkit-mask: var(--daily-result-tag-icon) center / contain no-repeat;
-  mask: var(--daily-result-tag-icon) center / contain no-repeat;
+  object-fit: contain;
 }
 
 .daily-result-copy h2 {

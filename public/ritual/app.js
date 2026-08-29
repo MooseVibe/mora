@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260828-instantdraw5";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260829-instantdraw6";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const preparedSpreadKey = "mora:prototype:preparedSpread";
@@ -208,7 +208,10 @@ function preloadCardTagIcons(cards) {
     if (!tagIconPreloads.has(icon)) {
       tagIconPreloads.set(icon, new Promise((resolve) => {
         const image = new Image();
-        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("load", () => {
+          if (image.decode) image.decode().catch(() => {}).finally(resolve);
+          else resolve();
+        }, { once: true });
         image.addEventListener("error", resolve, { once: true });
         image.src = icon;
       }));
@@ -975,7 +978,7 @@ function populateCardTag(container, label, icon, card) {
   label.textContent = tag.label;
   icon.hidden = !tag.icon;
   container.classList.toggle("without-icon", !tag.icon);
-  if (tag.icon) icon.style.setProperty("--daily-result-tag-icon", `url("${tag.icon}")`);
+  if (tag.icon) icon.src = tag.icon;
 }
 
 function getLocalDayKey(date = new Date()) {

@@ -3499,3 +3499,7 @@ Fix commits `bdcb176` и `740d355` вместе с ранее ожидавшим
 SVG-маркеры расклада не превращаются в inline-дубликаты и не грузятся полным набором. Поскольку три карты известны до выбора рубашек, клиент заранее прогревает только их три URL и перед показом нового reading ждёт завершения этих same-origin запросов; сохранённый расклад делает то же при восстановлении. Cache-version app/modulepreload/spread/CSS синхронизирован: исполняемый script больше не остаётся на старом ключе при новом preload.
 
 Hotfix выпущен commit `2847914` в production deployment `mora-gsuw2p5rz-mooses-projects-fe579d75.vercel.app`; canonical alias `moratarot.com` подтверждён. HTTP smoke показал новый `instantdraw5` executable key без старого `three-swords`, наличие icon-preload/discovery-lock/queued-face кода и ожидаемый `401` у auth-boundary.
+
+## 2026-08-29 — SVG-маркер тега рендерится как декодированное изображение
+
+Прогрев URL не гарантировал синхронный первый paint CSS `mask-image`: production Safari/Chrome мог показать текст тега и растеризовать маску следующим кадром. Динамический маркер теперь является обычным декоративным `<img>` с тем же SVG URL, а три известных маркера проходят `decode()` до открытия нового reading. Отдельная маска, inline-дубликаты SVG и preload полного набора не нужны.
