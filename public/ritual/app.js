@@ -703,6 +703,7 @@ async function switchMode(mode) {
 
 function showDailyMode() {
   const savedDailyCard = readSavedDailyCard();
+  const usesMobileDailyResult = window.matchMedia("(max-width: 720px)").matches;
   const showActive3DResult = Boolean(savedDailyCard && daily3DResultActive);
   resetSavedCardTilt();
   savedReturnChapter = null;
@@ -738,7 +739,7 @@ function showDailyMode() {
     scheduleDailyResultScrollUpdate();
     if (daily3DResultActive) {
       dailyDeck.disabled = false;
-    } else if (!daily3DRestoreInFlight) {
+    } else if (!usesMobileDailyResult && !daily3DRestoreInFlight) {
       daily3DRestoreInFlight = true;
       document.body.classList.add("daily-3d-restoring");
       reportClientEvent("daily-restore-started", false);

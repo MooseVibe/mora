@@ -514,3 +514,5 @@ Mobile typography release исправляет два полевых кейса.
 ## 2026-08-29 — Atomic daily card pending state
 
 Field QA still showed artwork/frame sequencing on mobile. The daily result card now starts with an explicit `is-visual-pending` state in HTML and only removes it after the current image decode; app/CSS cache key bumped to `dailyatomic2`. Local syntax, atomic regression, lint, and production build pass. Commit `0f03a77` is deployed as production `dpl_J1uZ5sFHipfJdK8tNmmf9E5izunV` and aliased to `moratarot.com`; real-device Safari verification remains.
+
+Повторный production QA показал, что последовательный paint остался. Root cause оказался позднее: mobile result использует 2D DOM-card, но сохранённая карта всё равно восстанавливала невидимую 3D result-модель и поздно добавляла `daily-3d-result`, вызывая повторную композицию Safari. Mobile saved result теперь не запускает ненужный 3D restore; desktop restore сохранён. Cache key `dailyatomic3`; syntax, atomic regression, lint и production build проходят. Pending production deploy и повторная Safari-проверка.

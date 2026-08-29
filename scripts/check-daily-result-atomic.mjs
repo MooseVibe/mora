@@ -12,8 +12,9 @@ assert.match(app, /dailyResultImage\.src === expectedImageUrl[\s\S]*classList\.a
 assert.match(app, /addEventListener\("load", resolve, \{ once: true \}\)/);
 assert.match(app, /classList\.add\("is-visual-pending"\)[\s\S]*classList\.remove\("is-visual-ready"\)/);
 assert.match(app, /classList\.remove\("is-visual-pending"\)[\s\S]*classList\.add\("is-visual-ready"\)/);
+assert.match(app, /usesMobileDailyResult[\s\S]*!usesMobileDailyResult && !daily3DRestoreInFlight/);
 assert.match(html, /daily-result-card is-visual-pending/);
 assert.match(css, /daily-result-card:not\(\.is-visual-ready\)[\s\S]*opacity: 0;[\s\S]*visibility: hidden;/);
-assert.equal((html.match(/app\.js\?v=20260829-dailyatomic2/g) || []).length, 2);
+assert.equal((html.match(/app\.js\?v=20260829-dailyatomic3/g) || []).length, 2);
 
 console.log("Daily result card waits for image decode before atomic reveal.");

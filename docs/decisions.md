@@ -3528,3 +3528,5 @@ Fix commit `4e10ee6` выпущен в production deployment `dpl_D7PxVZoQ6ZYmt3
 Field QA showed that CSS/body-state gating could still reveal a cached artwork before the card shell was ready. The result card now carries `is-visual-pending` from initial HTML and removes it only after the current image decode; cache key is `dailyatomic2`. This keeps the atomic reveal contract true from first paint.
 
 Released in commit `0f03a77` as production deployment `dpl_J1uZ5sFHipfJdK8tNmmf9E5izunV`; Vercel reported `READY` and aliased it to `moratarot.com`.
+
+Field QA proved decode gating alone was insufficient. Mobile intentionally renders the saved daily result as a 2D DOM card, so restoring an invisible 3D result there only introduced a late body-state change and Safari recomposition. Skip saved-result 3D restore at `max-width: 720px`; keep desktop 3D restoration unchanged. Cache key: `dailyatomic3`.
