@@ -735,6 +735,7 @@ function showDailyMode() {
   daily3DResultActive = showActive3DResult;
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
+    if (usesMobileDailyResult) updateDailyCooldownButton();
     document.documentElement.classList.remove("daily-saved-pending");
     scheduleDailyResultScrollUpdate();
     if (daily3DResultActive) {

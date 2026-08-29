@@ -3544,3 +3544,7 @@ Released in commit `883f0c9` as production deployment `dpl_EJbmCegPPGF3xir5En5Qg
 Browser QA proved the loaded `1024px` artwork was present while the card remained `opacity:0/visibility:hidden`: the desktop `daily-result-ready:not(.daily-3d-error)` selector outranked the generic mobile reveal. The mobile stylesheet now overrides that exact selector, and decode/pending gating is removed. Saved mobile results are visible from `daily-result-ready` alone; desktop 3D restore remains unchanged.
 
 Released in commit `04f1a95` as production deployment `dpl_FeoVBnfUhWzT8rA2pBkqa7xgNSk4`; Vercel reported `READY` and aliased it to `moratarot.com`.
+
+## 2026-08-30 — Mobile 2D result initializes its own cooldown
+
+Removing unnecessary mobile 3D restore exposed that the saved-result countdown was initialized only by `showDaily3DResult()`. `showDailyMode()` now calls `updateDailyCooldownButton()` only for the mobile 2D result. Desktop behavior remains unchanged and still initializes the timer after `showDaily3DResult()`. Browser QA confirmed the mobile value changes across seconds while the card remains visible.
