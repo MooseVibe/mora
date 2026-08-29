@@ -3548,3 +3548,5 @@ Released in commit `04f1a95` as production deployment `dpl_FeoVBnfUhWzT8rA2pBkqa
 ## 2026-08-30 — Mobile 2D result initializes its own cooldown
 
 Removing unnecessary mobile 3D restore exposed that the saved-result countdown was initialized only by `showDaily3DResult()`. `showDailyMode()` now calls `updateDailyCooldownButton()` only for the mobile 2D result. Desktop behavior remains unchanged and still initializes the timer after `showDaily3DResult()`. Browser QA confirmed the mobile value changes across seconds while the card remains visible.
+
+Released in commit `d3a1494` as production deployment `dpl_8u1xXC2SFVYoHiErQK4RC9aBBq2y`; Vercel reported `READY` and aliased it to `moratarot.com`.
