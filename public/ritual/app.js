@@ -735,7 +735,6 @@ function showDailyMode() {
   daily3DResultActive = showActive3DResult;
   if (savedDailyCard) {
     populateDailyResult(savedDailyCard.card, savedDailyCard.variantIndex);
-    document.documentElement.classList.remove("daily-saved-pending");
     scheduleDailyResultScrollUpdate();
     if (daily3DResultActive) {
       dailyDeck.disabled = false;
@@ -977,20 +976,21 @@ function populateDailyResult(card, variantIndex) {
   }
   dailyResultImage.alt = card.name;
   const expectedImageUrl = dailyResultImage.src;
-  const imageReady = dailyResultImage.decode
-    ? dailyResultImage.decode().catch(() => {})
-    : dailyResultImage.complete
-      ? Promise.resolve()
-      : new Promise((resolve) => {
-          dailyResultImage.addEventListener("load", resolve, { once: true });
-          dailyResultImage.addEventListener("error", resolve, { once: true });
-        });
+  const imageReady = dailyResultImage.complete && dailyResultImage.naturalWidth > 0
+    ? Promise.resolve()
+    : new Promise((resolve) => {
+        dailyResultImage.addEventListener("load", resolve, { once: true });
+        dailyResultImage.addEventListener("error", resolve, { once: true });
+      });
   imageReady
     .then(() => {
-      if (dailyResultImage.src === expectedImageUrl) {
-        dailyResultCard.classList.remove("is-visual-pending");
-        dailyResultCard.classList.add("is-visual-ready");
-      }
+      window.requestAnimationFrame(() => {
+        if (dailyResultImage.src === expectedImageUrl) {
+          dailyResultCard.classList.remove("is-visual-pending");
+          dailyResultCard.classList.add("is-visual-ready");
+          document.documentElement.classList.remove("daily-saved-pending");
+        }
+      });
     });
   scheduleDailyResultScrollUpdate();
 }

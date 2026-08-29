@@ -3532,3 +3532,7 @@ Released in commit `0f03a77` as production deployment `dpl_J1uZ5sFHipfJdK8tNmmf9
 Field QA proved decode gating alone was insufficient. Mobile intentionally renders the saved daily result as a 2D DOM card, so restoring an invisible 3D result there only introduced a late body-state change and Safari recomposition. Skip saved-result 3D restore at `max-width: 720px`; keep desktop 3D restoration unchanged. Cache key: `dailyatomic3`.
 
 Released in commit `f2f495d` as production deployment `dpl_Axqqk9TEic9WJZAkVExk4Vdxzcyi`; Vercel reported `READY` and aliased it to `moratarot.com`.
+
+## 2026-08-29 — Safari daily restore uses load readiness, not decode-only gating
+
+Production Safari proved `img.decode()` can leave the 2D result permanently pending. Saved daily restore now treats an already complete image or native `load/error` as readiness, then reveals the card and removes `daily-saved-pending` in the same animation frame. This also prevents the idle 3D deck flash. Cache key: `dailyatomic4`.
