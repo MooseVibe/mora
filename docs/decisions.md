@@ -3505,3 +3505,7 @@ Hotfix выпущен commit `2847914` в production deployment `mora-gsuw2p5rz-
 Прогрев URL не гарантировал синхронный первый paint CSS `mask-image`: production Safari/Chrome мог показать текст тега и растеризовать маску следующим кадром. Динамический маркер теперь является обычным декоративным `<img>` с тем же SVG URL, а три известных маркера проходят `decode()` до открытия нового reading. Отдельная маска, inline-дубликаты SVG и preload полного набора не нужны.
 
 Hotfix выпущен commit `fdb1ee8` в production deployment `mora-lplxmrehw-mooses-projects-fe579d75.vercel.app`; canonical `moratarot.com` отдаёт `instantdraw6`, новый `<img>` markup и app с обязательным `decode()`.
+
+## 2026-08-29 — Ritual SVG используют общий свежий browser cache
+
+Задержка при повторных переходах была не декодированием SVG, а обязательной production revalidation: `/ritual/icons/*.svg` отдавались с `max-age=0, must-revalidate`. Все ritual icons теперь получают тот же суточный static-cache contract, что app/CSS/3D modules, со stale revalidation на неделю; tag helper дополнительно не переназначает неизменившийся `src`. Имена файлов остаются каноническими, поэтому срок ограничен сутками, а не годовым `immutable`; при будущей правке иконки достаточно обычного нового deploy.

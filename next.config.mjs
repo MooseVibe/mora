@@ -76,6 +76,10 @@ const nextConfig = {
         headers: staticCacheHeaders,
       },
       {
+        source: '/ritual/icons/:path*',
+        headers: staticCacheHeaders,
+      },
+      {
         source: '/vendor/three/0.180.0/:path*',
         headers: staticCacheHeaders,
       },

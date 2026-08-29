@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260829-instantdraw6";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260829-instantdraw7";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const preparedSpreadKey = "mora:prototype:preparedSpread";
@@ -978,7 +978,7 @@ function populateCardTag(container, label, icon, card) {
   label.textContent = tag.label;
   icon.hidden = !tag.icon;
   container.classList.toggle("without-icon", !tag.icon);
-  if (tag.icon) icon.src = tag.icon;
+  if (tag.icon && icon.getAttribute("src") !== tag.icon) icon.src = tag.icon;
 }
 
 function getLocalDayKey(date = new Date()) {

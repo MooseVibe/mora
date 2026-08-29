@@ -444,6 +444,8 @@ Production hotfix `instantdraw5` выпущен commit `2847914` в deployment `
 
 Production QA `instantdraw5` показал, что URL SVG уже прогрет, но CSS mask иногда появляется позже текста из-за отдельной растеризации. Hotfix `instantdraw6` выпущен commit `fdb1ee8` в deployment `mora-lplxmrehw-mooses-projects-fe579d75.vercel.app` и aliased на `moratarot.com`: четыре динамических маркера в daily/reading DOM стали обычными `<img>`, а preload ждёт нативный `decode()` до открытия нового чтения. Это удаляет отдельный mask-paint path без inline-копий SVG и без загрузки всех 26 маркеров. Syntax, regression, diff-check, lint, production build и canonical HTTP smoke чистые; production HTML содержит только новый `<img>` markup и `instantdraw6`, app подтверждает `decode()` и назначение `src`. Следующий шаг — повторный cold-cache production QA автора.
 
+Повторный QA выявил общий источник оставшейся задержки: production SVG headers были `public, max-age=0, must-revalidate`, а общий tag helper повторно назначал тот же `src` при возврате на экран. Подготовлен `instantdraw7`: `/ritual/icons/:path*` использует существующий static-cache contract на сутки со stale revalidation на неделю, а `populateCardTag()` меняет `src` только при реальной смене иконки; ранний exact-card `decode()` сохраняется. Это один общий fix для daily, reading, topic и saved tags. Syntax, regression, diff-check, lint и production build чистые; ожидает commit/deploy и проверку production response header.
+
 - Production MVP не заменяем и не ломаем.
 - Mora Next остаётся изолированным прототипом до отдельного решения.
 - Не создаём копию колоды или текстов.
