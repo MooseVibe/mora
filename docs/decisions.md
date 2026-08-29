@@ -3536,3 +3536,5 @@ Released in commit `f2f495d` as production deployment `dpl_Axqqk9TEic9WJZAkVExk4
 ## 2026-08-29 — Safari daily restore uses load readiness, not decode-only gating
 
 Production Safari proved `img.decode()` can leave the 2D result permanently pending. Saved daily restore now treats an already complete image or native `load/error` as readiness, then reveals the card and removes `daily-saved-pending` in the same animation frame. This also prevents the idle 3D deck flash. Cache key: `dailyatomic4`.
+
+Released in commit `883f0c9` as production deployment `dpl_EJbmCegPPGF3xir5En5QgzNJq5Ub`; Vercel reported `READY` and aliased it to `moratarot.com`.
