@@ -3521,3 +3521,5 @@ Release commit `6a546ed` выпущен в production deployment `dpl_9K46RbrGYq
 ## 2026-08-29 — Mobile daily result раскрывается только целым декодированным компонентом
 
 Сохранённый mobile result больше не связывает видимость оболочки только с `daily-result-ready`: перед новым `src` весь `.daily-result-card` скрывается, а после `img.decode()` актуального URL открывается одним `is-visual-ready`. Повторный вызов для того же уже готового изображения не снимает readiness; старый promise проверяет текущий абсолютный URL и не может открыть другую карту. При отсутствии `decode()` browser ждёт `load/error`, поэтому последовательный paint artwork/frame не возвращается на старых Safari и компонент не остаётся скрытым после сетевой ошибки. Desktop 3D, draw/save/cooldown и layout не меняются.
+
+Fix commit `4e10ee6` выпущен в production deployment `dpl_D7PxVZoQ6ZYmt3XkywdwY8xcEQZg`; alias `moratarot.com` Ready и отдаёт cache-key `dailyatomic1`, decode/readiness код и mobile CSS guard.

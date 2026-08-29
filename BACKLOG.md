@@ -129,7 +129,7 @@
 **Где:** Mora Next `/ritual`, сохранённая карта дня на mobile Safari
 **Источник:** production-наблюдение автора
 
-`daily-result-ready` открывал mobile DOM-card независимо от готовности `#daily-result-image`, а `populateDailyResult()` назначал `src` без `decode()`. Теперь весь `.daily-result-card` скрыт до декодирования актуального URL и открывается одним классом; повторное заполнение тем же уже готовым изображением не прячет компонент заново. Ошибка загрузки не оставляет результат навсегда скрытым. Нужен production QA cold/warm входа на реальном iPhone.
+`daily-result-ready` открывал mobile DOM-card независимо от готовности `#daily-result-image`, а `populateDailyResult()` назначал `src` без `decode()`. Теперь весь `.daily-result-card` скрыт до декодирования актуального URL и открывается одним классом; повторное заполнение тем же уже готовым изображением не прячет компонент заново. Ошибка загрузки не оставляет результат навсегда скрытым. Fix commit `4e10ee6` выпущен в production deployment `dpl_D7PxVZoQ6ZYmt3XkywdwY8xcEQZg`; нужен production QA cold/warm входа на реальном iPhone.
 
 ### Medium · SVG-иконка масти/аркана появляется позже текста тега
 

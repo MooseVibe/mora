@@ -61,7 +61,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 В последних чатах:
 
-- Mobile saved daily result теперь открывает artwork и CSS-shell атомарно: общий `.daily-result-card` остаётся скрытым до `img.decode()` актуального URL, а повторное заполнение тем же готовым `src` не запускает новый hide/reveal. Fallback старого browser без `decode()` ждёт `load/error`; stale promise не может открыть уже заменённую карту. Cache-key `dailyatomic1`; отдельный regression-check, syntax, spread invariant, lint, production build и Browser QA `390×844`/`1440×900` чистые.
+- Mobile saved daily result теперь открывает artwork и CSS-shell атомарно: общий `.daily-result-card` остаётся скрытым до `img.decode()` актуального URL, а повторное заполнение тем же готовым `src` не запускает новый hide/reveal. Fallback старого browser без `decode()` ждёт `load/error`; stale promise не может открыть уже заменённую карту. Cache-key `dailyatomic1`; отдельный regression-check, syntax, spread invariant, lint, production build и Browser QA `390×844`/`1440×900` чистые. Fix commit `4e10ee6` выпущен в production deployment `dpl_D7PxVZoQ6ZYmt3XkywdwY8xcEQZg`; canonical smoke подтвердил новый HTML/app/CSS, scroll/touch guards, SVG cache и старый доменный redirect.
 
 - По одному тестеру, у которого `moratarot.com` не открывается в Safari даже с VPN, текущий глобальный outage не подтверждён: Google/Cloudflare DoH возвращают `76.76.21.21`, AAAA отсутствует, TLS verify `ok`, origin отвечает `200`, расширенный Check-Host дал `200` из Москвы и всех проверенных неиранских узлов. До DNS/CDN-изменений нужен точный скрин/текст Safari error, время, версия OS и тип сети — иначе нельзя отличить локальный DNS/ISP сбой от уже загруженной пустой страницы.
 
