@@ -3517,3 +3517,7 @@ Fix commit `a7b5103` выпущен в production deployment `mora-bmv6nzqc4-moo
 Служебный Vercel alias `mora-kappa.vercel.app` остаётся привязан к тому же project, но больше не является самостоятельной публичной точкой входа: exact-host redirect сохраняет путь и переводит его на `moratarot.com`. Canonical/OG/JSON-LD/robots/sitemap и production-only PostHog используют только custom domain. Уникальные preview deployment URLs не перенаправляются и остаются доступными для QA.
 
 Release commit `6a546ed` выпущен в production deployment `dpl_9K46RbrGYqyxmDhYLp84uMSqBLFM`; alias `moratarot.com` Ready, старый service alias возвращает `308`, а canonical metadata, sitemap/robots, analytics allowlist и SVG cache header подтверждены HTTP smoke.
+
+## 2026-08-29 — Mobile daily result раскрывается только целым декодированным компонентом
+
+Сохранённый mobile result больше не связывает видимость оболочки только с `daily-result-ready`: перед новым `src` весь `.daily-result-card` скрывается, а после `img.decode()` актуального URL открывается одним `is-visual-ready`. Повторный вызов для того же уже готового изображения не снимает readiness; старый promise проверяет текущий абсолютный URL и не может открыть другую карту. При отсутствии `decode()` browser ждёт `load/error`, поэтому последовательный paint artwork/frame не возвращается на старых Safari и компонент не остаётся скрытым после сетевой ошибки. Desktop 3D, draw/save/cooldown и layout не меняются.

@@ -3658,6 +3658,11 @@ body.reading-to-saved.reading-saved-entering .reading {
     visibility: visible;
   }
 
+  body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) .daily-result-card:not(.is-visual-ready) {
+    opacity: 0;
+    visibility: hidden;
+  }
+
   body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) .daily-result-content {
     order: 2;
     width: 100%;

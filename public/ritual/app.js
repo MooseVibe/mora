@@ -967,8 +967,28 @@ function populateDailyResult(card, variantIndex) {
     item.textContent = paragraph;
     dailyResultText.append(item);
   });
-  dailyResultImage.src = `/${card.image.replace(/^\/+/, "")}`;
+  const imageUrl = `/${card.image.replace(/^\/+/, "")}`;
+  const imageChanged = dailyResultImage.getAttribute("src") !== imageUrl;
+  if (imageChanged) {
+    dailyResultCard.classList.remove("is-visual-ready");
+    dailyResultImage.src = imageUrl;
+  }
   dailyResultImage.alt = card.name;
+  const expectedImageUrl = dailyResultImage.src;
+  const imageReady = dailyResultImage.decode
+    ? dailyResultImage.decode().catch(() => {})
+    : dailyResultImage.complete
+      ? Promise.resolve()
+      : new Promise((resolve) => {
+          dailyResultImage.addEventListener("load", resolve, { once: true });
+          dailyResultImage.addEventListener("error", resolve, { once: true });
+        });
+  imageReady
+    .then(() => {
+      if (dailyResultImage.src === expectedImageUrl) {
+        dailyResultCard.classList.add("is-visual-ready");
+      }
+    });
   scheduleDailyResultScrollUpdate();
 }
 
