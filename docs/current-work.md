@@ -61,7 +61,7 @@ Desktop-регрессия открытой вкладки карты дня п�
 
 В последних чатах:
 
-- `moratarot.com` стал единственным публичным canonical origin: welcome/ritual metadata, Open Graph, JSON-LD, robots, sitemap и production-only PostHog allowlist больше не используют служебный Vercel alias. Точный host `mora-kappa.vercel.app` постоянно перенаправляется на тот же путь `moratarot.com`; уникальные preview deployment URLs сохраняются для QA. DNS, Supabase и пользовательский `Cover.png` этим release не меняются.
+- `moratarot.com` стал единственным публичным canonical origin: welcome/ritual metadata, Open Graph, JSON-LD, robots, sitemap и production-only PostHog allowlist больше не используют служебный Vercel alias. Точный host `mora-kappa.vercel.app` постоянно перенаправляется на тот же путь `moratarot.com`; уникальные preview deployment URLs сохраняются для QA. Release commit `6a546ed` выпущен в production deployment `dpl_9K46RbrGYqyxmDhYLp84uMSqBLFM`; smoke подтвердил redirect, custom-domain metadata, sitemap/robots, analytics allowlist и прежний SVG cache contract. DNS, Supabase и пользовательский `Cover.png` не менялись.
 
 - Повторная задержка SVG-тегов была вызвана production revalidation, а не размером иконок: commit `a7b5103` выпущен в deployment `mora-bmv6nzqc4-mooses-projects-fe579d75.vercel.app`, и `moratarot.com/ritual/icons/*.svg` теперь подтверждённо отдаёт `Cache-Control: public, max-age=86400, stale-while-revalidate=604800`.
 
