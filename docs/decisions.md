@@ -3530,3 +3530,5 @@ Field QA showed that CSS/body-state gating could still reveal a cached artwork b
 Released in commit `0f03a77` as production deployment `dpl_J1uZ5sFHipfJdK8tNmmf9E5izunV`; Vercel reported `READY` and aliased it to `moratarot.com`.
 
 Field QA proved decode gating alone was insufficient. Mobile intentionally renders the saved daily result as a 2D DOM card, so restoring an invisible 3D result there only introduced a late body-state change and Safari recomposition. Skip saved-result 3D restore at `max-width: 720px`; keep desktop 3D restoration unchanged. Cache key: `dailyatomic3`.
+
+Released in commit `f2f495d` as production deployment `dpl_Axqqk9TEic9WJZAkVExk4Vdxzcyi`; Vercel reported `READY` and aliased it to `moratarot.com`.
