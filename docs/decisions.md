@@ -3542,3 +3542,5 @@ Released in commit `883f0c9` as production deployment `dpl_EJbmCegPPGF3xir5En5Qg
 ## 2026-08-30 — Mobile 2D result visibility must not depend on 3D state
 
 Browser QA proved the loaded `1024px` artwork was present while the card remained `opacity:0/visibility:hidden`: the desktop `daily-result-ready:not(.daily-3d-error)` selector outranked the generic mobile reveal. The mobile stylesheet now overrides that exact selector, and decode/pending gating is removed. Saved mobile results are visible from `daily-result-ready` alone; desktop 3D restore remains unchanged.
+
+Released in commit `04f1a95` as production deployment `dpl_FeoVBnfUhWzT8rA2pBkqa7xgNSk4`; Vercel reported `READY` and aliased it to `moratarot.com`.
