@@ -1315,11 +1315,6 @@ body.daily-result-entering .daily-result-copy {
   perspective: 900px;
 }
 
-.daily-result-card.is-visual-pending {
-  opacity: 0;
-  visibility: hidden;
-}
-
 .daily-result-card-tilt {
   --daily-result-tilt-x: 0deg;
   --daily-result-tilt-y: 0deg;
@@ -3649,7 +3644,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     pointer-events: none;
   }
 
-  body.daily-mode.daily-result-ready.daily-3d-result .daily-result-card {
+  body.daily-mode.daily-result-ready:not(.daily-3d-error) .daily-result-card {
     opacity: 1;
     visibility: visible;
   }
@@ -3661,11 +3656,6 @@ body.reading-to-saved.reading-saved-entering .reading {
   body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) #daily-result-image {
     opacity: 1;
     visibility: visible;
-  }
-
-  body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) .daily-result-card:not(.is-visual-ready) {
-    opacity: 0;
-    visibility: hidden;
   }
 
   body.daily-mode:is(.daily-result-ready, .daily-3d-result, .daily-3d-handoff) .daily-result-content {
