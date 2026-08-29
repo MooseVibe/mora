@@ -970,6 +970,7 @@ function populateDailyResult(card, variantIndex) {
   const imageUrl = `/${card.image.replace(/^\/+/, "")}`;
   const imageChanged = dailyResultImage.getAttribute("src") !== imageUrl;
   if (imageChanged) {
+    dailyResultCard.classList.add("is-visual-pending");
     dailyResultCard.classList.remove("is-visual-ready");
     dailyResultImage.src = imageUrl;
   }
@@ -986,6 +987,7 @@ function populateDailyResult(card, variantIndex) {
   imageReady
     .then(() => {
       if (dailyResultImage.src === expectedImageUrl) {
+        dailyResultCard.classList.remove("is-visual-pending");
         dailyResultCard.classList.add("is-visual-ready");
       }
     });

@@ -1315,6 +1315,11 @@ body.daily-result-entering .daily-result-copy {
   perspective: 900px;
 }
 
+.daily-result-card.is-visual-pending {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .daily-result-card-tilt {
   --daily-result-tilt-x: 0deg;
   --daily-result-tilt-y: 0deg;

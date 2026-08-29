@@ -511,3 +511,6 @@ Mobile typography release исправляет два полевых кейса.
 ## Локальный desktop daily-scroll — 2026-08-24
 
 В desktop-result карты дня вертикальный wheel/trackpad над любой частью сцены теперь прокручивает единственный существующий контейнер `.daily-result-copy`; над самим текстом сохраняется нативный scroll. Mobile, horizontal gestures и browser zoom не перехватываются. После первого production release `a386441` выявлено scroll chaining на границе текста: локальный hotfix всегда поглощает перенаправленный wheel, поэтому фон страницы не двигается, даже когда текст уже дошёл до начала или конца. Требуется повторный ручной LAN QA и отдельный production hotfix.
+## 2026-08-29 — Atomic daily card pending state
+
+Field QA still showed artwork/frame sequencing on mobile. The daily result card now starts with an explicit `is-visual-pending` state in HTML and only removes it after the current image decode; app/CSS cache key bumped to `dailyatomic2`. Local syntax, atomic regression, and diff checks pass. Pending production deploy and real-device Safari verification remain.
