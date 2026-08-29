@@ -7,7 +7,7 @@
 - **3D:** Three.js `0.180.0`, vendored same-origin в `public/vendor/three/`.
 - **Auth и данные:** Supabase Auth + PostgreSQL через server-side `@supabase/ssr`.
 - **AI:** Gemini с GigaChat fallback через защищённый Route Handler.
-- **Production:** Vercel project `mora`, `mora-kappa.vercel.app`. Проект `mora-vnkt` удалён и не используется.
+- **Production:** `https://moratarot.com` на Vercel project `mora`. Служебный alias `mora-kappa.vercel.app` постоянно перенаправляется на канонический домен; проект `mora-vnkt` удалён и не используется.
 
 ## Канонический flow
 
@@ -79,7 +79,7 @@ mora/
 ## Окружения и команды
 
 - dev: `npm run dev` (`localhost:3000`, при необходимости `3001/3002`)
-- production: `mora-kappa.vercel.app`
+- production: `moratarot.com`
 - проверки: `npm run lint`, `npm run build`, `git diff --check`
 
 ```env

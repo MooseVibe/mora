@@ -55,8 +55,8 @@
 1. ✅ Production cleanup и clean URL выпущены.
 2. ✅ Минимальная privacy-safe PostHog Cloud EU аналитика подключена без autocapture и session replay.
 3. 🟡 UX/legal пакет `/privacy` и `/terms` визуально согласован и готов к release с `noindex`; перед индексацией нужна финальная правовая проверка адреса, retention и AI-провайдера.
-4. Купить домен, настроить Vercel, Supabase Site URL/redirects и production SMTP.
-5. ✅ Базовые metadata/SEO и OG-preview выпущены; после подключения домена обновить canonical URLs, проверить индексацию и провести закрытую бету 7–14 дней на 20–30 пользователях.
+4. ✅ Домен `moratarot.com` и Vercel настроены; отдельно остаются Supabase Site URL/redirects и production SMTP.
+5. ✅ Базовые metadata/SEO и OG-preview переведены на `moratarot.com`; дальше проверить индексацию и провести закрытую бету 7–14 дней на 20–30 пользователях.
 6. Перед масштабированием подключить доступный платный AI provider и проверить structured logs на реальном раскладе.
 
 ## Не делаем сейчас

@@ -1,7 +1,7 @@
 (() => {
   window.MoraAnalytics = { capture() {} };
-  // ponytail: production-only analytics; add the custom domain here when it exists.
-  if (window.location.hostname !== "mora-kappa.vercel.app") return;
+  // ponytail: production-only analytics; local and preview deployments stay no-op.
+  if (window.location.hostname !== "moratarot.com") return;
 
   const posthog = window.posthog = window.posthog || [];
   if (!posthog.__SV) {

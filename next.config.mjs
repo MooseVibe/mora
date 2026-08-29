@@ -41,6 +41,16 @@ const nextConfig = {
       ],
     };
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'mora-kappa.vercel.app' }],
+        destination: 'https://moratarot.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

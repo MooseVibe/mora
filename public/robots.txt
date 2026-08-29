@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /qa/
 
-Sitemap: https://mora-kappa.vercel.app/sitemap.xml
+Sitemap: https://moratarot.com/sitemap.xml

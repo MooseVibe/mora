@@ -3509,3 +3509,9 @@ Hotfix выпущен commit `fdb1ee8` в production deployment `mora-lplxmrehw-
 ## 2026-08-29 — Ritual SVG используют общий свежий browser cache
 
 Задержка при повторных переходах была не декодированием SVG, а обязательной production revalidation: `/ritual/icons/*.svg` отдавались с `max-age=0, must-revalidate`. Все ritual icons теперь получают тот же суточный static-cache contract, что app/CSS/3D modules, со stale revalidation на неделю; tag helper дополнительно не переназначает неизменившийся `src`. Имена файлов остаются каноническими, поэтому срок ограничен сутками, а не годовым `immutable`; при будущей правке иконки достаточно обычного нового deploy.
+
+Fix commit `a7b5103` выпущен в production deployment `mora-bmv6nzqc4-mooses-projects-fe579d75.vercel.app`; canonical header и cache-key `instantdraw7` подтверждены HTTP smoke.
+
+## 2026-08-29 — Публичный canonical origin — только `moratarot.com`
+
+Служебный Vercel alias `mora-kappa.vercel.app` остаётся привязан к тому же project, но больше не является самостоятельной публичной точкой входа: exact-host redirect сохраняет путь и переводит его на `moratarot.com`. Canonical/OG/JSON-LD/robots/sitemap и production-only PostHog используют только custom domain. Уникальные preview deployment URLs не перенаправляются и остаются доступными для QA.
