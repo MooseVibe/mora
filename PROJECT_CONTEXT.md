@@ -95,7 +95,7 @@ Current work phase:
 - Mora Next in `public/ritual/` is canonical production, not a parallel laboratory
 - standalone 3D and legacy dashboard/journal/auth routes are archived outside the production tree
 - current cleanup keeps only the static landing/spread UI, three protected APIs, Supabase server adapter, QA cards and shared assets
-- cleanup, минимальная privacy-safe PostHog EU аналитика, custom domain и canonical metadata готовы; дальше SMTP/auth redirects и закрытая бета
+- cleanup, минимальная privacy-safe PostHog EU аналитика, custom domain, canonical metadata и production OTP/SMTP готовы; дальше закрытая бета
 - cards-first visual unification is complete across all 78 cards; `world` and `judgement` remain the locked style-and-palette references, while 8 old cards still need approved `preview/full/share` texts
 - AI tarot chat is planned later, after the product feels presentable
 

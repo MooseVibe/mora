@@ -11,6 +11,7 @@
 ### Авторизация
 
 - Supabase email OTP встроен в Mora Next.
+- Production OTP состоит из 6 цифр и отправляется через Resend Custom SMTP с отдельного поддомена `auth.moratarot.com`; Supabase quota — 30 писем/час, resend interval — 60 секунд.
 - После подтверждения сессия принадлежит реальному `auth.uid()`.
 - Logout очищает сессию и возвращает guest-state.
 - Старые самостоятельные `/auth`, `/dashboard` и `/journal` удалены из production tree.
@@ -55,7 +56,7 @@
 1. ✅ Production cleanup и clean URL выпущены.
 2. ✅ Минимальная privacy-safe PostHog Cloud EU аналитика подключена без autocapture и session replay.
 3. 🟡 UX/legal пакет `/privacy` и `/terms` визуально согласован и готов к release с `noindex`; перед индексацией нужна финальная правовая проверка адреса, retention и AI-провайдера.
-4. ✅ Домен `moratarot.com` и Vercel настроены; отдельно остаются Supabase Site URL/redirects и production SMTP.
+4. ✅ Домен `moratarot.com`, Supabase Site URL/redirects и production SMTP настроены; тестовое шестизначное OTP-письмо доставлено.
 5. ✅ Базовые metadata/SEO и OG-preview переведены на `moratarot.com`; дальше проверить индексацию и провести закрытую бету 7–14 дней на 20–30 пользователях.
 6. Перед масштабированием подключить доступный платный AI provider и проверить structured logs на реальном раскладе.
 
