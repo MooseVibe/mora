@@ -19,6 +19,13 @@
 | Redirect URLs | `https://moratarot.com`, `https://moratarot.com/ritual` и localhost 3000/3001/3002. Устаревший callback удалён. |
 | Email templates | Оба (`Confirm sign up`, `Magic link or OTP`) используют один OTP-only шаблон с `{{ .Token }}`; несуществующая fallback-ссылка удалена. |
 
+### Аватар отправителя — 2026-08-31
+
+- `no-reply@auth.moratarot.com` подтверждён как дополнительный адрес рабочего Google-аккаунта автора `mora.privacy@gmail.com`.
+- В рабочем Google-аккаунте установлена авторская аватарка Mora из `Avamail.png`; страница аккаунта показывает новый логотип.
+- Для получения письма подтверждения в Resend включён inbound на `auth.moratarot.com`, а в Cloudflare добавлен отдельный MX `auth` → `inbound-smtp.eu-west-1.amazonaws.com`, priority 10, DNS only. Корневые Beget MX/SPF и Google/Yandex verification TXT не менялись.
+- Это бесплатный best-effort способ для Gmail. Аватар может появиться не сразу и не гарантирован во всех клиентах; universal BIMI/VMC не подключались и не оплачивались.
+
 ### Фактический код
 
 - `public/ritual/app.js`: единственный login submit handler; OTP pattern `[0-9]{6,8}`, отправка **по кнопке**, автоматической проверки начиная с шестой цифры нет. Старое описание относилось к удалённому UI. Отдельной resend-кнопки/таймера в текущем flow тоже нет.
@@ -34,8 +41,9 @@
 4. Подключён **Resend Free** на отдельном sending subdomain `auth.moratarot.com`. Добавлены только его DKIM и отдельные MX/SPF для `send.auth.moratarot.com`; корневые Beget MX/SPF и verification TXT Google/Yandex сохранены.
 5. API key имеет только Sending access и ограничен доменом `auth.moratarot.com`; он сохранён только в Supabase SMTP и не записан в репозиторий или документацию.
 6. Production-запрос с `https://moratarot.com/ritual` дошёл на подтверждённый Gmail автора. Resend зафиксировал `Delivered`, письмо пришло от `Mora <no-reply@auth.moratarot.com>` и содержало шестизначный код без fallback-ссылки.
+7. Автор подтвердил полный production-вход шестизначным кодом. Затем отправляющий адрес был связан с рабочим Google-аккаунтом, а его фото заменено на логотип Mora для бесплатного отображения аватара в Gmail.
 
-**Граница проверки:** доставка production-письма и формат кода подтверждены. Полный вход этим кодом агент повторно не выполнял, чтобы не передавать чувствительный OTP через инструмент без отдельного подтверждения. Следующая полезная проверка — обычный вход автора; тестировать исчерпание лимитов не нужно.
+**Граница проверки:** доставка production-письма, формат кода и полный вход подтверждены автором. Агент не получал и не вводил чувствительный OTP. Тестировать исчерпание лимитов не нужно; отображение новой аватарки проверяется на следующем обычном письме после распространения фото Google.
 
 Официальные источники, проверенные 2026-08-31: [Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp), [rate limits](https://supabase.com/docs/guides/auth/rate-limits), [email OTP](https://supabase.com/docs/guides/auth/auth-email-passwordless), [Auth config API](https://supabase.com/docs/reference/api/v1-update-auth-service-config), [Resend Free](https://resend.com/pricing), [Supabase SMTP integration](https://resend.com/docs/send-with-supabase-smtp), [Brevo Free](https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan). Changelog Markdown не загрузился; проверен официальный Auth changelog и изменение шаблонов Free от 2026-06-03. Последнее не запрещает кастомизацию с Custom SMTP; существующие два шаблона Mora доступны.
 

@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-08-31 — Бесплатная Gmail-аватарка через рабочий Google-аккаунт
+
+**Что:** `no-reply@auth.moratarot.com` подтверждён как дополнительный адрес рабочего Google-аккаунта автора `mora.privacy@gmail.com`. Автор установил `Avamail.png` как фото этого аккаунта; логотип виден в настройках Google. Для получения verification-письма включён Resend inbound и добавлен отдельный MX только для `auth.moratarot.com`. Корневые Beget MX/SPF и Google/Yandex verification TXT сохранены. Платный BIMI/VMC не подключался.
+
+**Почему:** это минимальный бесплатный путь к аватарке в Gmail без нового email backend и без изменения OTP-писем. Отображение остаётся best-effort: Google может обновлять фото с задержкой, а другие почтовые клиенты не обязаны использовать профиль Google. Кто: автор + агент.
+
 ## 2026-08-31 — Production OTP переведён на шесть цифр и Resend Free
 
 **Что:** В Supabase проекта `mora` OTP сокращён с 8 до 6 цифр, а срок 3600 секунд, resend interval 60 секунд и verify/sign-in limits сохранены. Site URL и redirects переведены на `https://moratarot.com`, оба email template оставлены OTP-only. На отдельном sending subdomain `auth.moratarot.com` подключён Resend Free; Supabase email quota теперь 30 писем/час, при внешнем лимите 100/день и 3000/месяц. Корневые Beget MX/SPF и Google/Yandex verification TXT не менялись. Production-письмо с шестизначным кодом доставлено на подтверждённый Gmail автора. Платный тариф не подключался.
