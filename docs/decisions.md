@@ -3663,3 +3663,7 @@ Release commit `2afbc9b` выпущен в production deployment `dpl_6LbcBWax8C
 Авторизованный spread cooldown определяется только серверным `nextSpreadAt`; локальный `snapshot.createdAt` не может продлевать или отменять серверное решение. Для гостя без account-state прежний локальный 12-часовой расчёт сохраняется.
 
 Fix commit `466e62c` выпущен в production deployment `dpl_Hjkchay5RLEm63BgX59Kkk2DgL95`; canonical alias подтверждён с cache key `spreadcooldown1`.
+
+## 2026-09-02 — Mobile использует системный share, desktop — Telegram
+
+Новый `/ritual` на touch/mobile вызывает системный `navigator.share({ title, text, url })`: iOS сама показывает bottom sheet и доступные приложения, включая Яндекс Мессенджер, если он установлен и предоставляет share extension. Desktop сохраняет предсказуемый `t.me/share/url`; он же служит fallback, если Web Share недоступен или завершился ошибкой. Изображения не прикладываются. Карта дня использует утверждённый share-текст конкретного варианта; расклад передаёт только тему и три названия карт. Оба payload ведут на `https://moratarot.com/ritual`, существующие кнопки и visual states не меняются.

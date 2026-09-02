@@ -74,12 +74,14 @@ const dailyResultSuitLabel = document.querySelector("#daily-result-suit-label");
 const dailyResultText = document.querySelector("#daily-result-text");
 const dailyResultCopy = document.querySelector(".daily-result-copy");
 const dailyResultImage = document.querySelector("#daily-result-image");
+const dailyResultShareButton = document.querySelector(".daily-result-share");
 const dailyCooldownButton = document.querySelector("#daily-cooldown");
 const dailyResultCard = document.querySelector(".daily-result-card");
 const dailyResult = document.querySelector("#daily-result");
 const dailyResultCardTilt = document.querySelector(".daily-result-card-tilt");
 const readingStatusPhrases = document.querySelector(".status-phrases");
 const readingStatusAnnouncement = document.querySelector(".status-announcement");
+const readingSummaryShareButton = document.querySelector(".reading-summary-actions .share");
 let picked = 0;
 let activeChapter = 0;
 let wheelGestureActive = false;
@@ -184,6 +186,7 @@ const isLocalPrototype = (
   || /^172\.(1[6-9]|2\d|3[01])\./.test(window.location.hostname)
 );
 const spreadCooldownMs = 12 * 60 * 60 * 1000;
+const shareBaseUrl = "https://moratarot.com/ritual";
 const suitTags = {
   "Пентакли": "./icons/suit-pentacles.svg",
   "Мечи": "./icons/suit-swords.svg",
@@ -992,6 +995,54 @@ function populateCardTag(container, label, icon, card) {
   icon.hidden = !tag.icon;
   container.classList.toggle("without-icon", !tag.icon);
   if (tag.icon && icon.getAttribute("src") !== tag.icon) icon.src = tag.icon;
+}
+
+function openTelegramShare(text) {
+  const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareBaseUrl)}&text=${encodeURIComponent(text)}`;
+  window.open(telegramUrl, "_blank", "noopener,noreferrer");
+}
+
+function isDesktopShareContext() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+async function shareResult(title, text) {
+  if (!isDesktopShareContext() && navigator.share) {
+    try {
+      await navigator.share({ title, text, url: shareBaseUrl });
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+
+  openTelegramShare(text);
+}
+
+function shareDailyResult() {
+  const result = readSavedDailyCard();
+  if (!result) return;
+  const variant = result.card.result.dayVariants[result.variantIndex];
+  const approvedText = !Array.isArray(variant) && typeof variant?.share === "string"
+    ? variant.share.trim()
+    : "";
+  const text = [
+    `Сегодня моя карта дня — ${result.card.name}.`,
+    approvedText,
+    "Вытащи свою карту дня:",
+  ].filter(Boolean).join("\n\n");
+  shareResult(`Моя карта дня — ${result.card.name}`, text);
+}
+
+function shareSpreadResult() {
+  const snapshot = readLastSpread();
+  if (!snapshot || snapshot.cards.length !== spreadSize) return;
+  const text = [
+    `Мой расклад на тему «${snapshot.topic}».`,
+    `Карты: ${snapshot.cards.map((card) => card.name).join(", ")}.`,
+    "Сделай свой расклад:",
+  ].join("\n\n");
+  shareResult(`Мой расклад — ${snapshot.topic}`, text);
 }
 
 function getLocalDayKey(date = new Date()) {
@@ -2527,6 +2578,8 @@ readingCloseButton.addEventListener("click", () => closeReadingToSaved(activeCha
 readingPrevButton.addEventListener("click", () => goToChapter(activeChapter - 1));
 readingNextButton.addEventListener("click", () => goToChapter(activeChapter + 1));
 readingSummaryHomeButton.addEventListener("click", () => closeReadingToSaved(activeChapter));
+dailyResultShareButton.addEventListener("click", shareDailyResult);
+readingSummaryShareButton.addEventListener("click", shareSpreadResult);
 
 dailyResultCopy.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
 dailyResult.addEventListener("scroll", updateDailyResultScrollState, { passive: true });
