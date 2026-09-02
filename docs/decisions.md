@@ -3655,3 +3655,5 @@ Release commit `8d8d8f3` выпущен в production deployment `dpl_Gw7wP2eQHD
 ## 2026-09-02 — Сердце вырезает лупу настоящей SVG-маской
 
 Для `search-love.svg` выбран нативный SVG mask: увеличенный силуэт сердца вычитает фрагмент лупы независимо от цвета и текстуры фона. Отдельная подложка сердца повторяет эффективную opacity линзы (`10%`), а оба контура остаются белыми на `50%`; подкрашивание зазора цветом текущего фона удалено как хрупкое.
+
+Release commit `2afbc9b` выпущен в production deployment `dpl_6LbcBWax8CbJm3V3TEBNRVCqRNRt`; alias `moratarot.com` Ready и отдаёт cache key `searchcutout4`, SVG mask и одинаковую эффективную opacity обеих подложек.
