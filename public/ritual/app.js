@@ -193,7 +193,10 @@ const suitTags = {
 const topicIcons = {
   "Внутреннее состояние": "./icons/star-four.svg",
   "Работа": "./icons/bag.svg",
+  "Карьера": "./icons/bag.svg",
   "Отношения": "./icons/heart.svg",
+  "Поиск любви": "./icons/search-love.svg",
+  "Финансы": "./icons/currency-circle-dollar.svg",
   "Выбор": "./icons/diamonds-four.svg",
 };
 const tagIconPreloads = new Map();

@@ -1521,9 +1521,18 @@ h1 {
 
 .topics {
   display: flex;
-  flex-wrap: nowrap;
+  width: max-content;
+  max-width: calc(100vw - 48px);
+  flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
+}
+
+@media (min-width: 1440px) {
+  .topics {
+    max-width: 750px;
+    gap: 12px 8px;
+  }
 }
 
 .topic,
