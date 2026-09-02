@@ -195,7 +195,7 @@ const topicIcons = {
   "Работа": "./icons/bag.svg",
   "Карьера": "./icons/bag.svg",
   "Отношения": "./icons/heart.svg",
-  "Поиск любви": "./icons/search-love.svg",
+  "Поиск любви": "./icons/search-love.svg?v=20260902-searchcutout4",
   "Финансы": "./icons/currency-circle-dollar.svg",
   "Выбор": "./icons/diamonds-four.svg",
 };
