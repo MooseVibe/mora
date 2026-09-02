@@ -349,6 +349,18 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
   renderDeck();
   host.classList.add("is-ready");
 
+  function stopResultSpins() {
+    parkedResults.forEach((result) => {
+      result.spinToken += 1;
+      result.spinning = false;
+      result.hovered = false;
+      result.card.position.copy(result.target.position);
+      result.card.quaternion.copy(result.target.quaternion);
+      result.card.scale.copy(result.target.scale);
+    });
+    renderDeck();
+  }
+
   return {
     refresh: renderDeck,
     preloadFace,
@@ -384,6 +396,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     reset() {
       window.cancelAnimationFrame(animationFrame);
       fanExitToken += 1;
+      stopResultSpins();
       selectedIndices.clear();
       parkedResults.clear();
       fanVisible = true;
@@ -498,10 +511,12 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
       if (!result || result.spinning) return;
       result.spinning = true;
       result.hovered = false;
+      const spinToken = ++result.spinToken;
       const spinAxis = new THREE.Vector3(0, 0, 1);
       const spinQuaternion = new THREE.Quaternion();
       const fullTurn = THREE.MathUtils.degToRad(360);
       await tween(window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1050, (progress) => {
+        if (spinToken !== result.spinToken) return;
         const spinProgress = 1 - (1 - clamp01(progress)) ** 5;
         spinQuaternion.setFromAxisAngle(spinAxis, fullTurn * spinProgress);
         result.card.position.copy(result.target.position);
@@ -509,10 +524,12 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         result.card.scale.copy(result.target.scale);
         renderer.render(scene, camera);
       });
+      if (spinToken !== result.spinToken) return;
       result.card.quaternion.copy(result.target.quaternion);
       result.spinning = false;
       renderDeck();
     },
+    stopResultSpins,
     async drawToSlot({ index, slotIndex, imageUrl, targetElement, onCover, onTextReveal, onFaceReady }) {
       if (selectedIndices.has(index)) return false;
       ensureCard(index);
@@ -648,6 +665,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
         tiltPoint: new THREE.Vector2(),
         hovered: false,
         spinning: false,
+        spinToken: 0,
         texture,
         targetAspect,
       });

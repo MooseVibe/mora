@@ -3627,3 +3627,17 @@ Released in commit `04f1a95` as production deployment `dpl_FeoVBnfUhWzT8rA2pBkqa
 Removing unnecessary mobile 3D restore exposed that the saved-result countdown was initialized only by `showDaily3DResult()`. `showDailyMode()` now calls `updateDailyCooldownButton()` only for the mobile 2D result. Desktop behavior remains unchanged and still initializes the timer after `showDaily3DResult()`. Browser QA confirmed the mobile value changes across seconds while the card remains visible.
 
 Released in commit `d3a1494` as production deployment `dpl_8u1xXC2SFVYoHiErQK4RC9aBBq2y`; Vercel reported `READY` and aliased it to `moratarot.com`.
+
+## 2026-09-02 — Loading-фразы используют общий блик и мягкий crossfade
+
+«Раскладываем» и «Смотрим глубже» остаются в одном стабильном status-контейнере: через 8 секунд первая фраза гаснет за `500ms`, вторая начинает появляться через `250ms`. Обе переиспользуют существующий `deck-hint-flow` без новой анимации или зависимости; точки, API-таймер и открытие готового расклада не меняются. Визуальный дубль скрыт от accessibility tree, а отдельный live-текст сохраняет корректное объявление состояния. Общий `prefers-reduced-motion` сокращает crossfade и блик до `1ms`.
+
+## 2026-09-02 — Три выбранные карты становятся единым loading-loader
+
+Loading расклада переиспользует существующий `spinResult()` выбранной карты без изменения его `1050ms` скорости и WebGL-геометрии. После выбора третьей карты проходит пауза `1000ms`, затем карты запускаются по порядку через `700ms`, поэтому движения немного перекрываются; после завершения третьей выдерживается ещё `750ms`, затем цикл повторяется. Экран остаётся видимым минимум `10s`, но API-запрос начинается сразу; если ответ занимает больше, результат открывается сразу после его готовности. Перед открытием чтения controller отменяет активные вращения и возвращает карты в целевую ориентацию. При `prefers-reduced-motion` цикл не запускается.
+
+## 2026-09-02 — DOM-карты используют общий loading-state для artwork
+
+Для `.tarot-card-shell` введён переиспользуемый state `.is-image-loading`: пока native `load` не подтвердил готовность artwork, изображение скрыто за общим skeleton shimmer и открывается целиком на следующем animation frame. Сейчас state подключён к сохранённому раскладу и DOM-картам чтения; WebGL-выбор из веера не меняется. `decode()` не используется из-за ранее подтверждённого зависания в Safari.
+
+В пределах открытой страницы успешно загруженные URL запоминаются в памяти. Повторный переход на таб расклада создаёт новый DOM, но уже готовый artwork назначается без loading-state; shimmer возвращается только после реальной перезагрузки страницы или для ещё не загруженного URL.

@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260829-instantdraw7";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260902-spreadloading1";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const preparedSpreadKey = "mora:prototype:preparedSpread";
@@ -11,6 +11,10 @@ let spreadDeck = restoreSpreadDeckOrder(availableSpreadCards);
 let preparedSpreadCards = [];
 const selectedCards = [];
 const spreadSize = 3;
+const spreadLoadingMinMs = 10_000;
+const spreadLoadingSpinDelayMs = 1000;
+const spreadLoadingSpinStaggerMs = 700;
+const spreadLoadingSpinPauseMs = 750;
 
 const ritual = document.querySelector(".ritual-screen");
 const topics = document.querySelectorAll(".topic");
@@ -74,7 +78,8 @@ const dailyCooldownButton = document.querySelector("#daily-cooldown");
 const dailyResultCard = document.querySelector(".daily-result-card");
 const dailyResult = document.querySelector("#daily-result");
 const dailyResultCardTilt = document.querySelector(".daily-result-card-tilt");
-const readingStatusCopy = document.querySelector(".status-copy");
+const readingStatusPhrases = document.querySelector(".status-phrases");
+const readingStatusAnnouncement = document.querySelector(".status-announcement");
 let picked = 0;
 let activeChapter = 0;
 let wheelGestureActive = false;
@@ -88,6 +93,8 @@ let scrollSettleTimer;
 let deckPromptTimer;
 let deckDiscoveryFrame;
 let spreadFacePreloadTimer;
+let spreadLoadingSpinToken = 0;
+let spreadLoadingCopyTimer;
 let dragState = null;
 let deckScroll = 0;
 let selectionInFlight = false;
@@ -1709,7 +1716,36 @@ function beginReadingGeneration() {
   ritual.dataset.step = "loading";
   spreadDeck3DController?.hideFan(animateMobileLoading ? 560 : 0);
   spreadDeck3DController?.syncResults(animateMobileLoading ? 650 : 800);
+  startSpreadLoadingSpins();
   generateReading();
+}
+
+async function startSpreadLoadingSpins() {
+  const token = ++spreadLoadingSpinToken;
+  if (
+    !spreadDeck3DController
+    || window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) return;
+  await new Promise((resolve) => window.setTimeout(resolve, spreadLoadingSpinDelayMs));
+
+  while (token === spreadLoadingSpinToken && ritual.dataset.step === "loading") {
+    let lastSpin;
+    for (let index = 0; index < spreadSize; index += 1) {
+      if (token !== spreadLoadingSpinToken || ritual.dataset.step !== "loading") return;
+      lastSpin = spreadDeck3DController.spinResult(index);
+      if (index < spreadSize - 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, spreadLoadingSpinStaggerMs));
+      }
+    }
+    await lastSpin;
+    if (token !== spreadLoadingSpinToken || ritual.dataset.step !== "loading") return;
+    await new Promise((resolve) => window.setTimeout(resolve, spreadLoadingSpinPauseMs));
+  }
+}
+
+function stopSpreadLoadingSpins() {
+  spreadLoadingSpinToken += 1;
+  spreadDeck3DController?.stopResultSpins();
 }
 
 function createSlotName(text) {
@@ -1801,6 +1837,31 @@ function restoreSavedSpread() {
   document.body.classList.add("saved-home");
 }
 
+const cardArtworkLoads = new WeakMap();
+const loadedCardArtwork = new Set();
+
+function loadCardArtwork(image, source) {
+  const shell = image.closest(".tarot-card-shell");
+  if (loadedCardArtwork.has(source)) {
+    image.src = source;
+    return;
+  }
+  const loadToken = Symbol();
+  let ready = false;
+  cardArtworkLoads.set(image, loadToken);
+  const reveal = () => {
+    if (ready || cardArtworkLoads.get(image) !== loadToken) return;
+    ready = true;
+    loadedCardArtwork.add(source);
+    window.requestAnimationFrame(() => shell?.classList.remove("is-image-loading"));
+  };
+
+  shell?.classList.add("is-image-loading");
+  image.addEventListener("load", reveal, { once: true });
+  image.src = source;
+  if (image.complete && image.naturalWidth) reveal();
+}
+
 function renderSavedSpread(snapshot) {
   resetSavedCardTilt();
   currentTopic = snapshot.topic;
@@ -1822,13 +1883,13 @@ function renderSavedSpread(snapshot) {
     const caption = document.createElement("figcaption");
     figure.className = "saved-card";
     cardShell.className = "tarot-card-shell saved-card-shell";
-    image.src = card.image;
     image.alt = card.name;
     caption.textContent = window.innerWidth <= 720 ? compactMobileCardName(card.name) : card.name;
     caption.title = card.name;
     cardShell.append(image);
     figure.append(cardShell, caption);
     savedCards.append(figure);
+    loadCardArtwork(image, card.image);
   });
   updateNewSpreadButton(snapshot);
 }
@@ -2221,8 +2282,10 @@ function buildFallbackReading(topic, cards) {
 async function generateReading() {
   const fallback = buildFallbackReading(currentTopic, selectedCards);
   const startedAt = Date.now();
-  const longResponseTimer = window.setTimeout(() => {
-    readingStatusCopy.firstChild.textContent = "Смотрим глубже";
+  window.clearTimeout(spreadLoadingCopyTimer);
+  spreadLoadingCopyTimer = window.setTimeout(() => {
+    readingStatusPhrases.classList.add("is-deep");
+    readingStatusAnnouncement.textContent = "Смотрим глубже";
   }, 8000);
 
   try {
@@ -2253,14 +2316,11 @@ async function generateReading() {
       completed: false,
     };
     window.MoraAnalytics.capture("spread_generation_failed");
-  } finally {
-    window.clearTimeout(longResponseTimer);
-    readingStatusCopy.firstChild.textContent = "Раскладываем";
   }
 
   await preloadCardTagIcons(selectedCards);
 
-  const remainingRitual = Math.max(0, 1500 - (Date.now() - startedAt));
+  const remainingRitual = Math.max(0, spreadLoadingMinMs - (Date.now() - startedAt));
   window.setTimeout(showReading, remainingRitual);
 }
 
@@ -2286,17 +2346,17 @@ function populateReading(reading, cards) {
     navItem.dataset.label = `${position} · ${card.name}`;
     navItem.setAttribute("aria-label", `${position}: ${card.name}`);
     const image = stage.querySelector(`[data-card="${index}"] img`);
-    image.src = card.image;
+    loadCardArtwork(image, card.image);
     image.alt = card.name;
     const positionImage = chapter.querySelector(".reading-position-card img");
     positionImage.src = card.image;
     positionImage.alt = card.name;
     const summaryImage = chapters[4].querySelector(`[data-summary-card="${index}"] img`);
-    summaryImage.src = card.image;
+    loadCardArtwork(summaryImage, card.image);
     summaryImage.alt = card.name;
     const overviewCard = chapters[0].querySelector(`[data-overview-card="${index}"]`);
     const overviewImage = overviewCard.querySelector("img");
-    overviewImage.src = card.image;
+    loadCardArtwork(overviewImage, card.image);
     overviewImage.alt = card.name;
     const displayName = window.innerWidth <= 720 ? compactMobileCardName(card.name) : card.name;
     overviewCard.querySelector(".reading-overview-card-name").textContent = displayName;
@@ -2307,6 +2367,11 @@ function populateReading(reading, cards) {
 }
 
 function showReading() {
+  stopSpreadLoadingSpins();
+  window.clearTimeout(spreadLoadingCopyTimer);
+  spreadLoadingCopyTimer = undefined;
+  readingStatusPhrases.classList.remove("is-deep");
+  readingStatusAnnouncement.textContent = "Раскладываем";
   if (document.body.classList.contains("daily-mode")) return;
   window.MoraAnalytics.capture("spread_reading_opened", { source: "new" });
   readingCopy.scrollTop = 0;
