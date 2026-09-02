@@ -187,6 +187,7 @@ const isLocalPrototype = (
 );
 const spreadCooldownMs = 12 * 60 * 60 * 1000;
 const shareBaseUrl = "https://moratarot.com/ritual";
+let dailyShareFile = null;
 const suitTags = {
   "Пентакли": "./icons/suit-pentacles.svg",
   "Мечи": "./icons/suit-swords.svg",
@@ -985,6 +986,12 @@ function populateDailyResult(card, variantIndex) {
   const imageUrl = `/${card.image.replace(/^\/+/, "")}`;
   if (dailyResultImage.getAttribute("src") !== imageUrl) dailyResultImage.src = imageUrl;
   dailyResultImage.alt = card.name;
+  dailyShareFile = null;
+  if (!isDesktopShareContext()) {
+    createDailyShareFile(card).then((file) => {
+      if (dailyResultImage.getAttribute("src") === imageUrl) dailyShareFile = file;
+    });
+  }
   scheduleDailyResultScrollUpdate();
 }
 
@@ -1006,10 +1013,28 @@ function isDesktopShareContext() {
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 }
 
-async function shareResult(title, text) {
+async function createDailyShareFile(card) {
+  if (!card?.image || typeof File === "undefined" || !navigator.canShare) return null;
+
+  try {
+    const response = await fetch(`/${card.image.replace(/^\/+/, "")}`, { cache: "force-cache" });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    const file = new File([blob], `mora-${card.id}.webp`, { type: blob.type || "image/webp" });
+    return navigator.canShare({ files: [file] }) ? file : null;
+  } catch {
+    return null;
+  }
+}
+
+async function shareResult(title, text, file = null) {
   if (!isDesktopShareContext() && navigator.share) {
     try {
-      await navigator.share({ title, text: `${text}\n\n${shareBaseUrl}` });
+      await navigator.share({
+        title,
+        text: `${text}\n\n${shareBaseUrl}`,
+        ...(file ? { files: [file] } : {}),
+      });
       return;
     } catch (error) {
       if (error?.name === "AbortError") return;
@@ -1031,7 +1056,7 @@ function shareDailyResult() {
     approvedText,
     "Вытащи свою карту дня:",
   ].filter(Boolean).join("\n\n");
-  shareResult(`Моя карта дня — ${result.card.name}`, text);
+  shareResult(`Моя карта дня — ${result.card.name}`, text, dailyShareFile);
 }
 
 function shareSpreadResult() {

@@ -5,7 +5,9 @@ const app = await readFile("public/ritual/app.js", "utf8");
 
 assert.match(app, /https:\/\/t\.me\/share\/url\?url=/);
 assert.match(app, /const shareBaseUrl = "https:\/\/moratarot\.com\/ritual"/);
-assert.match(app, /navigator\.share\(\{ title, text: `\$\{text\}\\n\\n\$\{shareBaseUrl\}` \}\)/);
+assert.match(app, /navigator\.canShare\(\{ files: \[file\] \}\)/);
+assert.match(app, /new File\(\[blob\], `mora-\$\{card\.id\}\.webp`/);
+assert.match(app, /\.\.\.\(file \? \{ files: \[file\] \} : \{\}\)/);
 assert.doesNotMatch(app, /navigator\.share\(\{[^}]*url:/s);
 assert.match(app, /\(hover: hover\) and \(pointer: fine\)/);
 assert.match(app, /error\?\.name === "AbortError"/);

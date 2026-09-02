@@ -3673,3 +3673,5 @@ Release commit `222ec9a` выпущен в production deployment `dpl_DarSFZriGW
 Mobile share передаёт описание и URL одним полем `text`, а не отдельными `text` и `url`: полевой тест показал, что share extensions Telegram и Яндекс Мессенджера выбирали только URL и теряли описание. Desktop `t.me/share/url` не меняется.
 
 Hotfix commit `c19e10b` выпущен в production deployment `dpl_5XNABvqfi6cNsSrmWMRN2hRNKkEY`; alias `moratarot.com` подтверждён с cache key `telegramshare3`.
+
+Изображение карты дня для mobile share подготавливается заранее при показе результата, чтобы асинхронный fetch после клика не лишал `navigator.share` пользовательской активации. В системный share передаётся исходный WebP только после `navigator.canShare({ files })`; иначе работает существующий text-only fallback. Расклад и desktop share изображения не получают.
