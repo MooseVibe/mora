@@ -3675,3 +3675,5 @@ Mobile share передаёт описание и URL одним полем `tex
 Hotfix commit `c19e10b` выпущен в production deployment `dpl_5XNABvqfi6cNsSrmWMRN2hRNKkEY`; alias `moratarot.com` подтверждён с cache key `telegramshare3`.
 
 Изображение карты дня для mobile share подготавливается заранее при показе результата, чтобы асинхронный fetch после клика не лишал `navigator.share` пользовательской активации. В системный share передаётся исходный WebP только после `navigator.canShare({ files })`; иначе работает существующий text-only fallback. Расклад и desktop share изображения не получают.
+
+Release commit `79247ff` выпущен в production deployment `dpl_9zdok5GD6qvo2kk3gxAqRGguFK4t`; alias `moratarot.com` подтверждён с cache key `telegramshare4`. Реальные Telegram/Яндекс share extensions остаются обязательным field QA, потому что окончательное отображение вложения контролирует принимающее приложение.
