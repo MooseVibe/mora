@@ -1952,7 +1952,7 @@ function updateNewSpreadButton(snapshot = readLastSpread()) {
 
   const createdAt = Date.parse(snapshot?.createdAt || "");
   const localCooldownEndsAt = Number.isFinite(createdAt) ? createdAt + spreadCooldownMs : 0;
-  const cooldownEndsAt = Math.max(localCooldownEndsAt, prototypeNextSpreadAt);
+  const cooldownEndsAt = prototypeTesterAuthenticated ? prototypeNextSpreadAt : localCooldownEndsAt;
 
   const render = () => {
     const remaining = cooldownEndsAt - Date.now();
