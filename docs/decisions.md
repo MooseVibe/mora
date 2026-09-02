@@ -3669,3 +3669,5 @@ Fix commit `466e62c` выпущен в production deployment `dpl_Hjkchay5RLEm63
 Новый `/ritual` на touch/mobile вызывает системный `navigator.share({ title, text, url })`: iOS сама показывает bottom sheet и доступные приложения, включая Яндекс Мессенджер, если он установлен и предоставляет share extension. Desktop сохраняет предсказуемый `t.me/share/url`; он же служит fallback, если Web Share недоступен или завершился ошибкой. Изображения не прикладываются. Карта дня использует утверждённый share-текст конкретного варианта; расклад передаёт только тему и три названия карт. Оба payload ведут на `https://moratarot.com/ritual`, существующие кнопки и visual states не меняются.
 
 Release commit `222ec9a` выпущен в production deployment `dpl_DarSFZriGWUrv89vtgd1FNYu9gJV`; alias `moratarot.com` подтверждён с cache key `telegramshare2` и обеими share-ветками.
+
+Mobile share передаёт описание и URL одним полем `text`, а не отдельными `text` и `url`: полевой тест показал, что share extensions Telegram и Яндекс Мессенджера выбирали только URL и теряли описание. Desktop `t.me/share/url` не меняется.

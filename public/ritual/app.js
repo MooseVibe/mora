@@ -1009,7 +1009,7 @@ function isDesktopShareContext() {
 async function shareResult(title, text) {
   if (!isDesktopShareContext() && navigator.share) {
     try {
-      await navigator.share({ title, text, url: shareBaseUrl });
+      await navigator.share({ title, text: `${text}\n\n${shareBaseUrl}` });
       return;
     } catch (error) {
       if (error?.name === "AbortError") return;

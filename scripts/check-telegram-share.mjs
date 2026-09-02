@@ -5,7 +5,8 @@ const app = await readFile("public/ritual/app.js", "utf8");
 
 assert.match(app, /https:\/\/t\.me\/share\/url\?url=/);
 assert.match(app, /const shareBaseUrl = "https:\/\/moratarot\.com\/ritual"/);
-assert.match(app, /navigator\.share\(\{ title, text, url: shareBaseUrl \}\)/);
+assert.match(app, /navigator\.share\(\{ title, text: `\$\{text\}\\n\\n\$\{shareBaseUrl\}` \}\)/);
+assert.doesNotMatch(app, /navigator\.share\(\{[^}]*url:/s);
 assert.match(app, /\(hover: hover\) and \(pointer: fine\)/);
 assert.match(app, /error\?\.name === "AbortError"/);
 assert.match(app, /variant\?\.share/);
