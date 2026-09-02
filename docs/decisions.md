@@ -3661,3 +3661,5 @@ Release commit `2afbc9b` выпущен в production deployment `dpl_6LbcBWax8C
 Для ручного разрешения повторного расклада безопаснее сдвигать `last_spread_at` за cooldown и снимать reservation, не удаляя `spread_snapshot`: пользователь сохраняет доступ к прежнему чтению до собственного нажатия «Ещё расклад». Для `ez8923211@gmail.com` применён именно этот узкий reset; карта дня не затронута.
 
 Авторизованный spread cooldown определяется только серверным `nextSpreadAt`; локальный `snapshot.createdAt` не может продлевать или отменять серверное решение. Для гостя без account-state прежний локальный 12-часовой расчёт сохраняется.
+
+Fix commit `466e62c` выпущен в production deployment `dpl_Hjkchay5RLEm63BgX59Kkk2DgL95`; canonical alias подтверждён с cache key `spreadcooldown1`.
