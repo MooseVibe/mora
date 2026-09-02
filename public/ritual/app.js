@@ -1,6 +1,7 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260902-spreadloading1";
+import { createDailyShareCardFile } from "./share-card.js?v=20260902-sharetemplate4";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
 const preparedSpreadKey = "mora:prototype:preparedSpread";
@@ -1017,6 +1018,9 @@ async function createDailyShareFile(card) {
   if (!card?.image || typeof File === "undefined" || !navigator.canShare) return null;
 
   try {
+    const shareCard = await createDailyShareCardFile(card, cardTag(card));
+    if (shareCard && navigator.canShare({ files: [shareCard] })) return shareCard;
+
     const response = await fetch(`/${card.image.replace(/^\/+/, "")}`, { cache: "force-cache" });
     if (!response.ok) return null;
     const blob = await response.blob();

@@ -2,13 +2,19 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const app = await readFile("public/ritual/app.js", "utf8");
+const shareCard = await readFile("public/ritual/share-card.js", "utf8");
 
 assert.match(app, /https:\/\/t\.me\/share\/url\?url=/);
 assert.match(app, /const shareBaseUrl = "https:\/\/moratarot\.com\/ritual"/);
 assert.match(app, /navigator\.canShare\(\{ files: \[file\] \}\)/);
+assert.match(app, /createDailyShareCardFile\(card, cardTag\(card\)\)/);
 assert.match(app, /new File\(\[blob\], `mora-\$\{card\.id\}\.webp`/);
 assert.match(app, /\.\.\.\(file \? \{ files: \[file\] \} : \{\}\)/);
 assert.doesNotMatch(app, /navigator\.share\(\{[^}]*url:/s);
+assert.match(shareCard, /canvas\.width = canvasWidth/);
+assert.match(shareCard, /const groupTop = \(696 - groupHeight\) \/ 2/);
+assert.match(shareCard, /canvas\.toBlob\(resolve, "image\/jpeg", 0\.92\)/);
+assert.match(shareCard, /new File\(\[blob\], `mora-\$\{card\.id\}\.jpg`/);
 assert.match(app, /\(hover: hover\) and \(pointer: fine\)/);
 assert.match(app, /error\?\.name === "AbortError"/);
 assert.match(app, /variant\?\.share/);
