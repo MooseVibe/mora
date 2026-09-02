@@ -3671,3 +3671,5 @@ Fix commit `466e62c` выпущен в production deployment `dpl_Hjkchay5RLEm63
 Release commit `222ec9a` выпущен в production deployment `dpl_DarSFZriGWUrv89vtgd1FNYu9gJV`; alias `moratarot.com` подтверждён с cache key `telegramshare2` и обеими share-ветками.
 
 Mobile share передаёт описание и URL одним полем `text`, а не отдельными `text` и `url`: полевой тест показал, что share extensions Telegram и Яндекс Мессенджера выбирали только URL и теряли описание. Desktop `t.me/share/url` не меняется.
+
+Hotfix commit `c19e10b` выпущен в production deployment `dpl_5XNABvqfi6cNsSrmWMRN2hRNKkEY`; alias `moratarot.com` подтверждён с cache key `telegramshare3`.
