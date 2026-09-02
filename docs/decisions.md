@@ -3657,3 +3657,5 @@ Release commit `8d8d8f3` выпущен в production deployment `dpl_Gw7wP2eQHD
 Для `search-love.svg` выбран нативный SVG mask: увеличенный силуэт сердца вычитает фрагмент лупы независимо от цвета и текстуры фона. Отдельная подложка сердца повторяет эффективную opacity линзы (`10%`), а оба контура остаются белыми на `50%`; подкрашивание зазора цветом текущего фона удалено как хрупкое.
 
 Release commit `2afbc9b` выпущен в production deployment `dpl_6LbcBWax8CbJm3V3TEBNRVCqRNRt`; alias `moratarot.com` Ready и отдаёт cache key `searchcutout4`, SVG mask и одинаковую эффективную opacity обеих подложек.
+
+Для ручного разрешения повторного расклада безопаснее сдвигать `last_spread_at` за cooldown и снимать reservation, не удаляя `spread_snapshot`: пользователь сохраняет доступ к прежнему чтению до собственного нажатия «Ещё расклад». Для `ez8923211@gmail.com` применён именно этот узкий reset; карта дня не затронута.
