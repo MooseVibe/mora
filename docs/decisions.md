@@ -3641,3 +3641,5 @@ Loading расклада переиспользует существующий `
 Для `.tarot-card-shell` введён переиспользуемый state `.is-image-loading`: пока native `load` не подтвердил готовность artwork, изображение скрыто за общим skeleton shimmer и открывается целиком на следующем animation frame. Сейчас state подключён к сохранённому раскладу и DOM-картам чтения; WebGL-выбор из веера не меняется. `decode()` не используется из-за ранее подтверждённого зависания в Safari.
 
 В пределах открытой страницы успешно загруженные URL запоминаются в памяти. Повторный переход на таб расклада создаёт новый DOM, но уже готовый artwork назначается без loading-state; shimmer возвращается только после реальной перезагрузки страницы или для ещё не загруженного URL.
+
+Release commit `9db0912` выпущен в production deployment `dpl_6n9ZHeSg4wwzyryddaSboXFdzfMJ` и aliased на `moratarot.com`. Production smoke подтвердил cache-key `20260902-spreadloading1`, ответы `200` для HTML/CSS/app/WebGL и ожидаемый `401` для guest account-state.
