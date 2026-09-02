@@ -3679,3 +3679,5 @@ Hotfix commit `c19e10b` выпущен в production deployment `dpl_5XNABvqfi6c
 Release commit `79247ff` выпущен в production deployment `dpl_9zdok5GD6qvo2kk3gxAqRGguFK4t`; alias `moratarot.com` подтверждён с cache key `telegramshare4`. Реальные Telegram/Яндекс share extensions остаются обязательным field QA, потому что окончательное отображение вложения контролирует принимающее приложение.
 
 Share-картинка карты дня генерируется client-side через Canvas по Figma node `2021:1149`, без DOM screenshot и backend-renderer. Шаблон сохраняет авторские background/frame assets, переиспользует текущие данные карты, tag icons и локальные шрифты, а всю группу `карта + chip + title` центрирует по её динамической высоте. На mobile заранее готовится JPEG `1080×1740`; при ошибке остаются исходный WebP и text-only fallback. Рабочие template assets хранятся как оптимизированные WebP, исходные PNG остаются автору.
+
+Release commit `0fdb684` выпущен в production deployment `dpl_7kBAUE7dsfkEFKyXkipipMEFf2Ks`; alias `moratarot.com` подтверждён с cache key `sharetemplate4`, Canvas-модулем и обоими WebP-ассетами.
