@@ -167,6 +167,7 @@ async function generateWithGemini(apiKey: string, prompt: string, cardIds: strin
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.3,
+          thinkingConfig: { thinkingLevel: 'low' },
           responseMimeType: 'application/json',
           responseJsonSchema: schema,
         },

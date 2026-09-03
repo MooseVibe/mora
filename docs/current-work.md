@@ -1,5 +1,9 @@
 # Current Work · Mora
 
+## Локальный эксперимент — 2026-09-03, скорость AI-расклада
+
+Production-лог последнего доступного успешного расклада показал: Gemini 3.5 Flash занял `11 279 ms` и вернул 693 output tokens; значит почти всё наблюдаемое ожидание 10–14 секунд пришлось на модель, а не устройство. Добавлен только официальный `generationConfig.thinkingConfig.thinkingLevel: "low"`; модель, промпт, structured JSON schema, fallback и сохранение не менялись. Добавлен минимальный contract check. Прямой A/B не запустился: `.env.local` содержит пустой Gemini key, а выгрузка полного набора production-секретов Vercel была отклонена как слишком широкая и не выполнялась. Автор разрешил применить рекомендованный `low`; после отдельного deploy-аппрува сравнить следующий реальный duration и качество с baseline 11,28 сек.
+
 ## Релизный проход — 2026-09-03
 
 Релиз завершён: `38abf16` закоммичен и отправлен в `origin/main`, опубликован как `dpl_3wSJGmdBomw95t44VrYBCZKCn8bA`; alias `https://moratarot.com` подтверждён. На домене проверены cache keys `loadingcopy1`/`spreadsharp1`, обе новые фразы и DPR cap 2. Ошибка automatic approval 404 больше не блокирует команды.
