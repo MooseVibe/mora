@@ -153,7 +153,7 @@ export async function mountSpreadDeck3D({ canvas, host, cardElements }) {
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   scene.add(new THREE.HemisphereLight(0xded6ce, 0x151519, 1.7));
   const key = new THREE.DirectionalLight(0xffe7d2, 2.8);
   key.position.set(-4, 8, 8);

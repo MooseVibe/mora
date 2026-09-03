@@ -2059,6 +2059,8 @@ h1 {
   z-index: 5;
   bottom: 9.67vh;
   left: 50%;
+  width: max-content;
+  max-width: calc(100% - 48px);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2079,38 +2081,22 @@ h1 {
 
 .status-icon {
   display: block;
+  flex-shrink: 0;
   width: 24px;
   height: 24px;
 }
 
 .status-copy {
-  display: inline-flex;
-}
-
-.status-phrases {
-  display: grid;
-}
-
-.status-phrase {
-  grid-area: 1 / 1;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .ritual-screen[data-step="loading"] .status-phrase {
   animation: deck-hint-flow 1500ms linear infinite;
 }
 
-.status-phrase-deep,
-.status-phrases.is-deep .status-phrase-primary {
-  opacity: 0;
-}
-
-.status-phrases.is-deep .status-phrase-primary {
-  transition: opacity 500ms var(--ease);
-}
-
-.status-phrases.is-deep .status-phrase-deep {
-  opacity: 1;
-  transition: opacity 500ms var(--ease) 250ms;
+.loading-dots {
+  white-space: nowrap;
 }
 
 .loading-dots span {

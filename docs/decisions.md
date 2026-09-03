@@ -3681,3 +3681,11 @@ Release commit `79247ff` выпущен в production deployment `dpl_9zdok5GD6q
 Share-картинка карты дня генерируется client-side через Canvas по Figma node `2021:1149`, без DOM screenshot и backend-renderer. Шаблон сохраняет авторские background/frame assets, переиспользует текущие данные карты, tag icons и локальные шрифты, а всю группу `карта + chip + title` центрирует по её динамической высоте. На mobile заранее готовится JPEG `1080×1740`; при ошибке остаются исходный WebP и text-only fallback. Рабочие template assets хранятся как оптимизированные WebP, исходные PNG остаются автору.
 
 Release commit `0fdb684` выпущен в production deployment `dpl_7kBAUE7dsfkEFKyXkipipMEFf2Ks`; alias `moratarot.com` подтверждён с cache key `sharetemplate4`, Canvas-модулем и обоими WebP-ассетами.
+
+## 2026-09-03 — Локальная проверка резкости 3D-карт расклада
+
+По аппруву автора DPR cap spread-renderer поднят с 1.5 до 2, как у daily-renderer. Это минимальная проверка гипотезы о недостаточном разрешении canvas на Retina; исходники 1024×1536, MeshBasicMaterial, цвета, освещение рамки и spin timings не менялись. Import/preload/entry cache keys обновлены на `20260903-spreadsharp1`. Lint, spread contract checks и локальный выбор карты прошли, browser console без ошибок. Тестовый браузер сообщает DPR около 0.9, поэтому улучшение на Retina и производительность при DPR 2 ещё требуют ручного QA автора. Не задеплоено.
+
+## 2026-09-03 — Loading copy и устранение тестового ожидания
+
+После визуального аппрува резкости автор согласовал следующий шаг: убрать 10-секундный минимум loading, оставив сам переход и spin timings. Это не ускоряет долгий provider request, но не задерживает быстрый. Статус теперь содержит одну текущую фразу: скрытая длинная строка больше не резервирует место перед троеточием. На 8-й секунде — «Ещё чуть-чуть», на 20-й — «Нужно чуть больше времени. Готовим твой расклад…», без недоказуемого обещания «почти закончили» и объяснения задержки сложностью карт. Таймер сбрасывается перед новым запросом и при выходе в чтение. Использованы существующие CSS/DOM, без зависимостей (Ponytail и visual-polish skill). Автотесты и lint пройдены; browser visual QA заблокирован ошибкой auto-review 404. Backend и production не менялись, фактические provider/save latency ещё не измерены.

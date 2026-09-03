@@ -1,6 +1,6 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260902-spreadloading1";
+import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260903-spreadsharp1";
 import { createDailyShareCardFile } from "./share-card.js?v=20260902-sharetemplate4";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
@@ -12,7 +12,6 @@ let spreadDeck = restoreSpreadDeckOrder(availableSpreadCards);
 let preparedSpreadCards = [];
 const selectedCards = [];
 const spreadSize = 3;
-const spreadLoadingMinMs = 10_000;
 const spreadLoadingSpinDelayMs = 1000;
 const spreadLoadingSpinStaggerMs = 700;
 const spreadLoadingSpinPauseMs = 750;
@@ -80,7 +79,7 @@ const dailyCooldownButton = document.querySelector("#daily-cooldown");
 const dailyResultCard = document.querySelector(".daily-result-card");
 const dailyResult = document.querySelector("#daily-result");
 const dailyResultCardTilt = document.querySelector(".daily-result-card-tilt");
-const readingStatusPhrases = document.querySelector(".status-phrases");
+const readingStatusPhrase = document.querySelector(".status-phrase");
 const readingStatusAnnouncement = document.querySelector(".status-announcement");
 const readingSummaryShareButton = document.querySelector(".reading-summary-actions .share");
 let picked = 0;
@@ -2362,14 +2361,30 @@ function buildFallbackReading(topic, cards) {
   };
 }
 
+function setSpreadLoadingCopy(text) {
+  readingStatusPhrase.textContent = text;
+  readingStatusAnnouncement.textContent = text;
+}
+
+function stopSpreadLoadingCopy() {
+  window.clearTimeout(spreadLoadingCopyTimer);
+  spreadLoadingCopyTimer = undefined;
+  setSpreadLoadingCopy("Раскладываем");
+}
+
+function startSpreadLoadingCopy() {
+  stopSpreadLoadingCopy();
+  spreadLoadingCopyTimer = window.setTimeout(() => {
+    setSpreadLoadingCopy("Ещё чуть-чуть");
+    spreadLoadingCopyTimer = window.setTimeout(() => {
+      setSpreadLoadingCopy("Нужно чуть больше времени. Готовим твой расклад");
+    }, 12_000);
+  }, 8000);
+}
+
 async function generateReading() {
   const fallback = buildFallbackReading(currentTopic, selectedCards);
-  const startedAt = Date.now();
-  window.clearTimeout(spreadLoadingCopyTimer);
-  spreadLoadingCopyTimer = window.setTimeout(() => {
-    readingStatusPhrases.classList.add("is-deep");
-    readingStatusAnnouncement.textContent = "Смотрим глубже";
-  }, 8000);
+  startSpreadLoadingCopy();
 
   try {
     const response = await fetch("/api/prototypes/spread-reading", {
@@ -2403,8 +2418,7 @@ async function generateReading() {
 
   await preloadCardTagIcons(selectedCards);
 
-  const remainingRitual = Math.max(0, spreadLoadingMinMs - (Date.now() - startedAt));
-  window.setTimeout(showReading, remainingRitual);
+  showReading();
 }
 
 function populateReading(reading, cards) {
@@ -2451,10 +2465,7 @@ function populateReading(reading, cards) {
 
 function showReading() {
   stopSpreadLoadingSpins();
-  window.clearTimeout(spreadLoadingCopyTimer);
-  spreadLoadingCopyTimer = undefined;
-  readingStatusPhrases.classList.remove("is-deep");
-  readingStatusAnnouncement.textContent = "Раскладываем";
+  stopSpreadLoadingCopy();
   if (document.body.classList.contains("daily-mode")) return;
   window.MoraAnalytics.capture("spread_reading_opened", { source: "new" });
   readingCopy.scrollTop = 0;
