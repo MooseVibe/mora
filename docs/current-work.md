@@ -2,9 +2,9 @@
 
 ## Релизный проход — 2026-09-03
 
-Блокер: попытка `git add`/`git commit` не была запущена — automatic approval вернул HTTP 404 (`Automatic approval review failed`). Commit, push и deploy не выполнены; production не менялся. После восстановления разрешений продолжить с коммита перечисленных ниже файлов, затем Vercel production deploy и проверка cache keys на `moratarot.com`.
+Релиз завершён: `38abf16` закоммичен и отправлен в `origin/main`, опубликован как `dpl_3wSJGmdBomw95t44VrYBCZKCn8bA`; alias `https://moratarot.com` подтверждён. На домене проверены cache keys `loadingcopy1`/`spreadsharp1`, обе новые фразы и DPR cap 2. Ошибка automatic approval 404 больше не блокирует команды.
 
-Автор разрешил production deploy резкости 3D-карт и loading copy без дальнейшего локального QA. Готовятся только связанные файлы, `docs/feedback.md`, `Cover.png` и `docs/network-recovery.md` остаются вне релиза. Production build (включая lint и type check), регрессии loading/draw/topics и diff check пройдены. Деплой ещё не подтверждён; браузерные проверки ранее блокировались технической ошибкой системы разрешений. Реальную AI-скорость после релиза проверяем отдельно.
+Автор разрешил production deploy резкости 3D-карт и loading copy без дальнейшего локального QA. Опубликован чистый архив коммита; `docs/feedback.md`, `Cover.png` и `docs/network-recovery.md` не включены. Production build (локальный и Vercel, включая lint/type check), регрессии loading/draw/topics и diff check пройдены. Следующий шаг: ручной production QA подписей и реального времени генерации; backend/model не менялись. Записи локальных шагов ниже описывают состояние до этого релиза.
 
 ## Последний локальный шаг — 2026-09-03, тексты и ожидание расклада
 
