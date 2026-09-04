@@ -53,6 +53,113 @@ body {
   overscroll-behavior-x: none;
 }
 
+.app-bootstrap {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  background-color: var(--prototype-surface);
+  background-image: url("./assets/mora-background-v1.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 420ms var(--ease), visibility 0s linear 420ms;
+}
+
+html.app-ready .app-bootstrap {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app-content {
+  opacity: 0;
+  transition: opacity 560ms var(--ease) 80ms;
+}
+
+html.app-ready .app-content {
+  opacity: 1;
+}
+
+.app-bootstrap-shuffle {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 58px;
+}
+
+.app-bootstrap-shuffle span {
+  position: absolute;
+  top: 7px;
+  left: 10px;
+  display: block;
+  width: 28px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+  animation: app-bootstrap-shuffle 1.4s var(--ease) infinite;
+  will-change: transform, opacity;
+}
+
+.app-bootstrap-shuffle span:nth-child(1) {
+  animation-delay: -0.92s;
+}
+
+.app-bootstrap-shuffle span:nth-child(2) {
+  animation-delay: -0.46s;
+}
+
+.app-bootstrap-label {
+  position: relative;
+  display: flex;
+  width: max-content;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.app-bootstrap-label .status-phrase {
+  display: inline-block;
+  animation: deck-hint-flow 1500ms linear infinite;
+}
+
+.app-bootstrap-label .loading-dots {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+}
+
+@keyframes app-bootstrap-shuffle {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  38% {
+    opacity: 1;
+    transform: translate3d(14px, -5px, 0) rotate(7deg);
+  }
+  72% {
+    opacity: 0.72;
+    transform: translate3d(-4px, 1px, 0) rotate(-2deg);
+  }
+}
+
 html:has(body.prototype-tester:not(.daily-mode) .ritual-screen[data-step="loading"]),
 body.prototype-tester:not(.daily-mode):has(.ritual-screen[data-step="loading"]) {
   height: 100dvh;
@@ -70,17 +177,6 @@ button,
 a {
   color: inherit;
   font: inherit;
-}
-
-.header,
-.mode-nav,
-main {
-  animation: mora-page-enter 420ms var(--ease);
-}
-
-@keyframes mora-page-enter {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 button {
@@ -374,7 +470,6 @@ html.tester-session-pending main {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  animation: none;
 }
 
 .profile-trigger {
@@ -3326,6 +3421,10 @@ body.reading-to-saved.reading-saved-entering .reading {
 }
 
 @media (max-width: 720px) {
+  body {
+    background-attachment: scroll;
+  }
+
   body.login-screen-open {
     position: fixed;
     inset: 0;

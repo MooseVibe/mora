@@ -1,6 +1,5 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
 import { mountDailyDeck3D } from "./daily-3d.js?v=20260904-mobileperf2";
-import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260903-spreadsharp1";
 import { createDailyShareCardFile } from "./share-card.js?v=20260902-sharetemplate4";
 
 const deckOrderKey = "mora:prototype:spreadDeckOrder";
@@ -164,6 +163,13 @@ dailyDeck.setAttribute("aria-busy", "true");
 dailyHeadingDescription.textContent = "Готовим колоду…";
 let dailyDeck3D;
 let daily3DReady = false;
+const bootstrapBackgroundReady = loadBootstrapImage("./assets/mora-background-v1.webp");
+const bootstrapFontsReady = document.fonts
+  ? Promise.all([
+    document.fonts.load('400 20px "Inter Display"'),
+    document.fonts.load('400 48px "Spectral SC"'),
+  ])
+  : Promise.resolve();
 
 const savedSpreadKey = "mora:prototype:lastSpread";
 const savedDailyCardKey = "mora:prototype:dailyCard";
@@ -430,7 +436,11 @@ async function restorePrototypeTesterSession() {
 
   const guestDailyCard = readGuestDailyCardForAdoption();
   try {
-    const response = await fetch("/api/prototypes/account-state", { cache: "no-store" });
+    const response = await (
+      window.__moraAccountStateResponse
+      || fetch("/api/prototypes/account-state", { cache: "no-store" })
+    );
+    window.__moraAccountStateResponse = null;
     if (response.status === 401) {
       setPrototypeTesterAuthenticated(false);
       return;
@@ -1379,14 +1389,88 @@ if (startInLogin) {
     window.history.replaceState(null, "", window.location.pathname);
   });
 }
+revealAppWhenCriticalViewReady();
+
+function loadBootstrapImage(source) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    const finish = () => resolve();
+    image.addEventListener("load", finish, { once: true });
+    image.addEventListener("error", finish, { once: true });
+    image.src = source;
+    if (image.complete) finish();
+  });
+}
+
+function waitForImageLoad(image) {
+  if (image.complete && image.naturalWidth) return Promise.resolve();
+  return new Promise((resolve) => {
+    image.addEventListener("load", resolve, { once: true });
+    image.addEventListener("error", resolve, { once: true });
+  });
+}
+
+function waitForDesktopDailyResult() {
+  if (document.body.matches(".daily-3d-result, .daily-3d-error")) return Promise.resolve();
+  return new Promise((resolve) => {
+    const finish = () => {
+      observer.disconnect();
+      window.clearTimeout(timeout);
+      resolve();
+    };
+    const observer = new MutationObserver(() => {
+      if (document.body.matches(".daily-3d-result, .daily-3d-error")) finish();
+    });
+    const timeout = window.setTimeout(finish, 6500);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  });
+}
+
+async function waitForCriticalView() {
+  await prototypeTesterSessionPromise;
+  if (startInSpreadMode) {
+    if (prototypeTesterAuthenticated) await ensureSpreadDeck3D();
+    return;
+  }
+
+  const savedDailyCard = readSavedDailyCard();
+  if (savedDailyCard && window.matchMedia("(max-width: 720px)").matches) {
+    await waitForImageLoad(dailyResultImage);
+    return;
+  }
+  if (savedDailyCard) {
+    await dailyDeck3D;
+    await waitForDesktopDailyResult();
+    return;
+  }
+  await dailyDeck3D;
+}
+
+async function revealAppWhenCriticalViewReady() {
+  const ready = Promise.allSettled([
+    waitForCriticalView(),
+    bootstrapBackgroundReady,
+    bootstrapFontsReady,
+  ]);
+  await Promise.race([
+    ready,
+    new Promise((resolve) => window.setTimeout(resolve, 7000)),
+  ]);
+  await new Promise((resolve) => {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+  });
+  window.clearTimeout(window.__moraBootstrapTimeout);
+  document.documentElement.classList.add("app-ready");
+}
 
 function ensureSpreadDeck3D() {
   if (spreadDeck3DPromise) return spreadDeck3DPromise;
-  spreadDeck3DPromise = mountSpreadDeck3D({
-    canvas: spreadDeck3DCanvas,
-    host: spreadDeck3DHost,
-    cardElements: deckCards,
-  })
+  spreadDeck3DPromise = import("./spread-deck-3d.js?v=20260903-spreadsharp1")
+    .then(({ mountSpreadDeck3D }) => mountSpreadDeck3D({
+      canvas: spreadDeck3DCanvas,
+      host: spreadDeck3DHost,
+      cardElements: deckCards,
+    }))
     .then((controller) => {
       spreadDeck3DController = controller;
       renderDeck();

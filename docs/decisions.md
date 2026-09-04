@@ -3709,3 +3709,13 @@ Mobile idle-композиция считается единым блоком `h
 Новый авторский логотип хранится одним каноническим SVG в `/ritual/icons/logo.svg`; отдельные копии для welcome/login/legal не создаются. Компоненты отображают натуральные `108×29`, а cache key `20260904-logo2` гарантирует обновление существующих клиентов. Mobile header оставлен с геометрическим centering: flex-контейнер использует `align-items:center`, новый logo и burger SVG имеют совпадающий внутренний Y-center, поэтому ручной `translateY` не нужен.
 
 Release commit `d1b793a` опубликован в production deployment `dpl_HFn5d51Pcx72C2VABK2D6G2yfu3G`. Alias `moratarot.com` подтверждён по cache keys `20260904-dailymobile3`, `20260904-mobileperf2`, `20260904-logo2`; logo asset отвечает `200`. Локальные contract check, lint/build и Vercel build прошли. Оставшийся риск — субъективная плавность WebGL на реальном iPhone, поэтому следующий шаг только manual device QA, без дополнительных изменений вслепую.
+
+## 2026-09-04 — Bootstrap показывает один готовый critical view вместо пустого фона
+
+Первый ritual paint не должен быть пустым и не должен раскрывать session, fonts, background и WebGL отдельными вспышками. Выбран один статический HTML/CSS overlay с мини-тасовкой: он доступен до выполнения module JS, не добавляет библиотеку/изображение и исчезает одним `420ms` fade только после session resolution и готовности видимого critical view. Production account-state стартует из head параллельно module graph; скрытый spread WebGL исключён из initial preload/import и загружается по требованию. Loader намеренно не ждёт весь продукт и все artwork; fail-safe не позволяет ему зависнуть. Mobile fixed background заменяется на scroll, независимый page-enter удалён как второй reveal. Это локальный эксперимент до manual mobile QA; production пока не менялся.
+
+После проверки буквальной тасовки CSS иконки loader восстановлен точно из первого патча: цикл 1.4 секунды, задержки −0.92/−0.46 секунды и исходная траектория с opacity. Текст сохраняет уже существующие `status-phrase`, `loading-dots`, `deck-hint-flow` и `loading-dot`, а также medium-вес и запас высоты для глифов.
+
+Bootstrap loader переиспользует основной `mora-background-v1.webp` вместо отдельной noise-текстуры: фон, шум и виньетка совпадают с интерфейсом, новый asset и дополнительный эффект не нужны. До загрузки изображения работает существующий тёплый `--prototype-surface`.
+
+Готовый ritual UI проявляется одним enter-fade на общей `.app-content`, а не отдельными анимациями header/nav/main/login. Это одинаково работает для любого восстановленного экрана, сохраняет внутренние transition и использует только compositor-friendly opacity.
