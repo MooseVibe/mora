@@ -63,18 +63,19 @@
     <link rel="stylesheet" href="/assets/fonts.css" />
     <link rel="preload" as="image" href="/assets/3d/mora-card-back.webp" fetchpriority="high" />
     <link rel="preload" as="fetch" href="/assets/3d/mora-card.glb?v=20260821-stripface1" type="model/gltf-binary" crossorigin fetchpriority="high" />
-    <link rel="modulepreload" href="./app.js?v=20260903-loadingcopy1" />
+    <link rel="preload" as="fetch" href="/assets/3d/mora-card-result.glb?v=20260821-stripface1" type="model/gltf-binary" crossorigin />
+    <link rel="modulepreload" href="./app.js?v=20260904-dailymobile3" />
     <link rel="modulepreload" href="/assets/cards.js?v=20260828-three-swords" />
-    <link rel="modulepreload" href="./daily-3d.js?v=20260827-dailysharp1" />
+    <link rel="modulepreload" href="./daily-3d.js?v=20260904-mobileperf2" />
     <link rel="modulepreload" href="./spread-deck-3d.js?v=20260903-spreadsharp1" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/build/three.module.js" />
     <link rel="modulepreload" href="/vendor/three/0.180.0/examples/jsm/loaders/GLTFLoader.js" />
-    <link rel="stylesheet" href="./styles.css?v=20260903-loadingcopy1" />
+    <link rel="stylesheet" href="./styles.css?v=20260904-dailymobile3" />
   </head>
   <body class="daily-mode">
     <header class="header">
       <a class="brand" href="/ritual" aria-label="Mora — на главную">
-        <img src="./icons/logo.svg" alt="Mora" />
+        <img src="./icons/logo.svg?v=20260904-logo2" alt="Mora" />
       </a>
       <div class="mobile-menu-control">
         <div class="mobile-menu-backdrop" aria-hidden="true"></div>
@@ -449,7 +450,7 @@
     <section class="login-screen" id="login-screen" aria-labelledby="login-screen-title" aria-hidden="true">
       <div class="login-screen-content">
         <a class="login-screen-brand" href="/ritual" aria-label="Вернуться в Mora">
-          <img src="./icons/logo.svg" alt="Mora" />
+          <img src="./icons/logo.svg?v=20260904-logo2" alt="Mora" />
         </a>
         <h1 id="login-screen-title">Добро пожаловать<br />к Море</h1>
         <p>Войдите или создайте аккаунт</p>
@@ -476,6 +477,6 @@
       </div>
     </section>
 
-    <script type="module" src="./app.js?v=20260903-loadingcopy1"></script>
+    <script type="module" src="./app.js?v=20260904-dailymobile3"></script>
   </body>
 </html>

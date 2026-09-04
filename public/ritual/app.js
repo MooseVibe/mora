@@ -1,5 +1,5 @@
 import { TAROT_CARDS } from "/assets/cards.js?v=20260828-three-swords";
-import { mountDailyDeck3D } from "./daily-3d.js?v=20260827-dailysharp1";
+import { mountDailyDeck3D } from "./daily-3d.js?v=20260904-mobileperf2";
 import { mountSpreadDeck3D } from "./spread-deck-3d.js?v=20260903-spreadsharp1";
 import { createDailyShareCardFile } from "./share-card.js?v=20260902-sharetemplate4";
 
@@ -64,6 +64,7 @@ const loginScreenEmail = document.querySelector("#login-screen-email");
 const guestSpreadLogin = document.querySelector(".guest-spread-login");
 const dailyDeck = document.querySelector("#daily-deck");
 const dailyDeckCanvas = document.querySelector("#daily-deck-canvas");
+const dailyHeadingDescription = document.querySelector(".daily-card-heading p");
 const spreadDeck3DHost = document.querySelector("#spread-deck-3d");
 const spreadDeck3DCanvas = document.querySelector("#spread-deck-3d-canvas");
 const dailyResultTitleMain = document.querySelector("#daily-result-title-main");
@@ -158,23 +159,11 @@ function reportClientEvent(event, once = true) {
 }
 
 dailyDeck.classList.add("is-3d-loading");
-const dailyDeck3D = mountDailyDeck3D({
-  canvas: dailyDeckCanvas,
-  host: dailyDeck,
-  onPrepare: prepareDailyCardCandidate,
-  onSelect: prepareDailyCardSelection,
-  onResult: showDaily3DResult,
-}).catch((error) => {
-  dailyDeck.classList.remove("is-3d-loading");
-  console.error("Mora daily 3D deck failed to load", error);
-  return null;
-});
+dailyDeck.disabled = true;
+dailyDeck.setAttribute("aria-busy", "true");
+dailyHeadingDescription.textContent = "Готовим колоду…";
+let dailyDeck3D;
 let daily3DReady = false;
-dailyDeck3D.then((controller) => {
-  daily3DReady = Boolean(controller);
-  if (controller && testerSessionResolved) dailyDeck.disabled = Boolean(readSavedDailyCard());
-  if (controller) reportClientEvent("daily-3d-ready");
-});
 
 const savedSpreadKey = "mora:prototype:lastSpread";
 const savedDailyCardKey = "mora:prototype:dailyCard";
@@ -333,6 +322,26 @@ function restoreSpreadDeckOrder(cards) {
 }
 
 const prototypeTesterSessionPromise = restorePrototypeTesterSession();
+dailyDeck3D = prototypeTesterSessionPromise
+  .then(() => mountDailyDeck3D({
+    canvas: dailyDeckCanvas,
+    host: dailyDeck,
+    onPrepare: prepareDailyCardCandidate,
+    onSelect: prepareDailyCardSelection,
+    onResult: showDaily3DResult,
+  }))
+  .catch((error) => {
+    dailyDeck.classList.remove("is-3d-loading");
+    console.error("Mora daily 3D deck failed to load", error);
+    return null;
+  });
+dailyDeck3D.then((controller) => {
+  daily3DReady = Boolean(controller);
+  dailyDeck.removeAttribute("aria-busy");
+  dailyHeadingDescription.textContent = "Нажми на колоду и узнай, что приготовил тебе день";
+  if (controller) dailyDeck.disabled = Boolean(readSavedDailyCard());
+  if (controller) reportClientEvent("daily-3d-ready");
+});
 restoreSavedSpread();
 const urlParams = new URLSearchParams(window.location.search);
 const resetDailyMode = urlParams.get("resetDaily");

@@ -52,7 +52,7 @@ body::before {
 
 .brand {
   display: inline-flex;
-  width: 112px;
+  width: 108px;
   min-height: 40px;
   align-items: center;
 }

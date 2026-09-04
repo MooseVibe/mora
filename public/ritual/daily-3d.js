@@ -10,6 +10,7 @@ const hoverFanRadius = 1.85;
 const hoverFanSpan = 0.045;
 const fanGroupScale = 1.2947;
 const fanDesktopSideGutter = 48;
+const mobileIdleCompositionGap = 24;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 const easeInOut = (value) => {
@@ -194,6 +195,41 @@ function prepareFadeMaterials(list) {
   return fadeMaterials;
 }
 
+function createSharedFadeMaterials(materials) {
+  return Object.fromEntries(Object.entries(materials).map(([name, material]) => {
+    const fadeMaterial = material.clone();
+    fadeMaterial.transparent = true;
+    fadeMaterial.opacity = 1;
+    fadeMaterial.depthWrite = false;
+    fadeMaterial.needsUpdate = true;
+    return [name, fadeMaterial];
+  }));
+}
+
+function localBoundsCenter(root) {
+  root.updateWorldMatrix(true, true);
+  const rootInverse = root.matrixWorld.clone().invert();
+  const bounds = new THREE.Box3();
+  const meshBounds = new THREE.Box3();
+  const toRoot = new THREE.Matrix4();
+  let hasBounds = false;
+
+  root.traverse((object) => {
+    if (!object.isMesh || !object.geometry) return;
+    if (!object.geometry.boundingBox) object.geometry.computeBoundingBox();
+    if (!object.geometry.boundingBox) return;
+    toRoot.multiplyMatrices(rootInverse, object.matrixWorld);
+    meshBounds.copy(object.geometry.boundingBox).applyMatrix4(toRoot);
+    if (hasBounds) bounds.union(meshBounds);
+    else {
+      bounds.copy(meshBounds);
+      hasBounds = true;
+    }
+  });
+
+  return hasBounds ? bounds.getCenter(new THREE.Vector3()) : new THREE.Vector3();
+}
+
 function stackTargets(cards) {
   return cards.map((card, index) => ({
     position: new THREE.Vector3(0, 0.08 + index * cardGap, 0),
@@ -275,6 +311,8 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     : null;
   const [gltf, backTexture] = await Promise.all([deckTemplatePromise, backTexturePromise]);
   const materials = createMaterials(backTexture);
+  const mobileFadeMaterials = createSharedFadeMaterials(materials);
+  const mobileFadeMaterialList = Object.values(mobileFadeMaterials);
   const template = gltf.scene;
   applyMaterials(template, materials);
   const bounds = new THREE.Box3().setFromObject(template);
@@ -283,6 +321,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   template.updateMatrixWorld(true);
   let resultTemplatePromise;
   let resultTemplateMetrics;
+  let preparedResultAssetsPromise;
   function loadResultTemplate() {
     resultTemplatePromise ||= loader.loadAsync("/assets/3d/mora-card-result.glb?v=20260821-stripface1").then((resultGltf) => {
       const resultTemplate = resultGltf.scene;
@@ -368,11 +407,11 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     const deckHeight = Math.max(...projectedY) - actualTop;
     const headingRect = heading.getBoundingClientRect();
     const availableTop = header?.getBoundingClientRect().bottom || rect.top;
-    const compositionHeight = headingRect.height + 32 + deckHeight;
+    const compositionHeight = headingRect.height + mobileIdleCompositionGap + deckHeight;
     const balanceShift = Math.max(0, (rect.bottom - availableTop - compositionHeight) / 2)
       + availableTop - headingRect.top;
     heading.style.setProperty("--daily-idle-balance-shift", `${balanceShift}px`);
-    const desiredTop = heading.getBoundingClientRect().bottom + 32;
+    const desiredTop = heading.getBoundingClientRect().bottom + mobileIdleCompositionGap;
     const depth = deckGroup.position.distanceTo(camera.position);
     const visibleWorldHeight = 2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const pixelsPerWorldUnit = rect.height / visibleWorldHeight;
@@ -464,7 +503,8 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
         card.scale.copy(target.scale);
       });
     }
-    if (ritualState === "result" && resultCard?.userData.resultTarget) {
+    let resultSettling = false;
+    if (!isMobile() && ritualState === "result" && resultCard?.userData.resultTarget) {
       const target = resultCard.userData.resultTarget;
       const pressTilt = resultHovered
         ? new THREE.Quaternion().setFromEuler(new THREE.Euler(
@@ -474,6 +514,7 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
         ))
         : new THREE.Quaternion();
       const desiredQuaternion = target.quaternion.clone().multiply(pressTilt);
+      resultSettling = resultHovered || resultCard.quaternion.angleTo(desiredQuaternion) > 0.002;
       resultCard.position.copy(target.position);
       resultCard.quaternion.slerp(desiredQuaternion, 0.12);
       resultCard.scale.copy(target.scale);
@@ -484,7 +525,9 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       ? Math.abs((hovered ? 1 : 0) - hoverAmount) > 0.002
       : ritualState === "fan"
         ? cards.some((card) => Math.abs((card === hoveredCard ? 1 : 0) - card.userData.hoverAmount) > 0.002)
-        : true;
+        : ritualState === "result"
+          ? resultSettling
+          : true;
     frameId = hoverSettling ? window.requestAnimationFrame(render) : null;
   }
 
@@ -494,17 +537,36 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
 
   function prepareResultAssets(selection = onPrepare?.()) {
     if (!selection?.imageUrl) return Promise.resolve();
-    if (preparedImageUrl === selection.imageUrl && preparedFaceTexture) {
-      return Promise.all([loadResultTemplate(), preparedFaceTexture]);
+    if (preparedImageUrl === selection.imageUrl && preparedResultAssetsPromise) {
+      return preparedResultAssetsPromise;
     }
 
+    const reusableFaceTexture = preparedImageUrl === selection.imageUrl
+      ? preparedFaceTexture
+      : null;
     preparedSelection = selection;
     preparedImageUrl = selection.imageUrl;
-    preparedFaceTexture = loadFaceTexture(renderer, selection.imageUrl).then((texture) => {
-      renderer.initTexture(texture);
-      return texture;
-    });
-    return Promise.all([loadResultTemplate(), preparedFaceTexture]);
+    preparedFaceTexture = reusableFaceTexture
+      ? reusableFaceTexture
+      : loadFaceTexture(renderer, selection.imageUrl).then((texture) => {
+        renderer.initTexture(texture);
+        return texture;
+      });
+    preparedResultAssetsPromise = Promise.all([loadResultTemplate(), preparedFaceTexture])
+      .then(async ([resultTemplate, faceTexture]) => {
+        const resultModel = resultTemplate.clone(true);
+        applyFaceTexture(resultModel, faceTexture);
+        await renderer.compileAsync(resultModel, camera, scene);
+        return { resultModel, faceTexture };
+      })
+      .catch((error) => {
+        if (preparedImageUrl === selection.imageUrl) {
+          preparedFaceTexture = null;
+          preparedResultAssetsPromise = null;
+        }
+        throw error;
+      });
+    return preparedResultAssetsPromise;
   }
 
   function handlePointerMove(event) {
@@ -688,22 +750,35 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   }
 
   async function beginMobileRitual() {
+    const selection = onSelect?.() || preparedSelection;
+    if (!selection?.imageUrl) {
+      ritualState = "idle";
+      return;
+    }
+    ritualState = "mobile-preparing";
+    let resultAssets;
+    try {
+      resultAssets = await prepareResultAssets(selection);
+    } catch (error) {
+      console.error("Mora daily result assets failed to load", error);
+      ritualState = "idle";
+      return;
+    }
+
+    const resultModel = resultAssets.resultModel;
+    const faceTexture = resultAssets.faceTexture;
+    resultModel.visible = false;
+    scene.add(resultModel);
+    preparedResultAssetsPromise = null;
     ritualState = "mobile-drawing";
     ensureRendering();
     hovered = false;
     floor.visible = false;
+    renderer.shadowMap.autoUpdate = false;
     document.body.classList.add("daily-3d-ritual", "daily-3d-animating");
 
-    const selection = onSelect?.() || preparedSelection;
-    if (!selection?.imageUrl) {
-      ritualState = "idle";
-      document.body.classList.remove("daily-3d-ritual", "daily-3d-animating");
-      return;
-    }
     const chosenCard = cards.at(-1);
     const remainingCards = cards.slice(0, -1);
-    const resultTemplatePromise = loadResultTemplate();
-    const faceTexturePromise = (preparedFaceTexture || loadFaceTexture(renderer, selection.imageUrl));
     const groupStart = {
       position: deckGroup.position.clone(),
       quaternion: deckGroup.quaternion.clone(),
@@ -730,7 +805,10 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
 
     deckGroup.updateWorldMatrix(true, true);
     scene.attach(chosenCard);
-    const fadeMaterials = prepareFadeMaterials(remainingCards);
+    remainingCards.forEach((card) => applyMaterials(card, mobileFadeMaterials));
+    mobileFadeMaterialList.forEach((material) => {
+      material.opacity = 1;
+    });
     const screenUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion).normalize();
     const chosenStart = chosenCard.position.clone();
     const chosenClear = chosenStart.clone().addScaledVector(screenUp, 2.9);
@@ -742,23 +820,11 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
       const fade = easeInOut(clamp01((rawProgress - 0.18) / 0.82));
       chosenCard.position.lerpVectors(chosenStart, chosenClear, movement);
       deckGroup.position.lerpVectors(deckStart, deckExit, movement);
-      fadeMaterials.forEach((material) => {
-        if (fade > 0 && !material.transparent) {
-          material.transparent = true;
-          material.depthWrite = false;
-          material.needsUpdate = true;
-        }
+      mobileFadeMaterialList.forEach((material) => {
         material.opacity = 1 - fade;
       });
     });
     deckGroup.visible = false;
-
-    const resultTemplate = await resultTemplatePromise;
-    const resultModel = resultTemplate.clone(true);
-    resultModel.visible = false;
-    scene.add(resultModel);
-    const faceTexture = await faceTexturePromise;
-    applyFaceTexture(resultModel, faceTexture);
     preparedSelection = null;
     preparedFaceTexture = null;
     preparedImageUrl = "";
@@ -793,35 +859,36 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     });
 
     const flipStartQuaternion = chosenCard.quaternion.clone();
-    const keepVisuallyCentered = (object) => {
-      object.updateWorldMatrix(true, true);
-      const visualCenter = new THREE.Box3().setFromObject(object).getCenter(new THREE.Vector3());
-      object.position.add(viewportCenter.clone().sub(visualCenter));
-    };
+    const flipPivot = new THREE.Group();
+    flipPivot.position.copy(viewportCenter);
+    flipPivot.quaternion.copy(flipStartQuaternion);
+    flipPivot.scale.copy(centerScale);
+    scene.add(flipPivot);
+    const chosenLocalCenter = localBoundsCenter(chosenCard);
+    const resultLocalCenter = localBoundsCenter(resultModel);
+    flipPivot.add(chosenCard);
+    chosenCard.position.copy(chosenLocalCenter).multiplyScalar(-1);
+    chosenCard.quaternion.identity();
+    chosenCard.scale.set(1, 1, 1);
+    flipPivot.add(resultModel);
+    resultModel.position.copy(resultLocalCenter).multiplyScalar(-1);
+    resultModel.quaternion.identity();
+    resultModel.scale.set(1, 1, 1);
     await tween(reducedMotion ? 1 : 640, (rawProgress) => {
       const progress = easeInOut(rawProgress);
-      const quaternion = new THREE.Quaternion().slerpQuaternions(
+      flipPivot.quaternion.slerpQuaternions(
         flipStartQuaternion,
         finalTarget.quaternion,
         progress,
       );
-      if (rawProgress < 0.5) {
-        chosenCard.quaternion.copy(quaternion);
-        keepVisuallyCentered(chosenCard);
-      } else {
-        if (!resultModel.visible) {
-          chosenCard.visible = false;
-          resultModel.visible = true;
-          resultModel.position.copy(viewportCenter);
-          resultModel.scale.copy(centerScale);
-        }
-        resultModel.quaternion.copy(quaternion);
-        keepVisuallyCentered(resultModel);
+      if (rawProgress >= 0.5 && !resultModel.visible) {
+        chosenCard.visible = false;
+        resultModel.visible = true;
       }
     });
 
-    resultModel.quaternion.copy(finalTarget.quaternion);
-    keepVisuallyCentered(resultModel);
+    scene.attach(resultModel);
+    scene.remove(flipPivot);
     const resultStart = {
       position: resultModel.position.clone(),
       quaternion: resultModel.quaternion.clone(),
@@ -1195,6 +1262,8 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     deckGroup.rotation.set(restingDeckTilt, 0, 0);
     setIdleDeckScale();
     floor.visible = true;
+    renderer.shadowMap.autoUpdate = true;
+    renderer.shadowMap.needsUpdate = true;
     hovered = false;
     hoveredCard = null;
     resultHovered = false;
@@ -1202,12 +1271,16 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
     preparedSelection = null;
     preparedFaceTexture = null;
     preparedImageUrl = "";
+    preparedResultAssetsPromise = null;
     ritualState = "idle";
     const heading = host.closest(".daily-card-screen")?.querySelector(".daily-card-heading");
     if (heading) {
       heading.querySelector("h1").textContent = "Карта дня";
       heading.querySelector("p").textContent = "Нажми на колоду и узнай, что приготовил тебе день";
     }
+    prepareResultAssets().catch((error) => {
+      console.error("Mora daily result preload failed", error);
+    });
     ensureRendering();
   }
 
@@ -1252,14 +1325,17 @@ export async function mountDailyDeck3D({ canvas, host, onPrepare, onSelect, onRe
   resizeObserver.observe(host);
   resize();
   render();
+  const animationPreloads = [prepareResultAssets(initialSelection)];
+  if (isMobile()) {
+    const fadeCompileModel = template.clone(true);
+    applyMaterials(fadeCompileModel, mobileFadeMaterials);
+    animationPreloads.push(renderer.compileAsync(fadeCompileModel, camera, scene));
+  }
+  await Promise.all(animationPreloads).catch((error) => {
+    console.error("Mora daily animation preload failed", error);
+  });
   host.classList.remove("is-3d-loading");
   host.classList.add("is-3d-ready");
-
-  const preloadResult = () => prepareResultAssets().catch((error) => {
-    console.error("Mora daily result preload failed", error);
-  });
-  if ("requestIdleCallback" in window) window.requestIdleCallback(preloadResult, { timeout: 1500 });
-  else window.setTimeout(preloadResult, 0);
 
   return {
     activate,
