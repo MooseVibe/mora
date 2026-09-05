@@ -3142,7 +3142,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     max-width: none;
   }
 
-  .reading.is-card-chapter .chapter {
+  .reading .reading-position-chapter {
     width: 100vw;
     max-width: none;
     align-items: center;
@@ -3150,7 +3150,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     padding: 76px 0 0;
   }
 
-  .reading.is-card-chapter .reading-card-layout {
+  .reading .reading-card-layout {
     display: grid;
     width: 1064px;
     flex: 0 0 1064px;
@@ -3160,22 +3160,22 @@ body.reading-to-saved.reading-saved-entering .reading {
     gap: 68px;
   }
 
-  .reading.is-card-chapter .reading-card-copy {
+  .reading .reading-card-copy {
     width: 620px;
     max-height: 619px;
     overflow-y: auto;
     scrollbar-width: none;
   }
 
-  .reading.is-card-chapter .reading-card-copy::-webkit-scrollbar {
+  .reading .reading-card-copy::-webkit-scrollbar {
     display: none;
   }
 
-  .reading.is-card-chapter .reading-card-suit {
+  .reading .reading-card-suit {
     margin-bottom: 20px;
   }
 
-  .reading.is-card-chapter .chapter h3 {
+  .reading .reading-position-chapter h3 {
     max-width: 620px;
     font-size: 48px;
     font-weight: 500;
@@ -3183,14 +3183,14 @@ body.reading-to-saved.reading-saved-entering .reading {
     text-transform: uppercase;
   }
 
-  .reading.is-card-chapter .chapter p {
+  .reading .reading-position-chapter p {
     max-width: 620px;
     margin-top: 16px;
     font-size: 20px;
     line-height: 28px;
   }
 
-  .reading.is-card-chapter .chapter p + p {
+  .reading .reading-position-chapter p + p {
     margin-top: 16px;
   }
 
@@ -3203,7 +3203,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     visibility: hidden;
   }
 
-  .reading.is-card-chapter .chapter.is-active .reading-position-card {
+  .reading .reading-position-chapter.is-active .reading-position-card {
     opacity: 1;
     visibility: visible;
   }
@@ -3219,7 +3219,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     max-width: none;
   }
 
-  .reading.is-summary .chapter.synthesis {
+  .reading .chapter.synthesis {
     width: 100vw;
     max-width: none;
     align-items: center;
@@ -3239,7 +3239,7 @@ body.reading-to-saved.reading-saved-entering .reading {
     align-items: center;
   }
 
-  .reading.is-summary .chapter p {
+  .reading .chapter.synthesis p {
     max-width: 820px;
     margin: 0;
     color: rgba(255, 255, 255, 0.7);
@@ -3393,6 +3393,36 @@ body.reading-to-saved.reading-saved-entering .reading {
 
 }
 
+@media (min-width: 721px) {
+  .reading:is(.is-overview, .is-card-chapter, .is-summary) .reading-copy {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    touch-action: none;
+  }
+
+  .reading .reading-copy .chapter {
+    flex: 0 0 100vw;
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  }
+
+  .reading .reading-position-chapter .reading-position-card {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (min-width: 721px) and (prefers-reduced-motion: no-preference) {
+  .reading-position-card .daily-result-card-tilt {
+    transform: rotateY(var(--reading-flip, 0deg));
+    transition: none;
+    backface-visibility: hidden;
+  }
+}
+
 @keyframes breathe {
   from { opacity: 0.35; scale: 0.72; }
   to { opacity: 1; scale: 1; }
@@ -3419,6 +3449,7 @@ body.reading-to-saved.reading-saved-entering .reading {
 @keyframes flying-card-front {
   to { transform: rotateY(360deg); }
 }
+
 
 @media (max-width: 720px) {
   body {

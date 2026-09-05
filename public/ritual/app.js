@@ -107,6 +107,7 @@ let daily3DRestoreInFlight = false;
 let modeSwitchInFlight = false;
 let stateTransitionInFlight = false;
 let touchStartY = 0;
+let touchStartX = 0;
 let touchStartedOnFirstChapter = false;
 let touchStartedOnLastChapter = false;
 let wheelNeedsRelease = false;
@@ -2169,7 +2170,8 @@ function absorbCurrentWheelGesture(direction) {
 
 function resetReadingScroll(chapterIndex = 0) {
   readingCopy.classList.add("is-resetting");
-  readingCopy.scrollTop = chapterIndex * readingCopy.clientHeight;
+  readingCopy.scrollTop = 0;
+  readingCopy.scrollLeft = window.innerWidth > 720 ? chapterIndex * readingCopy.clientWidth : 0;
   void readingCopy.offsetHeight;
   readingCopy.classList.remove("is-resetting");
 }
@@ -2605,9 +2607,106 @@ function updateReadingTopFade() {
   );
 }
 
+
+let overviewFlightActive = false;
+
+async function flyOverviewToPast(target) {
+  overviewFlightActive = true;
+  window.clearTimeout(scrollSettleTimer);
+  const forward = target === 1;
+  const overview = chapters[0].querySelector(".reading-overview-card-shell");
+  const card = chapters[1].querySelector(".reading-position-card");
+  const frame = card.querySelector(".daily-result-card-tilt");
+  const image = card.querySelector("img");
+  const parent = card.parentNode;
+  const sibling = card.nextSibling;
+  const originalStyle = card.getAttribute("style");
+  const animations = [];
+  const geometry = (element, shell, artwork) => {
+    const rect = element.getBoundingClientRect();
+    const art = getComputedStyle(artwork);
+    const gap = parseFloat(art.top);
+    return {
+      rect,
+      radius: getComputedStyle(shell).borderRadius,
+      artwork: {
+        top: `${gap}px`, left: `${gap}px`,
+        width: `calc(100% - ${gap * 2}px)`,
+        height: `calc(100% - ${gap * 2}px)`,
+        borderRadius: art.borderRadius,
+      },
+    };
+  };
+  const start = forward
+    ? geometry(overview, overview, overview.querySelector("img"))
+    : geometry(card, frame, image);
+  try {
+    // Handoff and first animation frame are prepared in one task: no empty paint.
+    setActiveChapter(target);
+    resetReadingScroll(target);
+    const end = forward
+      ? geometry(card, frame, image)
+      : geometry(overview, overview, overview.querySelector("img"));
+    // Both endpoints are captured before any animation changes layout.
+    document.body.append(card);
+    Object.assign(card.style, {
+      position: "fixed", left: `${end.rect.left}px`, top: `${end.rect.top}px`,
+      width: `${end.rect.width}px`, height: `${end.rect.height}px`,
+      zIndex: "20", opacity: "1", visibility: "visible", pointerEvents: "none",
+    });
+    overview.style.opacity = "0";
+    const timing = { duration: 700, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" };
+    animations.push(card.animate([
+      { width: `${start.rect.width}px`, height: `${start.rect.height}px`, transform: `translate(${start.rect.left - end.rect.left}px, ${start.rect.top - end.rect.top}px)` },
+      { width: `${end.rect.width}px`, height: `${end.rect.height}px`, transform: "translate(0, 0)" },
+    ], timing));
+    animations.push(frame.animate([{ borderRadius: start.radius }, { borderRadius: end.radius }], timing));
+    animations.push(image.animate([start.artwork, end.artwork], timing));
+    animations.push(frame.animate([
+      { inset: start.artwork.top, borderRadius: start.artwork.borderRadius },
+      { inset: end.artwork.top, borderRadius: end.artwork.borderRadius },
+    ], { ...timing, pseudoElement: "::after" }));
+    const content = forward ? chapters[1].querySelector(".reading-card-copy") : chapters[0];
+    animations.push(content.animate([{ opacity: 0 }, { opacity: 1 }],
+      { duration: 380, delay: 220, fill: "both" }));
+    await Promise.all(animations.map((animation) => animation.finished));
+  } finally {
+    parent.insertBefore(card, sibling);
+    animations.forEach((animation) => animation.cancel());
+    if (originalStyle === null) card.removeAttribute("style");
+    else card.setAttribute("style", originalStyle);
+    overview.style.opacity = "";
+    setActiveChapter(target);
+    resetReadingScroll(target);
+    overviewFlightActive = false;
+    syncReadingCardFlip();
+  }
+}
+
+function syncReadingCardFlip() {
+  if (overviewFlightActive) return;
+  const progress = readingCopy.scrollLeft / (readingCopy.clientWidth || 1);
+  const enabled = window.innerWidth > 720
+    && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    && progress > 1 && progress < 3;
+  chapters.slice(1, 4).forEach((chapter, index) => {
+    const card = chapter.querySelector(".reading-position-card");
+    if (!card) return;
+    const offset = Math.max(-1, Math.min(1, index + 1 - progress));
+    card.style.setProperty("--reading-flip", `${enabled ? offset * 90 : 0}deg`);
+  });
+}
+
+window.addEventListener("resize", syncReadingCardFlip, { passive: true });
+
 function goToChapter(index) {
   const target = Math.max(0, Math.min(chapters.length - 1, index));
-  if (target === activeChapter) return false;
+  if (target === activeChapter || overviewFlightActive) return false;
+  if (((activeChapter === 0 && target === 1) || (activeChapter === 1 && target === 0)) && window.innerWidth > 720
+    && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    flyOverviewToPast(target).catch(console.error);
+    return true;
+  }
 
   setActiveChapter(target);
   if (window.innerWidth <= 720) {
@@ -2617,8 +2716,8 @@ function goToChapter(index) {
     return true;
   }
   readingCopy.scrollTo({
-    top: activeChapter * readingCopy.clientHeight,
-    behavior: "smooth",
+    left: activeChapter * readingCopy.clientWidth,
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
   });
   return true;
 }
@@ -2630,8 +2729,9 @@ reading.addEventListener(
     if (window.innerWidth <= 720) return;
     event.preventDefault();
 
-    const direction = Math.sign(event.deltaY);
-    const delta = Math.abs(event.deltaY);
+    const movement = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    const direction = Math.sign(movement);
+    const delta = Math.abs(movement);
     const now = Date.now();
     if (!direction || absorbCurrentWheelGesture(direction)) return;
 
@@ -2686,13 +2786,17 @@ reading.addEventListener(
 reading.addEventListener("touchstart", (event) => {
   if (window.innerWidth <= 720) return;
   touchStartY = event.touches[0].clientY;
+  touchStartX = event.touches[0].clientX;
   touchStartedOnFirstChapter = activeChapter === 0;
   touchStartedOnLastChapter = activeChapter === chapters.length - 1;
 }, { passive: true });
 
 reading.addEventListener("touchend", (event) => {
   if (window.innerWidth <= 720) return;
-  const distance = touchStartY - event.changedTouches[0].clientY;
+  const horizontalDistance = touchStartX - event.changedTouches[0].clientX;
+  const verticalDistance = touchStartY - event.changedTouches[0].clientY;
+  const distance = Math.abs(horizontalDistance) > Math.abs(verticalDistance) ? horizontalDistance : verticalDistance;
+  if (Math.abs(distance) > 48) goToChapter(activeChapter + Math.sign(distance));
   if (touchStartedOnLastChapter && distance > 48) closeReadingToSaved(activeChapter);
   if (touchStartedOnFirstChapter && distance < -48) closeReadingToSaved();
 }, { passive: true });
@@ -2741,12 +2845,15 @@ chapters.forEach((chapter) => {
 });
 
 readingCopy.addEventListener("scroll", () => {
+  if (overviewFlightActive) return;
+  syncReadingCardFlip();
   if (!document.body.classList.contains("reading-ready")) return;
   if (window.innerWidth <= 720) return;
 
   window.clearTimeout(scrollSettleTimer);
   scrollSettleTimer = window.setTimeout(() => {
-    const settledChapter = Math.round(readingCopy.scrollTop / readingCopy.clientHeight);
+    if (overviewFlightActive) return;
+    const settledChapter = Math.round(readingCopy.scrollLeft / readingCopy.clientWidth);
     if (settledChapter !== activeChapter) setActiveChapter(settledChapter);
   }, 120);
 });
@@ -2756,6 +2863,10 @@ window.addEventListener("keydown", (event) => {
 
   const nextKeys = ["ArrowDown", "PageDown", " "];
   const previousKeys = ["ArrowUp", "PageUp"];
+  if (window.innerWidth > 720) {
+    nextKeys.push("ArrowRight");
+    previousKeys.push("ArrowLeft");
+  }
   if (![...nextKeys, ...previousKeys, "Home", "End"].includes(event.key)) return;
 
   event.preventDefault();
