@@ -1,5 +1,9 @@
 # Decisions Log
 
+## 2026-09-05 — Production release desktop reading motion
+
+Опубликован только motion-пакет из чистого git archive коммита `e329df2`; независимые локальные artwork retry/demo правки оставлены вне релиза. Deployment `dpl_GW2GeAXTZ47WnnRGKLQNdfZM8YYq`, canonical `https://moratarot.com/ritual`. Syntax/lint/build и Vercel build прошли; production HTML/JS/CSS проверены, JS/CSS совпали с release-копией. Финальный визуальный retest остаётся ручным.
+
 ## 2026-09-05 — Atomic handoff карты
 
 Убран предварительный fade всей главы на 160ms: переключение layout, перенос реального card DOM и создание первого кадра выполняются синхронно до следующего paint. Scroll-linked flip и scroll-settle не выполняются во время полёта: перенесённая в body карта временно отсутствует в chapter, что ранее вызывало null-доступ. Завершение восстанавливает активную главу и scroll offset перед разблокировкой. Syntax/lint/diff проверки прошли; визуальная проверка пользователем ещё требуется.
